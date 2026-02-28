@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Car Launcher</string>
+    <string name="settings_title">Cài đặt</string>
+    <string name="no_app_selected">Chọn ứng dụng</string>
+    <string name="add_app">Thêm ứng dụng</string>
+    <string name="remove_app">Xóa</string>
+    <string name="sidebar">Thanh dock</string>
+    <string name="app_frames">Khung ứng dụng</string>
+    <string name="overlay">Overlay</string>
+    <string name="weather">Thời tiết</string>
+    <string name="theme_settings">Giao diện</string>
+    <string name="about">Thông tin</string>
+    <string name="reset_defaults">Reset về mặc định</string>
+</resources>

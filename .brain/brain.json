@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "schema_version": "1.1.0",
+    "awf_version": "3.3.0"
+  },
+  "project": {
+    "name": "Car Overlay App v3",
+    "type": "Android Application",
+    "status": "Production-ready"
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "Jetpack Compose",
+      "language": "Kotlin",
+      "target_sdk": "34"
+    },
+    "backend": {},
+    "database": {
+      "type": "DataStore",
+      "library": "androidx.datastore:datastore-preferences"
+    }
+  },
+  "database_schema": {},
+  "api_endpoints": [],
+  "business_rules": [
+    "Khởi chạy Split-Screen bằng cách bấm vào Đồng Hồ Trái",
+    "Khởi chạy Cài đặt bằng Icon Nhanh bên Phải",
+    "Trợ lý Ảo độc lập bằng Nút Mic tùy chọn, có thể di chuyển",
+    "Tự do cài đặt Độ Mờ & Kích Thước (Scale & Opacity)",
+    "Hỗ trợ Auto-start khi thiết bị Boot lên (Receiver)"
+  ],
+  "features": [
+    "Draggable Overlay Settings",
+    "Voice Assistant Button Override",
+    "Glassmorphism Styling",
+    "Flat Styling Support",
+    "Custom Split Screen with Window Reflection for Edge Cases"
+  ],
+  "knowledge_items": {
+    "patterns": [
+      "MVVM Pattern implicitly with Compose State"
+    ],
+    "gotchas": [
+      "Modifier.shadow gây lỗi Render trên Unit Android Car => đổi sang Modifier.border",
+      "Intent_Launch_Adjacent không đủ mạnh ép màn hình đôi => phải invoke ActivityOptions bằng Reflection `setLaunchWindowingMode` (3 & 4)"
+    ],
+    "conventions": [
+      "Dùng DarkSurface làm nền",
+      "App KHÔNG CÒN LÀ LAUNCHER nữa, bỏ action HOME."
+    ]
+  }
+}

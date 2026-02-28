@@ -1,0 +1,50 @@
+{
+  "updated_at": "2026-02-28T19:59:00Z",
+  "working_on": {
+    "feature": "Overlay Enhancement",
+    "task": "Completed migration to floating overlay",
+    "status": "completed",
+    "files": [],
+    "blockers": [],
+    "notes": "Everything is working smoothly, tested SplitScreen via Reflection and AutoStart receiver."
+  },
+  "pending_tasks": [],
+  "recent_changes": [
+    {
+      "timestamp": "2026-02-28T19:59:00Z",
+      "type": "feature",
+      "description": "Converted Launcher to Standard Overlay App, added AutoStart, SplitScreen fix, Opacity/Scale features, and flat styling.",
+      "files": [
+        "AndroidManifest.xml",
+        "LauncherActivity.kt",
+        "OverlayService.kt",
+        "SettingsDataStore.kt",
+        "LauncherSettings.kt",
+        "SettingsScreen.kt",
+        "BootReceiver.kt"
+      ]
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Visual Glitch polygons on shadow modifier",
+      "solution": "Replaced Modifier.shadow with Modifier.border",
+      "resolved": true
+    },
+    {
+      "error": "SplitScreen opens consecutively rather than adjacently on Head Units",
+      "solution": "Invoked Method setLaunchWindowingMode (Primary 3 / Secondary 4) manually via Reflection",
+      "resolved": true
+    }
+  ],
+  "decisions_made": [
+    {
+      "decision": "Use Reflection for ActivityOptions Windowing Modes",
+      "reason": "FLAG_ACTIVITY_LAUNCH_ADJACENT does not force splitscreen correctly on heavily modified Android automotive OS."
+    },
+    {
+      "decision": "Remove Launcher capability",
+      "reason": "User wanted it to work on top of their main launcher instead of replacing it entirely."
+    }
+  ]
+}
