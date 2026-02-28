@@ -28,7 +28,9 @@ object SplitScreenLauncher {
         try {
             // Step 1: Launch first app in a new task as SPLIT_SCREEN_PRIMARY
             intent1.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
 
             val options1 = ActivityOptions.makeBasic()
@@ -42,11 +44,14 @@ object SplitScreenLauncher {
             
             context.startActivity(intent1, options1.toBundle())
 
-            // Step 2: After a short delay, launch second app adjacent
+            // Step 2: After a moderate delay, launch second app adjacent
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 try {
                     intent2.apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
+                        addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     }
 
                     val options2 = ActivityOptions.makeBasic()
@@ -65,7 +70,7 @@ object SplitScreenLauncher {
                     intent2.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent2)
                 }
-            }, 800) // 800ms delay to let first app settle
+            }, 1200) // Increased to 1200ms to allow heavy car units to settle the primary app
 
         } catch (e: Exception) {
             e.printStackTrace()

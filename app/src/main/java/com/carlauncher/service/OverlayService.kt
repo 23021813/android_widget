@@ -34,6 +34,7 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.*
 import androidx.savedstate.*
 import com.carlauncher.LauncherActivity
+import com.carlauncher.SplitScreenProxyActivity
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.data.WeatherRepository
 import com.carlauncher.data.models.LauncherSettings
@@ -135,7 +136,12 @@ class OverlayService : Service() {
                         val f1 = settings.frame1App
                         val f2 = settings.frame2App
                         if (f1 != null && f2 != null) {
-                            SplitScreenLauncher.launchSplitScreen(this@OverlayService, f1, f2)
+                            val intent = Intent(this@OverlayService, SplitScreenProxyActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                putExtra("pkg1", f1)
+                                putExtra("pkg2", f2)
+                            }
+                            startActivity(intent)
                         }
                     },
                     onSettingsClick = {

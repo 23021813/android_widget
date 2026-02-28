@@ -55,6 +55,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Proxy Activity for Split Screen Trampoline -->
+        <activity
+            android:name=".SplitScreenProxyActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:taskAffinity="" />
+
         <!-- Floating overlay service -->
         <service
             android:name=".service.OverlayService"
