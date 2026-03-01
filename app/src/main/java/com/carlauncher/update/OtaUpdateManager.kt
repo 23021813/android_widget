@@ -28,7 +28,7 @@ object OtaUpdateManager {
 
     // ⚠️ Replace with your actual GitHub raw URL for version.json
     private const val VERSION_CHECK_URL =
-        "https://raw.githubusercontent.com/user/carfloat/main/version.json"
+        "https://raw.githubusercontent.com/23021813/android_widget/main/version.json"
 
     /**
      * Check if there is a new version available.
@@ -53,7 +53,7 @@ object OtaUpdateManager {
                 UpdateInfo(
                     versionCode = remoteVersionCode,
                     versionName = json.getString("versionName"),
-                    apkUrl = json.getString("apkUrl"),
+                    apkUrl = json.getString("downloadUrl"),
                     changelog = json.optString("changelog", ""),
                     forceUpdate = json.optBoolean("forceUpdate", false)
                 )
