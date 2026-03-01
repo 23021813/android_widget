@@ -195,7 +195,38 @@ object OtaUpdateManager {
         }
     }
 
+    private fun canInstallApk(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
+    private fun requestInstallPermission(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                android.widget.Toast.makeText(
+                    context,
+                    "Please grant 'Install unknown apps' permission to CarFloat to continue update.",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun installApkFromUri(context: Context, uri: Uri) {
+        if (!canInstallApk(context)) {
+            requestInstallPermission(context)
+            return
+        }
         try {
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "application/vnd.android.package-archive")
@@ -211,6 +242,10 @@ object OtaUpdateManager {
     }
 
     private fun installApk(context: Context, file: File) {
+        if (!canInstallApk(context)) {
+            requestInstallPermission(context)
+            return
+        }
         try {
             val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
