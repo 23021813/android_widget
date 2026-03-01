@@ -52,6 +52,8 @@
     <string name="weather_manual">수동</string>
     <string name="notif_title">CarFloat</string>
     <string name="notif_text">오버레이 실행 중</string>
+    <string name="notif_channel_name">CarFloat 오버레이</string>
+    <string name="notif_channel_desc">CarFloat 플로팅 위젯 서비스</string>
     <string name="wifi_on">WiFi 켜짐</string>
     <string name="wifi_off">WiFi 꺼짐</string>
     <string name="bt_on">블루투스 켜짐</string>
@@ -59,4 +61,37 @@
     <string name="gps_on">GPS 켜짐</string>
     <string name="gps_off">GPS 꺼짐</string>
     <string name="assistant">어시스턴트</string>
+    <string name="perm_title">권한 필요</string>
+    <string name="perm_body">CarFloat에는 오버레이 권한이 필요합니다.</string>
+    <string name="perm_grant">권한 부여</string>
+    <string name="assistant_long_press_app">길게 누르기 앱</string>
+    <string name="assistant_double_tap_app">더블 탭 앱</string>
+    <string name="assistant_icon_label">버튼 아이콘</string>
+    <string name="allow_overlap_system_bars">상태 표시줄 위에 위젯 허용</string>
+    <string name="clock_click_through">터치 투과 모드</string>
+    <string name="auto_split_on_boot">부팅 후 자동 분할</string>
+    <string name="status_widget_size">상태 위젯 크기</string>
+    <string name="assistant_button_size">어시스턴트 버튼 크기</string>
+    <string name="section_help">❓ 도움말</string>
+    <string name="help_clock_title">시계 위젯</string>
+    <string name="help_clock_tap">탭 → 분할 화면</string>
+    <string name="help_clock_long">길게 누르기 → 설정</string>
+    <string name="help_clock_drag">드래그 → 이동</string>
+    <string name="help_weather_title">날씨 위젯</string>
+    <string name="help_weather_tap">탭 → 설정</string>
+    <string name="help_icons_title">WiFi / BT / GPS</string>
+    <string name="help_icons_tap">탭 → 시스템 설정</string>
+    <string name="help_voice_title">음성 어시스턴트</string>
+    <string name="help_voice_tap">탭 → 앱 열기</string>
+    <string name="help_voice_long">길게 누르기 → 2번째 앱</string>
+    <string name="help_voice_double">더블 탭 → 3번째 앱</string>
+    <string name="help_voice_drag">드래그 → 버튼 이동</string>
+    <string name="help_clickthrough_title">터치 투과 모드</string>
+    <string name="help_clickthrough_desc">활성화 시 터치가 위젯을 통과합니다. 모서리의 작은 점을 길게 누른 후 드래그하세요.</string>
+
+    <!-- OTA -->
+    <string name="update_available">업데이트 가능</string>
+    <string name="new_version">새 버전</string>
+    <string name="update_now">지금 업데이트</string>
+    <string name="update_later">나중에</string>
 </resources>

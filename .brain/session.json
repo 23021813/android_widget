@@ -1,65 +1,42 @@
 {
-  "updated_at": "2026-03-01T08:00:00Z",
+  "updated_at": "2026-03-01T12:15:30Z",
   "working_on": {
-    "feature": "Rebranding & i18n",
-    "task": "Completed CarFloat rebranding, 8-language i18n, and custom icon integration",
+    "feature": "v1.3.0 Release Documentation & Brain Save",
+    "task": "Finalizing project docs and OTA setup guide",
     "status": "completed",
-    "files": [],
+    "files": ["README.md", "CHANGELOG.md", "ota_setup_guide.md", "brain.json", "session.json"],
     "blockers": [],
-    "notes": "Major milestone: project renamed to CarFloat with full multi-language support and deep-linked system settings."
+    "notes": "All v1.3 features (9 items) are verified and documented."
   },
-  "pending_tasks": [
-    {
-      "task": "Test on physical car head unit for Boot reliability",
-      "priority": "high",
-      "notes": "Emulator does not fully simulate diverse OEM boot behaviors."
-    }
-  ],
   "recent_changes": [
     {
-      "timestamp": "2026-03-01T07:55:00Z",
-      "type": "rebranding",
-      "description": "Renamed project to CarFloat, integrated user's custom PNG icon, implemented 8-language i18n system with runtime switcher.",
-      "files": [
-        "strings.xml",
-        "LauncherActivity.kt",
-        "SettingsScreen.kt",
-        "LauncherSettings.kt",
-        "SettingsDataStore.kt",
-        "LocaleHelper.kt",
-        "ic_launcher.png"
-      ]
+      "timestamp": "2026-03-01T12:00:00Z",
+      "type": "bugfix",
+      "description": "Fixed click-through drag handle sizing (px to dp) and interaction logic.",
+      "files": ["OverlayService.kt"]
     },
     {
-      "timestamp": "2026-03-01T07:20:00Z",
+      "timestamp": "2026-03-01T11:50:00Z",
       "type": "feature",
-      "description": "Added deep-link click actions to WiFi/BT/GPS icons, long-press clock support, and widget visibility toggles.",
-      "files": [
-        "OverlayService.kt",
-        "SettingsScreen.kt"
-      ]
-    }
-  ],
-  "errors_encountered": [
-    {
-      "error": "Unresolved reference: perm_title/perm_body in LauncherActivity",
-      "solution": "Manually added missing string keys to all locale strings.xml files (sed script missed the default values/ folder).",
-      "resolved": true
-    },
-    {
-      "error": "Activity recreate() flickering",
-      "solution": "Added a small delay (200ms) before recreate() to ensure DataStore preference is fully written and prevents race conditions.",
-      "resolved": true
+      "description": "Added manual check update button and OTA setup documentation.",
+      "files": ["SettingsScreen.kt", "LauncherActivity.kt", "ota_setup_guide.md"]
     }
   ],
   "decisions_made": [
     {
-      "decision": "Use Legacy PNG Icons",
-      "reason": "Maximum compatibility for automotive head units that may not support VectorDrawables for launch icons."
+      "decision": "Use 48dp Window bounds with 12dp visual dot for click-through handle",
+      "reason": "Provides adequate touch target while remaining visually subtle."
     },
     {
-      "decision": "Runtime Locale Switching via attachBaseContext",
-      "reason": "Allows the app to ignore system language and use a specific user preference without needing a restart in most cases (activity recreate handles UI refresh)."
+      "decision": "Require long-press for click-through dragging",
+      "reason": "Prevents accidental movement when interacting with apps behind the widget."
+    },
+    {
+      "decision": "GitHub-based OTA system",
+      "reason": "Free, reliable, and requires no custom server backend."
     }
+  ],
+  "pending_tasks": [
+    { "task": "Integrate real GitHub RAW URL in OtaUpdateManager.kt once repo is created", "priority": "high" }
   ]
 }

@@ -52,6 +52,8 @@
     <string name="weather_manual">Manuell</string>
     <string name="notif_title">CarFloat</string>
     <string name="notif_text">Overlay läuft</string>
+    <string name="notif_channel_name">CarFloat-Overlay</string>
+    <string name="notif_channel_desc">CarFloat Floating-Widget-Dienst</string>
     <string name="wifi_on">WiFi An</string>
     <string name="wifi_off">WiFi Aus</string>
     <string name="bt_on">Bluetooth An</string>
@@ -59,4 +61,37 @@
     <string name="gps_on">GPS An</string>
     <string name="gps_off">GPS Aus</string>
     <string name="assistant">Assistent</string>
+    <string name="perm_title">Berechtigung erforderlich</string>
+    <string name="perm_body">CarFloat benötigt die Overlay-Berechtigung.</string>
+    <string name="perm_grant">Berechtigung erteilen</string>
+    <string name="assistant_long_press_app">Lang drücken App</string>
+    <string name="assistant_double_tap_app">Doppeltippen App</string>
+    <string name="assistant_icon_label">Schaltflächensymbol</string>
+    <string name="allow_overlap_system_bars">Widget über Statusleiste anzeigen</string>
+    <string name="clock_click_through">Durchklick-Modus</string>
+    <string name="auto_split_on_boot">Auto-Splitscreen nach Bootvorgang</string>
+    <string name="status_widget_size">Status-Widget-Größe</string>
+    <string name="assistant_button_size">Assistenten-Button-Größe</string>
+    <string name="section_help">❓ Hilfe</string>
+    <string name="help_clock_title">Uhr-Widget</string>
+    <string name="help_clock_tap">Tippen → Splitscreen</string>
+    <string name="help_clock_long">Lang drücken → Einstellungen</string>
+    <string name="help_clock_drag">Ziehen → Verschieben</string>
+    <string name="help_weather_title">Wetter-Widget</string>
+    <string name="help_weather_tap">Tippen → Einstellungen</string>
+    <string name="help_icons_title">WiFi / BT / GPS</string>
+    <string name="help_icons_tap">Tippen → Systemeinstellungen</string>
+    <string name="help_voice_title">Sprachassistent</string>
+    <string name="help_voice_tap">Tippen → App öffnen</string>
+    <string name="help_voice_long">Lang drücken → 2. App</string>
+    <string name="help_voice_double">Doppeltippen → 3. App</string>
+    <string name="help_voice_drag">Ziehen → Button verschieben</string>
+    <string name="help_clickthrough_title">Durchklick-Modus</string>
+    <string name="help_clickthrough_desc">Berührungen gehen durch das Widget. Kleinen Punkt zum Ziehen lange drücken.</string>
+
+    <!-- OTA -->
+    <string name="update_available">Update verfügbar</string>
+    <string name="new_version">Neue Version</string>
+    <string name="update_now">Jetzt aktualisieren</string>
+    <string name="update_later">Später</string>
 </resources>

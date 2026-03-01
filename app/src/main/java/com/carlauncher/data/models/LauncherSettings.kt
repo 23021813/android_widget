@@ -27,6 +27,18 @@ enum class AppLanguage(val locale: String, val displayName: String) {
     GERMAN("de", "Deutsch")
 }
 
+enum class AssistantIcon(val displayName: String) {
+    MIC("Microphone"),
+    HEADSET("Headset"),
+    ASSISTANT("AI Assistant"),
+    RECORD("Record"),
+    VOICE("Voice Over"),
+    CHAT("Chat"),
+    STAR("Star"),
+    HOME("Home"),
+    MUSIC("Music"),
+    PHONE("Phone")
+}
 
 data class LauncherSettings(
     // App Frames
@@ -34,20 +46,33 @@ data class LauncherSettings(
     val frame2App: String? = null,
     val assistantApp: String? = null,
     val autoStartOnBoot: Boolean = false,
-    
+
     // Widget Visibility
     val showStatusWidget: Boolean = true,
     val showAssistantWidget: Boolean = true,
 
-    // Widget Appearance
-    val widgetScale: Float = 1.0f,
+    // Widget Appearance — independent sizing
+    val statusWidgetScale: Float = 1.0f,
+    val assistantButtonScale: Float = 1.0f,
     val widgetOpacity: Float = 0.85f,
+
+    // Widget Position (Int.MIN_VALUE = not set, use default gravity)
+    val statusWidgetX: Int = Int.MIN_VALUE,
+    val statusWidgetY: Int = Int.MIN_VALUE,
+    val assistantWidgetX: Int = Int.MIN_VALUE,
+    val assistantWidgetY: Int = Int.MIN_VALUE,
+
+    // System bar overlap
+    val allowOverlapSystemBars: Boolean = false,
 
     // Clock & Overlay
     val clockFormat: ClockFormat = ClockFormat.TIME_ONLY,
     val showWifi: Boolean = true,
     val showBluetooth: Boolean = true,
     val showGps: Boolean = true,
+
+    // Click-through
+    val clockClickThrough: Boolean = false,
 
     // Weather
     val showWeather: Boolean = true,
@@ -57,5 +82,13 @@ data class LauncherSettings(
     val weatherApiKey: String = "",
 
     // Language
-    val appLanguage: AppLanguage = AppLanguage.SYSTEM
+    val appLanguage: AppLanguage = AppLanguage.SYSTEM,
+
+    // Voice button
+    val assistantIcon: AssistantIcon = AssistantIcon.MIC,
+    val assistantLongPressApp: String? = null,
+    val assistantDoubleTapApp: String? = null,
+
+    // Boot Split-View
+    val autoSplitOnBoot: Boolean = true
 )

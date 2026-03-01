@@ -22,6 +22,9 @@ import com.carlauncher.service.OverlayService
 import com.carlauncher.ui.navigation.NavGraph
 import com.carlauncher.ui.theme.CarLauncherTheme
 import com.carlauncher.util.LocaleHelper
+import com.carlauncher.update.OtaUpdateManager
+import com.carlauncher.update.UpdateDialog
+import com.carlauncher.update.UpdateInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -55,12 +58,17 @@ class LauncherActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val hasPermission by permissionState
 
+            // OTA update check
+            var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+            LaunchedEffect(Unit) {
+                updateInfo = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
+            }
+
             // Track language changes and recreate activity so Android reloads resources
             var lastLang by remember { mutableStateOf(settings.appLanguage) }
             LaunchedEffect(settings.appLanguage) {
                 if (settings.appLanguage != lastLang) {
                     lastLang = settings.appLanguage
-                    // A brief delay ensures DataStore write completes before recreate
                     kotlinx.coroutines.delay(200)
                     recreate()
                 }
@@ -80,6 +88,16 @@ class LauncherActivity : ComponentActivity() {
                                 scope.launch {
                                     settingsDataStore.resetToDefaults()
                                 }
+                            },
+                            onCheckUpdate = {
+                                scope.launch {
+                                    val info = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
+                                    if (info != null) {
+                                        updateInfo = info
+                                    } else {
+                                        android.widget.Toast.makeText(this@LauncherActivity, "You are on the latest version", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                             }
                         )
                     } else {
@@ -91,6 +109,18 @@ class LauncherActivity : ComponentActivity() {
                                 )
                                 startActivity(intent)
                             }
+                        )
+                    }
+
+                    // Show update dialog if available
+                    updateInfo?.let { info ->
+                        UpdateDialog(
+                            updateInfo = info,
+                            onUpdate = {
+                                OtaUpdateManager.downloadAndInstall(this@LauncherActivity, info)
+                                updateInfo = null
+                            },
+                            onDismiss = { updateInfo = null }
                         )
                     }
                 }

@@ -52,6 +52,8 @@
     <string name="weather_manual">手动</string>
     <string name="notif_title">CarFloat</string>
     <string name="notif_text">浮层运行中</string>
+    <string name="notif_channel_name">CarFloat 悬浮层</string>
+    <string name="notif_channel_desc">CarFloat 悬浮小组件服务</string>
     <string name="wifi_on">WiFi 已开启</string>
     <string name="wifi_off">WiFi 已关闭</string>
     <string name="bt_on">蓝牙已开启</string>
@@ -59,4 +61,38 @@
     <string name="gps_on">GPS 已开启</string>
     <string name="gps_off">GPS 已关闭</string>
     <string name="assistant">助手</string>
+    <!-- Permission -->
+    <string name="perm_title">需要悬浮窗权限</string>
+    <string name="perm_body">CarFloat 需要悬浮窗权限。</string>
+    <string name="perm_grant">立即授权</string>
+    <string name="assistant_long_press_app">长按应用</string>
+    <string name="assistant_double_tap_app">双击应用</string>
+    <string name="assistant_icon_label">按钮图标</string>
+    <string name="allow_overlap_system_bars">允许组件覆盖状态栏</string>
+    <string name="clock_click_through">穿透模式</string>
+    <string name="auto_split_on_boot">开机后自动启动分屏</string>
+    <string name="status_widget_size">状态组件大小</string>
+    <string name="assistant_button_size">助手按钮大小</string>
+    <string name="section_help">❓ 操作指南</string>
+    <string name="help_clock_title">时钟组件</string>
+    <string name="help_clock_tap">点击 → 启动分屏</string>
+    <string name="help_clock_long">长按 → 打开设置</string>
+    <string name="help_clock_drag">拖动 → 移动组件</string>
+    <string name="help_weather_title">天气组件</string>
+    <string name="help_weather_tap">点击 → 打开设置</string>
+    <string name="help_icons_title">WiFi / 蓝牙 / GPS</string>
+    <string name="help_icons_tap">点击 → 打开系统设置</string>
+    <string name="help_voice_title">语音助手</string>
+    <string name="help_voice_tap">点击 → 打开应用</string>
+    <string name="help_voice_long">长按 → 打开第2个应用</string>
+    <string name="help_voice_double">双击 → 打开第3个应用</string>
+    <string name="help_voice_drag">拖动 → 移动按钮</string>
+    <string name="help_clickthrough_title">穿透模式</string>
+    <string name="help_clickthrough_desc">启用后触摸穿透组件。长按角落小点拖动。</string>
+
+    <!-- OTA -->
+    <string name="update_available">有新版本</string>
+    <string name="new_version">新版本</string>
+    <string name="update_now">立即更新</string>
+    <string name="update_later">稍后</string>
 </resources>

@@ -77,6 +77,8 @@
     <!-- ServiceNotification -->
     <string name="notif_title">CarFloat</string>
     <string name="notif_text">Overlay is running</string>
+    <string name="notif_channel_name">CarFloat Overlay</string>
+    <string name="notif_channel_desc">CarFloat floating widget service</string>
 
     <!-- Accessibility -->
     <string name="wifi_on">WiFi On</string>
@@ -89,6 +91,44 @@
 
     <!-- Permission screen -->
     <string name="perm_title">Permission Required</string>
-    <string name="perm_body">CarFloat needs the "Display over other apps" permission to show floating widgets on top of maps and other apps.</string>
+    <string name="perm_body">CarFloat needs the \"Display over other apps\" permission to show floating widgets on top of maps and other apps.</string>
     <string name="perm_grant">Grant Permission Now</string>
+
+    <!-- Assistant multi-gesture -->
+    <string name="assistant_long_press_app">Long Press App</string>
+    <string name="assistant_double_tap_app">Double Tap App</string>
+    <string name="assistant_icon_label">Button Icon</string>
+
+    <!-- System toggles -->
+    <string name="allow_overlap_system_bars">Allow widget over Status/Nav bar</string>
+    <string name="clock_click_through">Click-Through Mode (touches pass to app below)</string>
+    <string name="auto_split_on_boot">Auto-launch Split View after boot</string>
+
+    <!-- Independent sizing -->
+    <string name="status_widget_size">Status Widget Size</string>
+    <string name="assistant_button_size">Assistant Button Size</string>
+
+    <!-- Help -->
+    <string name="section_help">❓ Help &amp; Gestures</string>
+    <string name="help_clock_title">Clock Widget</string>
+    <string name="help_clock_tap">Tap → Launch Split View</string>
+    <string name="help_clock_long">Long Press → Open CarFloat Settings</string>
+    <string name="help_clock_drag">Drag → Move widget</string>
+    <string name="help_weather_title">Weather Widget</string>
+    <string name="help_weather_tap">Tap → Open CarFloat Settings</string>
+    <string name="help_icons_title">WiFi / BT / GPS Icons</string>
+    <string name="help_icons_tap">Tap → Open corresponding System Settings</string>
+    <string name="help_voice_title">Voice / Assistant Button</string>
+    <string name="help_voice_tap">Tap → Open assigned app</string>
+    <string name="help_voice_long">Long Press → Open 2nd app</string>
+    <string name="help_voice_double">Double Tap → Open 3rd app</string>
+    <string name="help_voice_drag">Drag → Move button</string>
+    <string name="help_clickthrough_title">Click-Through Mode</string>
+    <string name="help_clickthrough_desc">When enabled, touches pass through the widget. Long press the small dot at the corner to drag.</string>
+
+    <!-- OTA Update -->
+    <string name="update_available">Update Available</string>
+    <string name="new_version">New version</string>
+    <string name="update_now">Update Now</string>
+    <string name="update_later">Later</string>
 </resources>

@@ -52,6 +52,8 @@
     <string name="weather_manual">手動</string>
     <string name="notif_title">CarFloat</string>
     <string name="notif_text">オーバーレイ実行中</string>
+    <string name="notif_channel_name">CarFloat オーバーレイ</string>
+    <string name="notif_channel_desc">CarFloat 浮動ウィジェットサービス</string>
     <string name="wifi_on">WiFi オン</string>
     <string name="wifi_off">WiFi オフ</string>
     <string name="bt_on">Bluetooth オン</string>
@@ -59,4 +61,37 @@
     <string name="gps_on">GPS オン</string>
     <string name="gps_off">GPS オフ</string>
     <string name="assistant">アシスタント</string>
+    <string name="perm_title">権限が必要です</string>
+    <string name="perm_body">CarFloatにはオーバーレイ権限が必要です。</string>
+    <string name="perm_grant">権限を付与</string>
+    <string name="assistant_long_press_app">長押しアプリ</string>
+    <string name="assistant_double_tap_app">ダブルタップアプリ</string>
+    <string name="assistant_icon_label">ボタンアイコン</string>
+    <string name="allow_overlap_system_bars">ステータスバー上に表示</string>
+    <string name="clock_click_through">タッチスルーモード</string>
+    <string name="auto_split_on_boot">起動後に自動分割</string>
+    <string name="status_widget_size">ステータスウィジェットサイズ</string>
+    <string name="assistant_button_size">アシスタントボタンサイズ</string>
+    <string name="section_help">❓ 操作ガイド</string>
+    <string name="help_clock_title">時計ウィジェット</string>
+    <string name="help_clock_tap">タップ → 分割画面</string>
+    <string name="help_clock_long">長押し → 設定を開く</string>
+    <string name="help_clock_drag">ドラッグ → 移動</string>
+    <string name="help_weather_title">天気ウィジェット</string>
+    <string name="help_weather_tap">タップ → 設定を開く</string>
+    <string name="help_icons_title">WiFi / BT / GPS</string>
+    <string name="help_icons_tap">タップ → システム設定</string>
+    <string name="help_voice_title">音声アシスタント</string>
+    <string name="help_voice_tap">タップ → アプリを開く</string>
+    <string name="help_voice_long">長押し → 2番目のアプリ</string>
+    <string name="help_voice_double">ダブルタップ → 3番目のアプリ</string>
+    <string name="help_voice_drag">ドラッグ → ボタン移動</string>
+    <string name="help_clickthrough_title">タッチスルーモード</string>
+    <string name="help_clickthrough_desc">有効にするとタッチがウィジェットを通過します。角の小さな点を長押ししてドラッグします。</string>
+
+    <!-- OTA -->
+    <string name="update_available">アップデート利用可能</string>
+    <string name="new_version">新バージョン</string>
+    <string name="update_now">今すぐ更新</string>
+    <string name="update_later">後で</string>
 </resources>

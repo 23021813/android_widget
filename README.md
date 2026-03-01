@@ -1,40 +1,68 @@
-# CarFloat (Formerly Car Launcher Overlay)
+# CarFloat (Formerly Car Launcher Overlay) - v1.3.0
 
-CarFloat là một ứng dụng tiện ích độc đáo dành cho màn hình xe hơi (Automotive Android/Android Box) với giao diện tinh tế chuẩn "Glassmorphism". Ứng dụng vẽ đè (Float Overlay) các widget thông minh lên mọi màn hình khác, mang lại các điều khiển tiện ích ngay lập tức mà không phá vỡ app đang hiển thị bên dưới.
+CarFloat là một ứng dụng tiện ích chuyên dụng dành cho màn hình xe hơi (Android Automotive / Android Box) với giao diện **Glassmorphism** hiện đại. Ứng dụng cung cấp các Widget nổi (Floating Widgets) thông minh, cho phép điều khiển và truy cập nhanh mà không cần thoát ứng dụng đang chạy.
 
-## 🚀 Tính Năng Nổi Bật
+---
 
-- **Chế Độ Chia Đôi Ứng Dụng (Split-Screen)**: Chạm vào đồng hồ để ngay lập tức khởi chạy hai ứng dụng chia màn hình song song.
-- **Microphone Trợ Lý Ảo Độc Lập**: Nút mic nổi có thể gán cho bất kỳ trợ lý ảo nào (Kiki, Google Assistant, Voice Search).
-- **Đa Ngôn Ngữ (Internationalization)**: Hỗ trợ 8 ngôn ngữ phổ biến (EN, VI, ZH, JA, KO, FR, DE) với khả năng tự động nhận diện hoặc chọn thủ công trong App.
-- **Biểu Tượng Clickable Linh Hoạt**:
-    - **Chạm 1 lần vào đồng hồ**: Chạy Split View.
-    - **Chạm giữ vào đồng hồ / Chạm thời tiết**: Vào cài đặt CarFloat.
-    - **Chạm icon WiFi/BT/GPS**: Mở ngay cài đặt hệ thống tương ứng.
-- **Trạng Thái Kết Nối Thời Gian Thực**: Icons WiFi, Bluetooth, GPS thay đổi màu sắc và trạng thái dựa trên kết nối thực tế của hệ thống.
-- **Trải Nghiệm Tùy Chỉnh Sâu**: Kéo thả linh hoạt mọi vị trí. Tùy chỉnh Kích thước, Độ mờ (Opacity) và Ẩn/Hiện riêng biệt từng widget.
-- **Tự Khởi Động (Auto-Start)**: Hỗ trợ nạp Overlay chạy nền tự động ngay khi khởi động xe (Hỗ trợ cả QuickBoot cho các đầu Android chuyên dụng).
+## 🌟 Có gì mới trong bản v1.3.0?
+
+Bản cập nhật v1.3.0 mang đến những cải tiến mạnh mẽ về khả năng tùy biến và tính ổn định:
+
+### 🎮 Thao Tác & Gestures Nâng Cao
+- **Chế Độ Click-Through (Chạm Xuyên Thấu)**: Widget đồng hồ có thể trở nên tàng hình với cảm ứng, cho phép bạn thao tác với các ứng dụng bên dưới nó. 
+    - **Cơ chế kéo thả mới**: Để di chuyển widget trong chế độ này, bạn cần **Nhấn Giữ (Long Press)** vào chấm nhỏ (12dp, opacity 15%) ở góc trước khi kéo.
+- **Nút Voice Đa Năng**: 
+    - Hỗ trợ gán 3 hành động khác nhau: **Chạm (Tap)**, **Nhấn Giữ (Long Press)**, và **Chạm Đúp (Double Tap)** cho các ứng dụng khác nhau.
+    - Cho phép thay đổi Icon Mic từ danh sách Icon Pack tích hợp sẵn.
+- **Kích Thước Độc Lập**: Tùy chỉnh tỉ lệ (Scale) riêng biệt cho Widget Trạng thái và Nút Voice.
+
+### 🛠 Tính Năng Hệ Thống
+- **Ghi Nhớ Vị Trí**: Tự động lưu và khôi phục vị trí chính xác của các widget sau khi khởi động lại.
+- **Ghi Đè Thanh Hệ Thống (Layout No Limits)**: Cho phép kéo widget đè lên cả thanh thông báo (Notification Bar) và thanh điều hướng (Navigation Bar).
+- **Tự Động Chia Màn Hình (Auto Split-View)**: Tùy chọn tự động kích hoạt chế độ chia đôi màn hình ngay khi hệ thống khởi động hoàn tất (Yêu cầu đã cấu hình 2 App).
+- **Cập Nhật OTA**: Tích hợp hệ thống tự động kiểm tra và tải bản cập nhật từ GitHub.
+
+### 📖 Hỗ Trợ & Bản Địa Hóa
+- **Help Center**: Mục hướng dẫn trực quan trong Settings giải thích chi tiết các cử chỉ Tap/Long Press/Double Tap.
+- **Internationalization (8 Ngôn Ngữ)**: Hỗ trợ hoàn hảo Tiếng Anh, Tiếng Việt, Trung Quốc, Nhật Bản, Hàn Quốc, Pháp, Đức, và Ý. Tự động nhận diện theo hệ thống hoặc chọn thủ công.
+
+---
+
+## 🚀 Hệ Thống Cập Nhật OTA (GitHub Releases)
+
+CarFloat hỗ trợ cập nhật từ xa mà không cần CH Play. Để cài đặt hệ thống này cho Repo của bạn, hãy xem hướng dẫn chi tiết tại:
+👉 [Hướng dẫn cấu hình OTA](brain/3bc9daad-ef9b-40e4-91fb-255d577e3e92/ota_setup_guide.md)
+
+**Cách hoạt động:**
+1. App kiểm tra file `version.json` trên nhánh main của GitHub.
+2. Nếu bản trên Web có `versionCode` cao hơn bản hiện tại, thông báo cập nhật sẽ hiện ra.
+3. Người dùng có thể nhấn **Update Now** trong mục *About* để kiểm tra thủ công.
+
+---
 
 ## 🛠 Cách Cài Đặt và Cấp Quyền
-1. Cài đặt file APK `CarFloat_v1.1_i18n_Icon.apk`.
-2. Mở App **CarFloat**. Cấp quyền "Hiển thị trên ứng dụng khác" (System Alert Window) khi được yêu cầu.
-3. Quay lại, Overlay sẽ lập tức hiển thị trên cùng.
 
-## ⚙️ Cấu Hình & Thao Tác
+1. Cài đặt file APK `CarFloat_v1.3.apk`.
+2. Cấp quyền **"Hiển thị trên ứng dụng khác" (System Alert Window)**.
+3. (Tùy chọn) Cấp quyền **"Cài đặt ứng dụng không rõ nguồn gốc"** để tính năng OTA hoạt động mượt mà.
 
-- **Click Đồng hồ**: Chạy Split View.
-- **Giữ Đồng hồ / Click Weather**: Mở Settings.
-- **Click Icons**: Mở cài đặt hệ thống (WiFi/BT/GPS).
-- **Kéo thả**: Chạm giữ vào widget để di chuyển tự do.
+---
 
-## 💻 Tech Stack & Kiến Trúc
-- **Ngôn ngữ**: Kotlin / Jetpack Compose
-- **Target SDK**: 34 (Android 14)
-- **Persistent Storage**: DataStore Preferences
-- **i18n**: Android String Resources with Runtime Locale Switching.
-- **Connectivity Monitoring**: System Service polling (3s intervals).
+## 💻 Dành Cho Nhà Phát Triển
 
-## 💡 Notes Dành Cho Dev
-- Project sử dụng `attachBaseContext` để override ngôn ngữ tại runtime.
-- Icon app được đóng gói dưới dạng Legacy PNG (`mipmap-xhdpi`) để đảm bảo hiển thị đồng nhất trên các đầu xe đời cũ.
-- `SplitScreenProxyActivity` đóng vai trò là "trampoline" để vượt qua giới hạn khởi chạy Activity từ Service context.
+### Build & Test
+- Dự án sử dụng **Jetpack Compose** cho UI và **DataStore** cho lưu trữ.
+- **Automation Script**: Sử dụng `./run_test.sh` để:
+    - Đóng các Emulator đang kẹt.
+    - Khởi động máy ảo.
+    - Tự động build, install và cấp quyền Overlay qua ADB.
+
+### Cấu trúc dự án
+- `com.carlauncher.service.OverlayService`: Trái tim của ứng dụng, quản lý WindowManager và các Overlay.
+- `com.carlauncher.update.OtaUpdateManager`: Quản lý logic tải và cài đặt APK.
+- `res/values-*/strings.xml`: Quản lý bản dịch cho 8 ngôn ngữ.
+
+---
+
+## 📝 Changelog
+Chi tiết các thay đổi qua từng phiên bản có thể xem tại [CHANGELOG.md](CHANGELOG.md).

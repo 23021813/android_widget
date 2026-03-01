@@ -1,69 +1,44 @@
 {
   "meta": {
     "schema_version": "1.1.0",
-    "awf_version": "3.3.0"
+    "awf_version": "3.3.0",
+    "last_saved": "2026-03-01T12:15:00Z"
   },
   "project": {
     "name": "CarFloat",
-    "type": "Android Automotive Utility",
-    "status": "Production-ready (v1.2.0)"
+    "type": "Android Utility App / Automotive Launcher Overlay",
+    "status": "v1.3.0 Stable"
   },
   "tech_stack": {
-    "frontend": {
-      "framework": "Jetpack Compose",
-      "language": "Kotlin",
-      "target_sdk": "34",
-      "i18n": "Multi-locale (7 languages) with Runtime Switching"
-    },
-    "backend": {},
-    "database": {
-      "type": "DataStore",
-      "library": "androidx.datastore:datastore-preferences"
-    }
+    "frontend": "Jetpack Compose",
+    "backend": "Android Service (OverlayService)",
+    "storage": "DataStore Preferences",
+    "tools": ["adb", "gradle", "emulator"]
   },
-  "database_schema": {
-    "Preferences": [
-      "app_language (Enum: SYSTEM, EN, VI, ZH, JA, KO, FR, DE)",
-      "show_status_widget (Boolean)",
-      "show_assistant_widget (Boolean)",
-      "auto_start_on_boot (Boolean)",
-      "widget_scale (Float)",
-      "widget_opacity (Float)"
-    ]
-  },
-  "api_endpoints": [
-    "OpenWeatherMap API for real-time weather data"
-  ],
-  "business_rules": [
-    "Single tap clock: Launch Split-View",
-    "Long press clock / Tap weather: Open CarFloat settings",
-    "Tap WiFi/BT/GPS icons: Open corresponding System Settings",
-    "Live connectivity icons: Tinted white when active, dimmed when inactive",
-    "Individual widget toggles: Status and Assistant widgets can be hidden independently",
-    "Auto-boot support: Foreground service starts on RECEIVE_BOOT_COMPLETED/LOCKED_BOOT_COMPLETED"
-  ],
   "features": [
-    "CarFloat Branding & Glassmorphism UI",
-    "Internationalization (EN/VI/ZH/JA/KO/FR/DE)",
-    "Deep-linking to System Settings from Overlay",
-    "Stable Split-Screen via Proxy Activity & Reflection",
-    "Precise Widget Positioning & Draggable Handles",
-    "Real-time Connectivity Monitoring Service"
+    "Glassmorphism Overlay Widgets",
+    "Independent Status & Voice Widget Scaling",
+    "Independent Position Memory",
+    "Click-Through Mode with Long-Press Drag Handle",
+    "Multi-Gesture Voice Button (Tap, Long, Double)",
+    "Custom Voice Icon Grid",
+    "OTA Updates via GitHub Releases",
+    "Auto Split-View on Boot",
+    "Help & Gesture Guide section",
+    "Draw Over Navigation/Status Bars",
+    "8-Lang Internationalization"
   ],
   "knowledge_items": {
     "patterns": [
-      "Locale Override Pattern: Using `attachBaseContext` in Activity to apply custom Configuration with a custom Locale.",
-      "Trampoline/Proxy Activity pattern: Using a translucent activity to launch split-screen intents from a Service context.",
-      "Polling Service Pattern: Updating connectivity UI every 3 seconds via a Flow/Loop in the Foreground Service."
+      "SplitScreenProxyActivity for launching apps from Service context",
+      "WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS for system bar overlap",
+      "attachBaseContext for dynamic locale switching",
+      "DownloadManager + FileProvider for APK installation"
     ],
     "gotchas": [
-      "Legacy Icon Support: Using mipmap-xhdpi PNGs for maximum compatibility on older Chinese Android Head Units.",
-      "Context Start Restrictions: Android 10+ restricts starting activities from background services without a visible window/proxy.",
-      "UI Recomposition on Locale Change: Activity.recreate() is necessary to force stringResource() to reload from different values-XX folders."
-    ],
-    "conventions": [
-      "Every user-facing string MUST reside in strings.xml for i18n compatibility.",
-      "Connectivity icons use specific Off-variant icons (e.g., ic_wifi_off) when service is disabled."
+      "Click-through handle must use dp, not pixels, to be interactive on High-DPI screens",
+      "WindowManager updates should be debounced or carefully timed to avoid flickering",
+      "OTA requires Public GitHub repo for raw JSON access"
     ]
   }
 }

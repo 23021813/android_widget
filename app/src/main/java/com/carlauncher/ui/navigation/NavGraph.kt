@@ -12,7 +12,8 @@ import com.carlauncher.ui.screens.SettingsScreen
 fun NavGraph(
     settings: LauncherSettings,
     onSettingsUpdate: (LauncherSettings) -> Unit,
-    onResetDefaults: () -> Unit
+    onResetDefaults: () -> Unit,
+    onCheckUpdate: () -> Unit
 ) {
     val context = LocalContext.current
     val appRepository = remember { AppRepository(context) }
@@ -31,6 +32,7 @@ fun NavGraph(
                 SplitScreenLauncher.launchSplitScreen(context, settings.frame1App, settings.frame2App)
             }
         },
-        onResetDefaults = onResetDefaults
+        onResetDefaults = onResetDefaults,
+        onCheckUpdate = onCheckUpdate
     )
 }
