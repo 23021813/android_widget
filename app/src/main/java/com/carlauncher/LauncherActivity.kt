@@ -60,6 +60,9 @@ class LauncherActivity : ComponentActivity() {
 
             // OTA update check
             var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+            val isDownloading by OtaUpdateManager.isDownloading.collectAsState()
+            val downloadProgress by OtaUpdateManager.downloadProgress.collectAsState()
+
             LaunchedEffect(Unit) {
                 updateInfo = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
             }
@@ -113,15 +116,21 @@ class LauncherActivity : ComponentActivity() {
                         )
                     }
 
+
                     // Show update dialog if available
                     updateInfo?.let { info ->
                         UpdateDialog(
                             updateInfo = info,
+                            isDownloading = isDownloading,
+                            progress = downloadProgress,
                             onUpdate = {
                                 OtaUpdateManager.downloadAndInstall(this@LauncherActivity, info)
-                                updateInfo = null
                             },
-                            onDismiss = { updateInfo = null }
+                            onDismiss = { 
+                                if (!isDownloading) {
+                                    updateInfo = null 
+                                }
+                            }
                         )
                     }
                 }

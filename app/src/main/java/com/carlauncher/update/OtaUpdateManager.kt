@@ -9,8 +9,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import androidx.core.content.FileProvider
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
@@ -29,6 +30,14 @@ object OtaUpdateManager {
     // ⚠️ Replace with your actual GitHub raw URL for version.json
     private const val VERSION_CHECK_URL =
         "https://raw.githubusercontent.com/23021813/android_widget/main/version.json"
+
+    private val _isDownloading = MutableStateFlow(false)
+    val isDownloading = _isDownloading.asStateFlow()
+
+    private val _downloadProgress = MutableStateFlow(0f)
+    val downloadProgress = _downloadProgress.asStateFlow()
+
+    private var progressJob: Job? = null
 
     /**
      * Check if there is a new version available.
@@ -70,9 +79,12 @@ object OtaUpdateManager {
      * Download and install the APK using Android DownloadManager.
      */
     fun downloadAndInstall(context: Context, updateInfo: UpdateInfo) {
+        if (_isDownloading.value) return
+        
         val fileName = "CarFloat_${updateInfo.versionName}.apk"
         
-        android.widget.Toast.makeText(context, "Downloading update: ${updateInfo.versionName}...", android.widget.Toast.LENGTH_LONG).show()
+        _isDownloading.value = true
+        _downloadProgress.value = 0f
 
         val request = DownloadManager.Request(Uri.parse(updateInfo.apkUrl))
             .setTitle("CarFloat Update ${updateInfo.versionName}")
@@ -84,13 +96,47 @@ object OtaUpdateManager {
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val downloadId = downloadManager.enqueue(request)
 
+        // Start progress polling
+        progressJob?.cancel()
+        progressJob = CoroutineScope(Dispatchers.IO).launch {
+            while (isActive && _isDownloading.value) {
+                val query = DownloadManager.Query().setFilterById(downloadId)
+                val cursor = downloadManager.query(query)
+                if (cursor != null && cursor.moveToFirst()) {
+                    val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                    val bytesDownloadedIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                    val bytesTotalIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                    
+                    if (statusIndex != -1 && bytesDownloadedIndex != -1 && bytesTotalIndex != -1) {
+                        val status = cursor.getInt(statusIndex)
+                        val downloaded = cursor.getLong(bytesDownloadedIndex)
+                        val total = cursor.getLong(bytesTotalIndex)
+                        
+                        if (total > 0) {
+                            _downloadProgress.value = downloaded.toFloat() / total.toFloat()
+                        }
+                        
+                        if (status == DownloadManager.STATUS_SUCCESSFUL || status == DownloadManager.STATUS_FAILED) {
+                            _isDownloading.value = false
+                            cursor.close()
+                            break
+                        }
+                    }
+                }
+                cursor?.close()
+                delay(500)
+            }
+        }
+
         // Listen for download complete
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context, intent: Intent) {
                 val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
                     ctx.unregisterReceiver(this)
-                    android.widget.Toast.makeText(ctx, "Download complete. Opening installer...", android.widget.Toast.LENGTH_SHORT).show()
+                    _isDownloading.value = false
+                    _downloadProgress.value = 1f
+                    
                     val file = File(
                         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                         fileName
