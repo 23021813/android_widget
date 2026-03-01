@@ -119,10 +119,15 @@ class LauncherActivity : ComponentActivity() {
 
                     // Show update dialog if available
                     updateInfo?.let { info ->
+                        val installFileExists = remember(info, isDownloading) {
+                            OtaUpdateManager.getDownloadedFile(this@LauncherActivity, info) != null
+                        }
+
                         UpdateDialog(
                             updateInfo = info,
                             isDownloading = isDownloading,
                             progress = downloadProgress,
+                            installFileExists = installFileExists,
                             onUpdate = {
                                 OtaUpdateManager.downloadAndInstall(this@LauncherActivity, info)
                             },

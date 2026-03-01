@@ -17,6 +17,7 @@ fun UpdateDialog(
     updateInfo: UpdateInfo,
     isDownloading: Boolean,
     progress: Float,
+    installFileExists: Boolean,
     onUpdate: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -38,6 +39,16 @@ fun UpdateDialog(
                     color = TextPrimary,
                     style = MaterialTheme.typography.bodyLarge
                 )
+                
+                if (installFileExists && !isDownloading) {
+                    Text(
+                        text = "Update file already downloaded and ready to install.",
+                        color = AccentGreen,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 if (updateInfo.changelog.isNotBlank()) {
                     Text(
                         text = updateInfo.changelog,
@@ -76,7 +87,12 @@ fun UpdateDialog(
                     disabledContentColor = TextTertiary
                 )
             ) {
-                Text(if (isDownloading) "Downloading..." else stringResource(R.string.update_now))
+                val buttonText = when {
+                    isDownloading -> "Downloading..."
+                    installFileExists -> "Install Now"
+                    else -> stringResource(R.string.update_now)
+                }
+                Text(buttonText)
             }
         },
         dismissButton = {

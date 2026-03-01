@@ -78,10 +78,26 @@ object OtaUpdateManager {
     /**
      * Download and install the APK using Android DownloadManager.
      */
+    fun getDownloadedFile(context: Context, updateInfo: UpdateInfo): File? {
+        val fileName = "CarFloat_${updateInfo.versionName}.apk"
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            fileName
+        )
+        return if (file.exists() && file.length() > 0) file else null
+    }
+
     fun downloadAndInstall(context: Context, updateInfo: UpdateInfo) {
         if (_isDownloading.value) return
         
         val fileName = "CarFloat_${updateInfo.versionName}.apk"
+        val existingFile = getDownloadedFile(context, updateInfo)
+        
+        if (existingFile != null) {
+            // File already exists, just install it
+            installApk(context, existingFile)
+            return
+        }
         
         _isDownloading.value = true
         _downloadProgress.value = 0f
