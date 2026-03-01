@@ -1,42 +1,62 @@
 {
-  "updated_at": "2026-03-01T12:15:30Z",
+  "updated_at": "2026-03-01T13:16:00+07:00",
   "working_on": {
-    "feature": "v1.3.0 Release Documentation & Brain Save",
-    "task": "Finalizing project docs and OTA setup guide",
-    "status": "completed",
-    "files": ["README.md", "CHANGELOG.md", "ota_setup_guide.md", "brain.json", "session.json"],
+    "feature": "UI/UX Redesign",
+    "task": "Planning Material Design UI refactor for Settings and Widgets",
+    "status": "planning",
+    "files": [],
     "blockers": [],
-    "notes": "All v1.3 features (9 items) are verified and documented."
+    "notes": "Transitioning from Glassmorphism/Basic UI to modern Material Design aesthetics."
   },
-  "recent_changes": [
+  "pending_tasks": [
     {
-      "timestamp": "2026-03-01T12:00:00Z",
-      "type": "bugfix",
-      "description": "Fixed click-through drag handle sizing (px to dp) and interaction logic.",
-      "files": ["OverlayService.kt"]
+      "task": "Implement Material 3 guidelines for SettingsScreen",
+      "priority": "high",
+      "notes": "User requested modern UI/UX."
     },
     {
-      "timestamp": "2026-03-01T11:50:00Z",
+      "task": "Redesign floating widget icons with Material aesthetics",
+      "priority": "medium",
+      "notes": "Align with new Settings UI."
+    }
+  ],
+  "recent_changes": [
+    {
+      "timestamp": "2026-03-01T13:00:00+07:00",
       "type": "feature",
-      "description": "Added manual check update button and OTA setup documentation.",
-      "files": ["SettingsScreen.kt", "LauncherActivity.kt", "ota_setup_guide.md"]
+      "description": "Implemented robust OTA updating (Permission fixes, non-intrusive UI, Parse Error fixes)",
+      "files": [
+        "OtaUpdateManager.kt",
+        "LauncherActivity.kt",
+        "SettingsScreen.kt"
+      ]
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Parse Error during OTA install",
+      "solution": "Use getUriForDownloadedFile from DownloadManager instead of raw File paths.",
+      "resolved": true
+    },
+    {
+      "error": "Permission Denied (WRITE_EXTERNAL_STORAGE)",
+      "solution": "Switch to getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).",
+      "resolved": true
+    },
+    {
+      "error": "Install unknown apps permission missing",
+      "solution": "Add canRequestPackageInstalls() check and redirect to ACTION_MANAGE_UNKNOWN_APP_SOURCES.",
+      "resolved": true
     }
   ],
   "decisions_made": [
     {
-      "decision": "Use 48dp Window bounds with 12dp visual dot for click-through handle",
-      "reason": "Provides adequate touch target while remaining visually subtle."
+      "decision": "Use private external files dir for OTA",
+      "reason": "Bypasses need to prompt for generic storage permissions on modern Android."
     },
     {
-      "decision": "Require long-press for click-through dragging",
-      "reason": "Prevents accidental movement when interacting with apps behind the widget."
-    },
-    {
-      "decision": "GitHub-based OTA system",
-      "reason": "Free, reliable, and requires no custom server backend."
+      "decision": "Non-intrusive OTA Notifications",
+      "reason": "Avoid nagging the user while driving; use a subtle settings badge instead."
     }
-  ],
-  "pending_tasks": [
-    { "task": "Integrate real GitHub RAW URL in OtaUpdateManager.kt once repo is created", "priority": "high" }
   ]
 }

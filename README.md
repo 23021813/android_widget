@@ -1,12 +1,12 @@
-# CarFloat (Formerly Car Launcher Overlay) - v1.3.0
+# CarFloat (Formerly Car Launcher Overlay) - v1.3.4
 
 CarFloat là một ứng dụng tiện ích chuyên dụng dành cho màn hình xe hơi (Android Automotive / Android Box) với giao diện **Glassmorphism** hiện đại. Ứng dụng cung cấp các Widget nổi (Floating Widgets) thông minh, cho phép điều khiển và truy cập nhanh mà không cần thoát ứng dụng đang chạy.
 
 ---
 
-## 🌟 Có gì mới trong bản v1.3.0?
+## 🌟 Có gì mới trong bản v1.3.4?
 
-Bản cập nhật v1.3.0 mang đến những cải tiến mạnh mẽ về khả năng tùy biến và tính ổn định:
+Bản cập nhật v1.3.4 mang đến những cải tiến mạnh mẽ về khả năng tùy biến, tính ổn định và hệ thống OTA chuyên nghiệp:
 
 ### 🎮 Thao Tác & Gestures Nâng Cao
 - **Chế Độ Click-Through (Chạm Xuyên Thấu)**: Widget đồng hồ có thể trở nên tàng hình với cảm ứng, cho phép bạn thao tác với các ứng dụng bên dưới nó. 
@@ -35,8 +35,9 @@ CarFloat hỗ trợ cập nhật từ xa mà không cần CH Play. Để cài đ
 
 **Cách hoạt động:**
 1. App kiểm tra file `version.json` trên nhánh main của GitHub.
-2. Nếu bản trên Web có `versionCode` cao hơn bản hiện tại, thông báo cập nhật sẽ hiện ra.
-3. Người dùng có thể nhấn **Update Now** trong mục *About* để kiểm tra thủ công.
+2. Nếu bản trên Web có `versionCode` cao hơn bản hiện tại, một **Badge thông báo** sẽ xuất hiện gọn gàng trong màn hình Cài đặt (Settings), thay vì liên tục hiện Popup làm phiền người dùng.
+3. Người dùng có thể nhấn **Update Now** trong mục *About* để cài đặt.
+4. App được tối ưu để lưu file vào bộ nhớ riêng tư (`getExternalFilesDir`) để tránh lỗi Permission Denied trên các màn hình ô tô cũ, đồng thời chủ động xin quyền "Cài đặt ứng dụng không rõ nguồn gốc".
 
 ---
 

@@ -1,44 +1,33 @@
 {
   "meta": {
     "schema_version": "1.1.0",
-    "awf_version": "3.3.0",
-    "last_saved": "2026-03-01T12:15:00Z"
+    "awf_version": "3.3.0"
   },
   "project": {
     "name": "CarFloat",
-    "type": "Android Utility App / Automotive Launcher Overlay",
-    "status": "v1.3.0 Stable"
+    "type": "Android App",
+    "status": "Active"
   },
   "tech_stack": {
-    "frontend": "Jetpack Compose",
-    "backend": "Android Service (OverlayService)",
-    "storage": "DataStore Preferences",
-    "tools": ["adb", "gradle", "emulator"]
+    "frontend": {
+      "framework": "Jetpack Compose",
+      "language": "Kotlin"
+    },
+    "architecture": "Service-based Overlay"
   },
   "features": [
-    "Glassmorphism Overlay Widgets",
-    "Independent Status & Voice Widget Scaling",
-    "Independent Position Memory",
-    "Click-Through Mode with Long-Press Drag Handle",
-    "Multi-Gesture Voice Button (Tap, Long, Double)",
-    "Custom Voice Icon Grid",
-    "OTA Updates via GitHub Releases",
-    "Auto Split-View on Boot",
-    "Help & Gesture Guide section",
-    "Draw Over Navigation/Status Bars",
-    "8-Lang Internationalization"
+    "Floating Widgets (Clock, Weather, Voice, Status)",
+    "Click-Through Gestures",
+    "Auto Split-Screen",
+    "Internationalization (8 languages)",
+    "Non-intrusive OTA Update System via GitHub Releases"
   ],
   "knowledge_items": {
-    "patterns": [
-      "SplitScreenProxyActivity for launching apps from Service context",
-      "WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS for system bar overlap",
-      "attachBaseContext for dynamic locale switching",
-      "DownloadManager + FileProvider for APK installation"
-    ],
     "gotchas": [
-      "Click-through handle must use dp, not pixels, to be interactive on High-DPI screens",
-      "WindowManager updates should be debounced or carefully timed to avoid flickering",
-      "OTA requires Public GitHub repo for raw JSON access"
+      "System Alert Window permission is required for overlays.",
+      "OTA Downloads must use context.getExternalFilesDir to avoid Permission Denied on some head units.",
+      "BroadcastReceiver for DownloadManager MUST use applicationContext to prevent memory leaks during config changes.",
+      "FileProvider needs broader paths config for diverse Android Automotive OS versions."
     ]
   }
 }
