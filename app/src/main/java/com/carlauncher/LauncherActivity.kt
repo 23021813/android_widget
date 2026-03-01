@@ -25,6 +25,8 @@ import com.carlauncher.util.LocaleHelper
 import com.carlauncher.update.OtaUpdateManager
 import com.carlauncher.update.UpdateDialog
 import com.carlauncher.update.UpdateInfo
+import com.carlauncher.data.AppRepository
+import com.carlauncher.data.models.AppInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -60,11 +62,20 @@ class LauncherActivity : ComponentActivity() {
 
             // OTA update check
             var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+            var showUpdateDialog by remember { mutableStateOf(false) }
             val isDownloading by OtaUpdateManager.isDownloading.collectAsState()
             val downloadProgress by OtaUpdateManager.downloadProgress.collectAsState()
 
+            val appRepository = remember { AppRepository(this@LauncherActivity) }
+            var installedApps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
+
             LaunchedEffect(Unit) {
-                updateInfo = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
+                installedApps = appRepository.getInstalledApps()
+                val info = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
+                if (info != null) {
+                    updateInfo = info
+                    showUpdateDialog = true
+                }
             }
 
             // Track language changes and recreate activity so Android reloads resources
@@ -82,6 +93,8 @@ class LauncherActivity : ComponentActivity() {
                     if (hasPermission) {
                         NavGraph(
                             settings = settings,
+                            installedApps = installedApps,
+                            updateInfo = updateInfo,
                             onSettingsUpdate = { newSettings ->
                                 scope.launch {
                                     settingsDataStore.updateSettings(newSettings)
@@ -98,6 +111,7 @@ class LauncherActivity : ComponentActivity() {
                                     val info = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
                                     if (info != null) {
                                         updateInfo = info
+                                        showUpdateDialog = true
                                     } else {
                                         android.widget.Toast.makeText(this@LauncherActivity, "You are on the latest version", android.widget.Toast.LENGTH_SHORT).show()
                                     }
@@ -117,29 +131,31 @@ class LauncherActivity : ComponentActivity() {
                     }
 
 
-                    // Show update dialog if available
-                    updateInfo?.let { info ->
-                        val installFileExists = remember(info, isDownloading) {
-                            OtaUpdateManager.getDownloadedFile(this@LauncherActivity, info) != null
-                        }
-
-                        UpdateDialog(
-                            updateInfo = info,
-                            isDownloading = isDownloading,
-                            progress = downloadProgress,
-                            installFileExists = installFileExists,
-                            onUpdate = {
-                                OtaUpdateManager.downloadAndInstall(this@LauncherActivity, info)
-                            },
-                            onClearCache = {
-                                OtaUpdateManager.clearCache(this@LauncherActivity, info)
-                            },
-                            onDismiss = { 
-                                if (!isDownloading) {
-                                    updateInfo = null 
-                                }
+                    // Show update dialog if user hasn't dismissed it or manually checked
+                    if (showUpdateDialog) {
+                        updateInfo?.let { info ->
+                            val installFileExists = remember(info, isDownloading) {
+                                OtaUpdateManager.getDownloadedFile(this@LauncherActivity, info) != null
                             }
-                        )
+
+                            UpdateDialog(
+                                updateInfo = info,
+                                isDownloading = isDownloading,
+                                progress = downloadProgress,
+                                installFileExists = installFileExists,
+                                onUpdate = {
+                                    OtaUpdateManager.downloadAndInstall(this@LauncherActivity, info)
+                                },
+                                onClearCache = {
+                                    OtaUpdateManager.clearCache(this@LauncherActivity, info)
+                                },
+                                onDismiss = { 
+                                    if (!isDownloading) {
+                                        showUpdateDialog = false
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }

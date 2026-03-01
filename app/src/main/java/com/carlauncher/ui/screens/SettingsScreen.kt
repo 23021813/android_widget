@@ -25,12 +25,15 @@ import com.carlauncher.data.models.*
 import com.carlauncher.service.resolveAssistantIcon
 import com.carlauncher.ui.components.AppPickerDialog
 import com.carlauncher.ui.theme.*
+import com.carlauncher.update.UpdateInfo
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     settings: LauncherSettings,
     installedApps: List<AppInfo>,
+    updateInfo: UpdateInfo? = null,
     onSettingsUpdate: (LauncherSettings) -> Unit,
     onLaunchSplitView: () -> Unit,
     onResetDefaults: () -> Unit,
@@ -303,19 +306,35 @@ fun SettingsScreen(
             // ═══ ABOUT ═══
             item {
                 SettingsSection(title = stringResource(R.string.section_about)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(stringResource(R.string.version), color = TextSecondary, style = MaterialTheme.typography.bodyLarge)
-                        Text("1.3.0", color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                    Column {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.version), color = TextSecondary, style = MaterialTheme.typography.bodyLarge)
+                            Text("1.3.1", color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                        }
+                        
+                        if (updateInfo != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.update_available_badge, updateInfo.versionName),
+                                color = AccentGreen,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.align(Alignment.End)
+                            )
+                        }
                     }
+
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedButton(
                         onClick = onCheckUpdate,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors()
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = if (updateInfo != null) AccentCyan else TextPrimary 
+                        )
                     ) {
-                        Icon(Icons.Default.SystemUpdate, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(if (updateInfo != null) Icons.Default.NewReleases else Icons.Default.SystemUpdate, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.update_now))
+                        Text(if (updateInfo != null) stringResource(R.string.update_now) else "Check for Updates")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedButton(

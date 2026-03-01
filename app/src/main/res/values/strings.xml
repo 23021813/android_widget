@@ -128,6 +128,7 @@
 
     <!-- OTA Update -->
     <string name="update_available">Update Available</string>
+    <string name="update_available_badge">New version %1$s is available!</string>
     <string name="new_version">New version</string>
     <string name="update_now">Update Now</string>
     <string name="update_later">Later</string>

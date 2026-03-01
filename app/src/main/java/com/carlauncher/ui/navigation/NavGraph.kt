@@ -7,25 +7,24 @@ import com.carlauncher.data.models.AppInfo
 import com.carlauncher.data.models.LauncherSettings
 import com.carlauncher.service.SplitScreenLauncher
 import com.carlauncher.ui.screens.SettingsScreen
+import com.carlauncher.update.UpdateInfo
 
 @Composable
 fun NavGraph(
     settings: LauncherSettings,
+    installedApps: List<AppInfo>,
+    updateInfo: UpdateInfo? = null,
     onSettingsUpdate: (LauncherSettings) -> Unit,
     onResetDefaults: () -> Unit,
     onCheckUpdate: () -> Unit
 ) {
     val context = LocalContext.current
-    val appRepository = remember { AppRepository(context) }
-    var installedApps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
-
-    LaunchedEffect(Unit) {
-        installedApps = appRepository.getInstalledApps()
-    }
+    // installedApps is now passed in from LauncherActivity
 
     SettingsScreen(
         settings = settings,
         installedApps = installedApps,
+        updateInfo = updateInfo,
         onSettingsUpdate = onSettingsUpdate,
         onLaunchSplitView = {
             if (settings.frame1App != null && settings.frame2App != null) {
