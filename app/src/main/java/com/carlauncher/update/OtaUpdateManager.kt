@@ -71,6 +71,8 @@ object OtaUpdateManager {
      */
     fun downloadAndInstall(context: Context, updateInfo: UpdateInfo) {
         val fileName = "CarFloat_${updateInfo.versionName}.apk"
+        
+        android.widget.Toast.makeText(context, "Downloading update: ${updateInfo.versionName}...", android.widget.Toast.LENGTH_LONG).show()
 
         val request = DownloadManager.Request(Uri.parse(updateInfo.apkUrl))
             .setTitle("CarFloat Update ${updateInfo.versionName}")
@@ -88,6 +90,7 @@ object OtaUpdateManager {
                 val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
                     ctx.unregisterReceiver(this)
+                    android.widget.Toast.makeText(ctx, "Download complete. Opening installer...", android.widget.Toast.LENGTH_SHORT).show()
                     val file = File(
                         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                         fileName
@@ -97,11 +100,12 @@ object OtaUpdateManager {
             }
         }
 
-        context.registerReceiver(
-            receiver,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0
-        )
+        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            context.registerReceiver(receiver, filter)
+        }
     }
 
     private fun installApk(context: Context, file: File) {

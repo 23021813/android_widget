@@ -91,6 +91,7 @@ class LauncherActivity : ComponentActivity() {
                             },
                             onCheckUpdate = {
                                 scope.launch {
+                                    android.widget.Toast.makeText(this@LauncherActivity, "Checking for updates...", android.widget.Toast.LENGTH_SHORT).show()
                                     val info = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
                                     if (info != null) {
                                         updateInfo = info
