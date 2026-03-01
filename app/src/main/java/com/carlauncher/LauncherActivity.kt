@@ -24,10 +24,13 @@ class LauncherActivity : ComponentActivity() {
 
     private lateinit var settingsDataStore: SettingsDataStore
 
+    private val permissionState = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         settingsDataStore = SettingsDataStore(this)
 
+        permissionState.value = Settings.canDrawOverlays(this)
         checkOverlayPermissionAndStartService()
 
         setContent {
@@ -35,7 +38,7 @@ class LauncherActivity : ComponentActivity() {
                 initial = LauncherSettings()
             )
             val scope = rememberCoroutineScope()
-            var hasPermission by remember { mutableStateOf(Settings.canDrawOverlays(this)) }
+            val hasPermission by permissionState
 
             CarLauncherTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -71,6 +74,7 @@ class LauncherActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        permissionState.value = Settings.canDrawOverlays(this)
         checkOverlayPermissionAndStartService()
     }
 

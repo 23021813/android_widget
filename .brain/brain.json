@@ -34,19 +34,22 @@
     "Voice Assistant Button Override",
     "Glassmorphism Styling",
     "Flat Styling Support",
-    "Custom Split Screen with Window Reflection for Edge Cases"
+    "Custom Split Screen with Activity Proxy for Background Contexts"
   ],
   "knowledge_items": {
     "patterns": [
-      "MVVM Pattern implicitly with Compose State"
+      "MVVM Pattern implicitly with Compose State",
+      "Trampoline/Proxy Activity pattern: Dùng một Activity trung gian để khởi chạy các tác vụ yêu cầu Activity Context thay vì Service Context."
     ],
     "gotchas": [
       "Modifier.shadow gây lỗi Render trên Unit Android Car => đổi sang Modifier.border",
-      "Intent_Launch_Adjacent không đủ mạnh ép màn hình đôi => phải invoke ActivityOptions bằng Reflection `setLaunchWindowingMode` (3 & 4)"
+      "Intent_Launch_Adjacent không đủ mạnh ép màn hình đôi => phải invoke ActivityOptions bằng Reflection `setLaunchWindowingMode` (3 & 4)",
+      "Permission check trong Compose cần được hoist ra Activity Lifecycle (onResume) để đảm bảo UI refresh ngay khi quay lại từ Settings."
     ],
     "conventions": [
       "Dùng DarkSurface làm nền",
-      "App KHÔNG CÒN LÀ LAUNCHER nữa, bỏ action HOME."
+      "App KHÔNG CÒN LÀ LAUNCHER nữa, bỏ action HOME.",
+      "Mọi lệnh StartActivity từ Background (Overlay) nên đi qua SplitScreenProxyActivity để đảm ổn định Windows Token."
     ]
   }
 }

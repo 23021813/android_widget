@@ -1,15 +1,27 @@
 {
-  "updated_at": "2026-02-28T19:59:00Z",
+  "updated_at": "2026-03-01T07:10:00Z",
   "working_on": {
     "feature": "Overlay Enhancement",
-    "task": "Completed migration to floating overlay",
+    "task": "Completed migration and stability fixes",
     "status": "completed",
     "files": [],
     "blockers": [],
-    "notes": "Everything is working smoothly, tested SplitScreen via Reflection and AutoStart receiver."
+    "notes": "Fixed SplitScreen instability using a Proxy Activity and UI permissions refresh issue."
   },
   "pending_tasks": [],
   "recent_changes": [
+    {
+      "timestamp": "2026-03-01T07:10:00Z",
+      "type": "bugfix",
+      "description": "Implemented SplitScreenProxyActivity to resolve background intent restrictions, fixed permission screen refresh, and increased split delays.",
+      "files": [
+        "SplitScreenProxyActivity.kt",
+        "AndroidManifest.xml",
+        "LauncherActivity.kt",
+        "OverlayService.kt",
+        "SplitScreenLauncher.kt"
+      ]
+    },
     {
       "timestamp": "2026-02-28T19:59:00Z",
       "type": "feature",
@@ -27,24 +39,25 @@
   ],
   "errors_encountered": [
     {
-      "error": "Visual Glitch polygons on shadow modifier",
-      "solution": "Replaced Modifier.shadow with Modifier.border",
+      "error": "SecurityException: Permission Denial when calling start from shell on unexported activity",
+      "solution": "Activity was internal, only exported for ADB test, now set back to private.",
+      "resolved": true
+    },
+    {
+      "error": "Permission state not refreshing after return from Settings",
+      "solution": "Moved mutableStateOf to Activity level and update it in onResume.",
       "resolved": true
     },
     {
       "error": "SplitScreen opens consecutively rather than adjacently on Head Units",
-      "solution": "Invoked Method setLaunchWindowingMode (Primary 3 / Secondary 4) manually via Reflection",
+      "solution": "Invoked Method setLaunchWindowingMode (Primary 3 / Secondary 4) manually via Reflection and wrapped in Proxy Activity.",
       "resolved": true
     }
   ],
   "decisions_made": [
     {
-      "decision": "Use Reflection for ActivityOptions Windowing Modes",
-      "reason": "FLAG_ACTIVITY_LAUNCH_ADJACENT does not force splitscreen correctly on heavily modified Android automotive OS."
-    },
-    {
-      "decision": "Remove Launcher capability",
-      "reason": "User wanted it to work on top of their main launcher instead of replacing it entirely."
+      "decision": "Use Proxy Activity (Trampoline)",
+      "reason": "Avoids Window Token mismatch or 'background start' restrictions when launching two apps in split mode from a floating Service."
     }
   ]
 }
