@@ -32,6 +32,7 @@ class SettingsDataStore(private val context: Context) {
         val WEATHER_CITY = stringPreferencesKey("weather_city")
         val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
         val WEATHER_API_KEY = stringPreferencesKey("weather_api_key")
+        val APP_LANGUAGE = stringPreferencesKey("app_language")
     }
 
     val settingsFlow: Flow<LauncherSettings> = context.dataStore.data.map { prefs ->
@@ -60,7 +61,10 @@ class SettingsDataStore(private val context: Context) {
             temperatureUnit = prefs[Keys.TEMPERATURE_UNIT]?.let {
                 try { TemperatureUnit.valueOf(it) } catch (e: Exception) { TemperatureUnit.CELSIUS }
             } ?: TemperatureUnit.CELSIUS,
-            weatherApiKey = prefs[Keys.WEATHER_API_KEY] ?: ""
+            weatherApiKey = prefs[Keys.WEATHER_API_KEY] ?: "",
+            appLanguage = prefs[Keys.APP_LANGUAGE]?.let {
+                try { AppLanguage.valueOf(it) } catch (e: Exception) { AppLanguage.SYSTEM }
+            } ?: AppLanguage.SYSTEM
         )
     }
 
@@ -89,6 +93,7 @@ class SettingsDataStore(private val context: Context) {
             prefs[Keys.WEATHER_CITY] = settings.weatherCity
             prefs[Keys.TEMPERATURE_UNIT] = settings.temperatureUnit.name
             prefs[Keys.WEATHER_API_KEY] = settings.weatherApiKey
+            prefs[Keys.APP_LANGUAGE] = settings.appLanguage.name
         }
     }
 

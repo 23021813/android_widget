@@ -4,15 +4,16 @@
     "awf_version": "3.3.0"
   },
   "project": {
-    "name": "Car Overlay App v3",
-    "type": "Android Application",
-    "status": "Production-ready"
+    "name": "CarFloat",
+    "type": "Android Automotive Utility",
+    "status": "Production-ready (v1.2.0)"
   },
   "tech_stack": {
     "frontend": {
       "framework": "Jetpack Compose",
       "language": "Kotlin",
-      "target_sdk": "34"
+      "target_sdk": "34",
+      "i18n": "Multi-locale (7 languages) with Runtime Switching"
     },
     "backend": {},
     "database": {
@@ -20,36 +21,49 @@
       "library": "androidx.datastore:datastore-preferences"
     }
   },
-  "database_schema": {},
-  "api_endpoints": [],
+  "database_schema": {
+    "Preferences": [
+      "app_language (Enum: SYSTEM, EN, VI, ZH, JA, KO, FR, DE)",
+      "show_status_widget (Boolean)",
+      "show_assistant_widget (Boolean)",
+      "auto_start_on_boot (Boolean)",
+      "widget_scale (Float)",
+      "widget_opacity (Float)"
+    ]
+  },
+  "api_endpoints": [
+    "OpenWeatherMap API for real-time weather data"
+  ],
   "business_rules": [
-    "Khởi chạy Split-Screen bằng cách bấm vào Đồng Hồ Trái",
-    "Khởi chạy Cài đặt bằng Icon Nhanh bên Phải",
-    "Trợ lý Ảo độc lập bằng Nút Mic tùy chọn, có thể di chuyển",
-    "Tự do cài đặt Độ Mờ & Kích Thước (Scale & Opacity)",
-    "Hỗ trợ Auto-start khi thiết bị Boot lên (Receiver)"
+    "Single tap clock: Launch Split-View",
+    "Long press clock / Tap weather: Open CarFloat settings",
+    "Tap WiFi/BT/GPS icons: Open corresponding System Settings",
+    "Live connectivity icons: Tinted white when active, dimmed when inactive",
+    "Individual widget toggles: Status and Assistant widgets can be hidden independently",
+    "Auto-boot support: Foreground service starts on RECEIVE_BOOT_COMPLETED/LOCKED_BOOT_COMPLETED"
   ],
   "features": [
-    "Draggable Overlay Settings",
-    "Voice Assistant Button Override",
-    "Glassmorphism Styling",
-    "Flat Styling Support",
-    "Custom Split Screen with Activity Proxy for Background Contexts"
+    "CarFloat Branding & Glassmorphism UI",
+    "Internationalization (EN/VI/ZH/JA/KO/FR/DE)",
+    "Deep-linking to System Settings from Overlay",
+    "Stable Split-Screen via Proxy Activity & Reflection",
+    "Precise Widget Positioning & Draggable Handles",
+    "Real-time Connectivity Monitoring Service"
   ],
   "knowledge_items": {
     "patterns": [
-      "MVVM Pattern implicitly with Compose State",
-      "Trampoline/Proxy Activity pattern: Dùng một Activity trung gian để khởi chạy các tác vụ yêu cầu Activity Context thay vì Service Context."
+      "Locale Override Pattern: Using `attachBaseContext` in Activity to apply custom Configuration with a custom Locale.",
+      "Trampoline/Proxy Activity pattern: Using a translucent activity to launch split-screen intents from a Service context.",
+      "Polling Service Pattern: Updating connectivity UI every 3 seconds via a Flow/Loop in the Foreground Service."
     ],
     "gotchas": [
-      "Modifier.shadow gây lỗi Render trên Unit Android Car => đổi sang Modifier.border",
-      "Intent_Launch_Adjacent không đủ mạnh ép màn hình đôi => phải invoke ActivityOptions bằng Reflection `setLaunchWindowingMode` (3 & 4)",
-      "Permission check trong Compose cần được hoist ra Activity Lifecycle (onResume) để đảm bảo UI refresh ngay khi quay lại từ Settings."
+      "Legacy Icon Support: Using mipmap-xhdpi PNGs for maximum compatibility on older Chinese Android Head Units.",
+      "Context Start Restrictions: Android 10+ restricts starting activities from background services without a visible window/proxy.",
+      "UI Recomposition on Locale Change: Activity.recreate() is necessary to force stringResource() to reload from different values-XX folders."
     ],
     "conventions": [
-      "Dùng DarkSurface làm nền",
-      "App KHÔNG CÒN LÀ LAUNCHER nữa, bỏ action HOME.",
-      "Mọi lệnh StartActivity từ Background (Overlay) nên đi qua SplitScreenProxyActivity để đảm ổn định Windows Token."
+      "Every user-facing string MUST reside in strings.xml for i18n compatibility.",
+      "Connectivity icons use specific Off-variant icons (e.g., ic_wifi_off) when service is disabled."
     ]
   }
 }

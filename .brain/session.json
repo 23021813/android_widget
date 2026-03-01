@@ -1,63 +1,65 @@
 {
-  "updated_at": "2026-03-01T07:10:00Z",
+  "updated_at": "2026-03-01T08:00:00Z",
   "working_on": {
-    "feature": "Overlay Enhancement",
-    "task": "Completed migration and stability fixes",
+    "feature": "Rebranding & i18n",
+    "task": "Completed CarFloat rebranding, 8-language i18n, and custom icon integration",
     "status": "completed",
     "files": [],
     "blockers": [],
-    "notes": "Fixed SplitScreen instability using a Proxy Activity and UI permissions refresh issue."
+    "notes": "Major milestone: project renamed to CarFloat with full multi-language support and deep-linked system settings."
   },
-  "pending_tasks": [],
+  "pending_tasks": [
+    {
+      "task": "Test on physical car head unit for Boot reliability",
+      "priority": "high",
+      "notes": "Emulator does not fully simulate diverse OEM boot behaviors."
+    }
+  ],
   "recent_changes": [
     {
-      "timestamp": "2026-03-01T07:10:00Z",
-      "type": "bugfix",
-      "description": "Implemented SplitScreenProxyActivity to resolve background intent restrictions, fixed permission screen refresh, and increased split delays.",
+      "timestamp": "2026-03-01T07:55:00Z",
+      "type": "rebranding",
+      "description": "Renamed project to CarFloat, integrated user's custom PNG icon, implemented 8-language i18n system with runtime switcher.",
       "files": [
-        "SplitScreenProxyActivity.kt",
-        "AndroidManifest.xml",
+        "strings.xml",
         "LauncherActivity.kt",
-        "OverlayService.kt",
-        "SplitScreenLauncher.kt"
+        "SettingsScreen.kt",
+        "LauncherSettings.kt",
+        "SettingsDataStore.kt",
+        "LocaleHelper.kt",
+        "ic_launcher.png"
       ]
     },
     {
-      "timestamp": "2026-02-28T19:59:00Z",
+      "timestamp": "2026-03-01T07:20:00Z",
       "type": "feature",
-      "description": "Converted Launcher to Standard Overlay App, added AutoStart, SplitScreen fix, Opacity/Scale features, and flat styling.",
+      "description": "Added deep-link click actions to WiFi/BT/GPS icons, long-press clock support, and widget visibility toggles.",
       "files": [
-        "AndroidManifest.xml",
-        "LauncherActivity.kt",
         "OverlayService.kt",
-        "SettingsDataStore.kt",
-        "LauncherSettings.kt",
-        "SettingsScreen.kt",
-        "BootReceiver.kt"
+        "SettingsScreen.kt"
       ]
     }
   ],
   "errors_encountered": [
     {
-      "error": "SecurityException: Permission Denial when calling start from shell on unexported activity",
-      "solution": "Activity was internal, only exported for ADB test, now set back to private.",
+      "error": "Unresolved reference: perm_title/perm_body in LauncherActivity",
+      "solution": "Manually added missing string keys to all locale strings.xml files (sed script missed the default values/ folder).",
       "resolved": true
     },
     {
-      "error": "Permission state not refreshing after return from Settings",
-      "solution": "Moved mutableStateOf to Activity level and update it in onResume.",
-      "resolved": true
-    },
-    {
-      "error": "SplitScreen opens consecutively rather than adjacently on Head Units",
-      "solution": "Invoked Method setLaunchWindowingMode (Primary 3 / Secondary 4) manually via Reflection and wrapped in Proxy Activity.",
+      "error": "Activity recreate() flickering",
+      "solution": "Added a small delay (200ms) before recreate() to ensure DataStore preference is fully written and prevents race conditions.",
       "resolved": true
     }
   ],
   "decisions_made": [
     {
-      "decision": "Use Proxy Activity (Trampoline)",
-      "reason": "Avoids Window Token mismatch or 'background start' restrictions when launching two apps in split mode from a floating Service."
+      "decision": "Use Legacy PNG Icons",
+      "reason": "Maximum compatibility for automotive head units that may not support VectorDrawables for launch icons."
+    },
+    {
+      "decision": "Runtime Locale Switching via attachBaseContext",
+      "reason": "Allows the app to ignore system language and use a specific user preference without needing a restart in most cases (activity recreate handles UI refresh)."
     }
   ]
 }

@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.view.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -209,11 +210,41 @@ class OverlayService : Service() {
                             startActivity(intent)
                         }
                     },
-                    onSettingsClick = {
+                    onClockLongPress = {
                         val intent = Intent(this@OverlayService, LauncherActivity::class.java).apply {
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         }
                         startActivity(intent)
+                    },
+                    onWeatherClick = {
+                        val intent = Intent(this@OverlayService, LauncherActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        }
+                        startActivity(intent)
+                    },
+                    onWifiClick = {
+                        try {
+                            val intent = Intent(android.provider.Settings.ACTION_WIFI_SETTINGS).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                        } catch (e: Exception) { e.printStackTrace() }
+                    },
+                    onBluetoothClick = {
+                        try {
+                            val intent = Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                        } catch (e: Exception) { e.printStackTrace() }
+                    },
+                    onLocationClick = {
+                        try {
+                            val intent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                        } catch (e: Exception) { e.printStackTrace() }
                     }
                 )
             }
@@ -358,6 +389,7 @@ class OverlayLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
     override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
 }
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun FloatingStatusWidget(
     settings: LauncherSettings,
@@ -367,7 +399,11 @@ fun FloatingStatusWidget(
     gpsActive: Boolean,
     onDrag: (Float, Float) -> Unit,
     onClockClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onClockLongPress: () -> Unit,
+    onWeatherClick: () -> Unit,
+    onWifiClick: () -> Unit,
+    onBluetoothClick: () -> Unit,
+    onLocationClick: () -> Unit
 ) {
     var currentTime by remember { mutableStateOf("") }
 
@@ -412,7 +448,7 @@ fun FloatingStatusWidget(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp * scale)
             ) {
-                // 1. Clock (Click -> Launch Split Screen)
+                // 1. Clock: Tap → Split Screen, Long Press → App Settings
                 Text(
                     text = currentTime,
                     color = Color.White,
@@ -421,64 +457,73 @@ fun FloatingStatusWidget(
                     letterSpacing = 1.sp * scale,
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp * scale))
-                        .clickable { onClockClick() }
+                        .combinedClickable(
+                            onClick = { onClockClick() },
+                            onLongClick = { onClockLongPress() }
+                        )
                         .padding(horizontal = 8.dp * scale, vertical = 4.dp * scale)
                 )
+
                 Box(modifier = Modifier.height(24.dp * scale).width(1.dp * scale).background(Color.White.copy(alpha = 0.2f)))
 
-                // Section for Settings (Click -> Launch Settings)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp * scale),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp * scale))
-                        .clickable { onSettingsClick() }
-                        .padding(horizontal = 8.dp * scale, vertical = 4.dp * scale)
-                ) {
-                    // 2. Weather
-                    if (settings.showWeather && weatherInfo != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "🌤️", // Simple weather icon mapping fallback
-                                fontSize = 20.sp * scale
-                            )
-                            Spacer(modifier = Modifier.width(4.dp * scale))
-                            Text(
-                                text = "${weatherInfo.temperature.toInt()}°",
-                                color = Color.White,
-                                fontSize = 20.sp * scale,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Box(modifier = Modifier.height(24.dp * scale).width(1.dp * scale).background(Color.White.copy(alpha = 0.2f)))
+                // 2. Weather: Tap → App Settings
+                if (settings.showWeather && weatherInfo != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp * scale))
+                            .clickable { onWeatherClick() }
+                            .padding(horizontal = 4.dp * scale, vertical = 4.dp * scale)
+                    ) {
+                        Text(
+                            text = "🌤️",
+                            fontSize = 20.sp * scale
+                        )
+                        Spacer(modifier = Modifier.width(4.dp * scale))
+                        Text(
+                            text = "${weatherInfo.temperature.toInt()}°",
+                            color = Color.White,
+                            fontSize = 20.sp * scale,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
+                    Box(modifier = Modifier.height(24.dp * scale).width(1.dp * scale).background(Color.White.copy(alpha = 0.2f)))
+                }
 
-                    // 3. Status icons with LIVE connectivity states
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp * scale)) {
-                        if (settings.showWifi) {
-                            Icon(
-                                imageVector = if (wifiActive) Icons.Rounded.Wifi else Icons.Rounded.WifiOff,
-                                contentDescription = if (wifiActive) "WiFi On" else "WiFi Off",
-                                tint = if (wifiActive) Color.White else Color.White.copy(alpha = 0.3f),
-                                modifier = Modifier.size(24.dp * scale)
-                            )
-                        }
-                        if (settings.showBluetooth) {
-                            Icon(
-                                imageVector = if (btActive) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
-                                contentDescription = if (btActive) "Bluetooth On" else "Bluetooth Off",
-                                tint = if (btActive) Color.White else Color.White.copy(alpha = 0.3f),
-                                modifier = Modifier.size(24.dp * scale)
-                            )
-                        }
-                        if (settings.showGps) {
-                            Icon(
-                                imageVector = if (gpsActive) Icons.Rounded.LocationOn else Icons.Rounded.LocationOff,
-                                contentDescription = if (gpsActive) "GPS On" else "GPS Off",
-                                tint = if (gpsActive) Color.White else Color.White.copy(alpha = 0.3f),
-                                modifier = Modifier.size(24.dp * scale)
-                            )
-                        }
+                // 3. Status icons - each individually clickable → system settings
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp * scale)) {
+                    if (settings.showWifi) {
+                        Icon(
+                            imageVector = if (wifiActive) Icons.Rounded.Wifi else Icons.Rounded.WifiOff,
+                            contentDescription = if (wifiActive) "WiFi On" else "WiFi Off",
+                            tint = if (wifiActive) Color.White else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier
+                                .size(24.dp * scale)
+                                .clip(CircleShape)
+                                .clickable { onWifiClick() }
+                        )
+                    }
+                    if (settings.showBluetooth) {
+                        Icon(
+                            imageVector = if (btActive) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
+                            contentDescription = if (btActive) "Bluetooth On" else "Bluetooth Off",
+                            tint = if (btActive) Color.White else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier
+                                .size(24.dp * scale)
+                                .clip(CircleShape)
+                                .clickable { onBluetoothClick() }
+                        )
+                    }
+                    if (settings.showGps) {
+                        Icon(
+                            imageVector = if (gpsActive) Icons.Rounded.LocationOn else Icons.Rounded.LocationOff,
+                            contentDescription = if (gpsActive) "GPS On" else "GPS Off",
+                            tint = if (gpsActive) Color.White else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier
+                                .size(24.dp * scale)
+                                .clip(CircleShape)
+                                .clickable { onLocationClick() }
+                        )
                     }
                 }
             }

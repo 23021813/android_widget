@@ -1,20 +1,32 @@
 package com.carlauncher.data.models
 
-enum class ClockFormat(val pattern: String, val label: String) {
-    TIME_ONLY("HH:mm", "Chỉ giờ"),
-    DATE_TIME("dd/MM HH:mm", "Ngày & Giờ"),
-    FULL("EEE, dd MMM HH:mm", "Đầy đủ")
+enum class ClockFormat(val pattern: String, val labelKey: String) {
+    TIME_ONLY("HH:mm", "clock_time_only"),
+    DATE_TIME("dd/MM HH:mm", "clock_date_time"),
+    FULL("EEE, dd MMM HH:mm", "clock_full")
 }
 
-enum class WeatherLocationMode(val label: String) {
-    GPS("GPS tự động"),
-    MANUAL("Thủ công")
+enum class WeatherLocationMode(val labelKey: String) {
+    GPS("weather_gps"),
+    MANUAL("weather_manual")
 }
 
 enum class TemperatureUnit(val label: String) {
     CELSIUS("°C"),
     FAHRENHEIT("°F")
 }
+
+enum class AppLanguage(val locale: String, val displayName: String) {
+    SYSTEM("", "System Default"),
+    ENGLISH("en", "English"),
+    VIETNAMESE("vi", "Tiếng Việt"),
+    CHINESE("zh", "中文"),
+    JAPANESE("ja", "日本語"),
+    KOREAN("ko", "한국어"),
+    FRENCH("fr", "Français"),
+    GERMAN("de", "Deutsch")
+}
+
 
 data class LauncherSettings(
     // App Frames
@@ -42,5 +54,8 @@ data class LauncherSettings(
     val weatherLocationMode: WeatherLocationMode = WeatherLocationMode.GPS,
     val weatherCity: String = "Hanoi",
     val temperatureUnit: TemperatureUnit = TemperatureUnit.CELSIUS,
-    val weatherApiKey: String = ""
+    val weatherApiKey: String = "",
+
+    // Language
+    val appLanguage: AppLanguage = AppLanguage.SYSTEM
 )

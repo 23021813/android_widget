@@ -2,6 +2,24 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án **Car Launcher** sẽ được ghi lại trong file này.
 
+## [1.2.0] - 2026-03-01
+
+### ✨ Added (Bổ sung mới)
+- **Rebranding**: Đổi tên ứng dụng chính thức thành **CarFloat**.
+- **Custom App Icon**: Cập nhật logo ứng dụng mới (Premium Glassmorphism Style).
+- **Internationalization (i18n)**: Hỗ trợ 8 ngôn ngữ (EN, VI, ZH, JA, KO, FR, DE) với khả năng tự chọn trong Settings.
+- **Live Connectivity Status**: Icons WiFi/BT/GPS tự động cập nhật trạng thái kết nối thực tế từ hệ thống (polling 3s).
+- **Refined Widget Actions**:
+    - Chạm đồng hồ: Chạy Split View.
+    - Giữ đồng hồ / Chạm Weather: Vào Settings.
+    - Chạm Icons: Vào cài đặt hệ thống (WiFi/Bluetooth/Location).
+- **Widget Visibility Toggles**: Cho phép ẩn/hiện widget trạng thái và nút trợ lý ảo riêng biệt.
+
+### 🔧 Changed (Thay đổi)
+- **Strings Migration**: Chuyển toàn bộ text cứng trong code sang `strings.xml`.
+- **Locale Persistence**: Lưu mã vùng ngôn ngữ vào DataStore để ghi nhớ lựa chọn của người dùng.
+- **Icon Packaging**: Chuyển sang dùng icon PNG truyền thống để tăng tương thích cho các đầu Android xe đời cũ.
+
 ## [1.1.0] - 2026-03-01
 
 ### ✨ Added (Bổ sung mới)

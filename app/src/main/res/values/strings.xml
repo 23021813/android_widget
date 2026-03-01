@@ -1,15 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Car Launcher</string>
-    <string name="settings_title">Cài đặt</string>
-    <string name="no_app_selected">Chọn ứng dụng</string>
-    <string name="add_app">Thêm ứng dụng</string>
-    <string name="remove_app">Xóa</string>
-    <string name="sidebar">Thanh dock</string>
-    <string name="app_frames">Khung ứng dụng</string>
-    <string name="overlay">Overlay</string>
-    <string name="weather">Thời tiết</string>
-    <string name="theme_settings">Giao diện</string>
-    <string name="about">Thông tin</string>
-    <string name="reset_defaults">Reset về mặc định</string>
+    <!-- App -->
+    <string name="app_name">CarFloat</string>
+
+    <!-- TopBar -->
+    <string name="settings_title">⚙️ CarFloat Settings</string>
+
+    <!-- Split Screen -->
+    <string name="section_split_screen">🚀 Split-Screen Apps</string>
+    <string name="split_screen_hint">Choose 2 apps to launch in split-screen mode:</string>
+    <string name="app_left_top">Left / Top App</string>
+    <string name="app_right_bottom">Right / Bottom App</string>
+    <string name="not_selected">Not Selected</string>
+    <string name="tap_to_select">Tap to select</string>
+    <string name="launch_split_view">Launch Split View</string>
+    <string name="choose_app_left">Choose Left / Top App</string>
+    <string name="choose_app_right">Choose Right / Bottom App</string>
+    <string name="choose_app">Choose App</string>
+
+    <!-- Assistant -->
+    <string name="section_assistant">🎙️ Virtual Assistant</string>
+    <string name="assistant_app">Assistant App</string>
+
+    <!-- System -->
+    <string name="section_system">⚙️ System</string>
+    <string name="auto_start_on_boot">Auto-start on boot (launch Overlay when car turns on)</string>
+    <string name="show_status_widget">Show Status Widget (Clock, Icons, Weather)</string>
+    <string name="show_assistant_widget">Show Assistant Button (Microphone)</string>
+
+    <!-- Widget Appearance -->
+    <string name="section_widget_appearance">🎨 Floating Widget Appearance</string>
+    <string name="widget_size">Widget Size</string>
+    <string name="widget_opacity">Background Opacity</string>
+
+    <!-- Clock & Status -->
+    <string name="section_clock_status">🕐 Clock &amp; Status</string>
+    <string name="clock_format">Clock Format</string>
+    <string name="show_wifi">Show WiFi</string>
+    <string name="show_bluetooth">Show Bluetooth</string>
+    <string name="show_gps">Show GPS</string>
+
+    <!-- Weather -->
+    <string name="section_weather">🌤️ Weather</string>
+    <string name="show_weather">Show weather</string>
+    <string name="location_source">Location source</string>
+    <string name="city">City</string>
+    <string name="unit">Unit</string>
+    <string name="api_key_label">API Key (OpenWeatherMap)</string>
+
+    <!-- Language -->
+    <string name="section_language">🌐 Language</string>
+    <string name="language_label">App Language</string>
+    <string name="lang_auto">System Default</string>
+    <string name="lang_en">English</string>
+    <string name="lang_vi">Tiếng Việt</string>
+    <string name="lang_zh">中文</string>
+    <string name="lang_ja">日本語</string>
+    <string name="lang_ko">한국어</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_de">Deutsch</string>
+
+    <!-- About -->
+    <string name="section_about">ℹ️ About</string>
+    <string name="version">Version</string>
+    <string name="reset_defaults">Reset to Defaults</string>
+
+    <!-- Clock Format Labels -->
+    <string name="clock_time_only">Time only</string>
+    <string name="clock_date_time">Date &amp; Time</string>
+    <string name="clock_full">Full</string>
+
+    <!-- Weather Location Labels -->
+    <string name="weather_gps">Auto GPS</string>
+    <string name="weather_manual">Manual</string>
+
+    <!-- ServiceNotification -->
+    <string name="notif_title">CarFloat</string>
+    <string name="notif_text">Overlay is running</string>
+
+    <!-- Accessibility -->
+    <string name="wifi_on">WiFi On</string>
+    <string name="wifi_off">WiFi Off</string>
+    <string name="bt_on">Bluetooth On</string>
+    <string name="bt_off">Bluetooth Off</string>
+    <string name="gps_on">GPS On</string>
+    <string name="gps_off">GPS Off</string>
+    <string name="assistant">Assistant</string>
+
+    <!-- Permission screen -->
+    <string name="perm_title">Permission Required</string>
+    <string name="perm_body">CarFloat needs the "Display over other apps" permission to show floating widgets on top of maps and other apps.</string>
+    <string name="perm_grant">Grant Permission Now</string>
 </resources>

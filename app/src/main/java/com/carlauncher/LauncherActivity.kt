@@ -1,8 +1,8 @@
 package com.carlauncher
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -12,19 +12,34 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.carlauncher.data.SettingsDataStore
+import com.carlauncher.data.models.AppLanguage
 import com.carlauncher.data.models.LauncherSettings
 import com.carlauncher.service.OverlayService
 import com.carlauncher.ui.navigation.NavGraph
 import com.carlauncher.ui.theme.CarLauncherTheme
+import com.carlauncher.util.LocaleHelper
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class LauncherActivity : ComponentActivity() {
 
     private lateinit var settingsDataStore: SettingsDataStore
 
     private val permissionState = mutableStateOf(false)
+
+    // Read locale synchronously before UI is set up
+    override fun attachBaseContext(newBase: Context) {
+        val store = SettingsDataStore(newBase)
+        val lang = runBlocking {
+            try { store.settingsFlow.first().appLanguage } catch (e: Exception) { AppLanguage.SYSTEM }
+        }
+        super.attachBaseContext(LocaleHelper.applyLocale(newBase, lang.locale))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +54,17 @@ class LauncherActivity : ComponentActivity() {
             )
             val scope = rememberCoroutineScope()
             val hasPermission by permissionState
+
+            // Track language changes and recreate activity so Android reloads resources
+            var lastLang by remember { mutableStateOf(settings.appLanguage) }
+            LaunchedEffect(settings.appLanguage) {
+                if (settings.appLanguage != lastLang) {
+                    lastLang = settings.appLanguage
+                    // A brief delay ensures DataStore write completes before recreate
+                    kotlinx.coroutines.delay(200)
+                    recreate()
+                }
+            }
 
             CarLauncherTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -93,20 +119,21 @@ fun PermissionRequestScreen(onRequestPermission: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Yêu cầu quyền hiển thị trên ứng dụng khác",
+            text = stringResource(R.string.perm_title),
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Car Overlay cần được cấp quyền System Alert Window để vẽ các nút nổi trên bản đồ hoặc ứng dụng khác.",
+            text = stringResource(R.string.perm_body),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = onRequestPermission) {
-            Text("Cấp quyền ngay")
+            Text(stringResource(R.string.perm_grant))
         }
     }
 }

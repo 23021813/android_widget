@@ -12,9 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.carlauncher.R
 import com.carlauncher.data.models.*
 import com.carlauncher.ui.components.AppPickerDialog
 import com.carlauncher.ui.theme.*
@@ -32,12 +32,23 @@ fun SettingsScreen(
     var appPickerTarget by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
 
+    // Resolved labels for Enum dropdowns (from string resources)
+    val clockFormatLabels = mapOf(
+        ClockFormat.TIME_ONLY to stringResource(R.string.clock_time_only),
+        ClockFormat.DATE_TIME to stringResource(R.string.clock_date_time),
+        ClockFormat.FULL to stringResource(R.string.clock_full)
+    )
+    val weatherModeLabels = mapOf(
+        WeatherLocationMode.GPS to stringResource(R.string.weather_gps),
+        WeatherLocationMode.MANUAL to stringResource(R.string.weather_manual)
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "⚙️ Cài đặt Car Overlay",
+                        stringResource(R.string.settings_title),
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
@@ -57,46 +68,44 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            
+
             // ═══════════════════════════════════════
             // 🚀 SPLIT-SCREEN LAUNCHER
             // ═══════════════════════════════════════
             item {
-                SettingsSection(title = "🚀 Mở Ứng Dụng Chia Đôi") {
-                    
-                    Text("Thiết lập 2 ứng dụng để khởi chạy chế độ chia màn hình:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
+                SettingsSection(title = stringResource(R.string.section_split_screen)) {
+
+                    Text(
+                        stringResource(R.string.split_screen_hint),
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
-                    
-                    // Frame 1 app
+
                     SettingsAppSelector(
-                        label = "App Trái / Trên",
+                        label = stringResource(R.string.app_left_top),
                         currentApp = settings.frame1App?.let { pkg ->
                             installedApps.find { it.packageName == pkg }?.label ?: pkg
-                        } ?: "Chưa chọn",
+                        } ?: stringResource(R.string.not_selected),
                         onClick = {
                             appPickerTarget = "frame1"
                             showAppPicker = true
                         },
-                        onClear = {
-                            onSettingsUpdate(settings.copy(frame1App = null))
-                        }
+                        onClear = { onSettingsUpdate(settings.copy(frame1App = null)) }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Frame 2 app
                     SettingsAppSelector(
-                        label = "App Phải / Dưới",
+                        label = stringResource(R.string.app_right_bottom),
                         currentApp = settings.frame2App?.let { pkg ->
                             installedApps.find { it.packageName == pkg }?.label ?: pkg
-                        } ?: "Chưa chọn",
+                        } ?: stringResource(R.string.not_selected),
                         onClick = {
                             appPickerTarget = "frame2"
                             showAppPicker = true
                         },
-                        onClear = {
-                            onSettingsUpdate(settings.copy(frame2App = null))
-                        }
+                        onClear = { onSettingsUpdate(settings.copy(frame2App = null)) }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -105,9 +114,7 @@ fun SettingsScreen(
                     Button(
                         onClick = onLaunchSplitView,
                         enabled = canLaunch,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = AccentCyan,
                             contentColor = DarkBackground,
@@ -123,183 +130,148 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Khởi chạy Split View",
+                            text = stringResource(R.string.launch_split_view),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
                 }
             }
-            
+
             // ═══════════════════════════════════════
-            // 🎙️ TRỢ LÝ ẢO
+            // 🎙️ ASSISTANT
             // ═══════════════════════════════════════
             item {
-                SettingsSection(title = "🎙️ Trợ lý ảo (Assistant)") {
+                SettingsSection(title = stringResource(R.string.section_assistant)) {
                     SettingsAppSelector(
-                        label = "Ứng dụng Trợ lý",
+                        label = stringResource(R.string.assistant_app),
                         currentApp = settings.assistantApp?.let { pkg ->
                             installedApps.find { it.packageName == pkg }?.label ?: pkg
-                        } ?: "Nhấn để chọn",
+                        } ?: stringResource(R.string.tap_to_select),
                         onClick = {
                             appPickerTarget = "assistant"
                             showAppPicker = true
                         },
-                        onClear = {
-                            onSettingsUpdate(settings.copy(assistantApp = null))
-                        }
+                        onClear = { onSettingsUpdate(settings.copy(assistantApp = null)) }
                     )
                 }
             }
 
             // ═══════════════════════════════════════
-            // ⚙️ HỆ THỐNG
+            // ⚙️ SYSTEM
             // ═══════════════════════════════════════
             item {
-                SettingsSection(title = "⚙️ Hệ thống") {
+                SettingsSection(title = stringResource(R.string.section_system)) {
                     SettingsToggle(
-                        label = "Khởi động cùng xe (Tự động chạy Overlay khi bật máy)",
+                        label = stringResource(R.string.auto_start_on_boot),
                         checked = settings.autoStartOnBoot,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(autoStartOnBoot = it))
-                        }
+                        onCheckedChange = { onSettingsUpdate(settings.copy(autoStartOnBoot = it)) }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     SettingsToggle(
-                        label = "Hiển thị Widget Trạng thái (Đồng hồ, Icon, Thời tiết)",
+                        label = stringResource(R.string.show_status_widget),
                         checked = settings.showStatusWidget,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(showStatusWidget = it))
-                        }
+                        onCheckedChange = { onSettingsUpdate(settings.copy(showStatusWidget = it)) }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     SettingsToggle(
-                        label = "Hiển thị Nút Trợ lý ảo (Microphone)",
+                        label = stringResource(R.string.show_assistant_widget),
                         checked = settings.showAssistantWidget,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(showAssistantWidget = it))
-                        }
+                        onCheckedChange = { onSettingsUpdate(settings.copy(showAssistantWidget = it)) }
                     )
                 }
             }
-            
+
             // ═══════════════════════════════════════
-            // 🎨 GIAO DIỆN WIDGET
+            // 🎨 WIDGET APPEARANCE
             // ═══════════════════════════════════════
             item {
-                SettingsSection(title = "🎨 Giao diện Widget Nổi") {
-                    // Size slider
+                SettingsSection(title = stringResource(R.string.section_widget_appearance)) {
                     SettingsSlider(
-                        label = "Kích thước Widget",
+                        label = stringResource(R.string.widget_size),
                         value = settings.widgetScale,
                         valueRange = 0.5f..1.5f,
                         displayValue = "${(settings.widgetScale * 100).toInt()}%",
-                        onValueChange = {
-                            onSettingsUpdate(settings.copy(widgetScale = it))
-                        }
+                        onValueChange = { onSettingsUpdate(settings.copy(widgetScale = it)) }
                     )
-                    
                     Spacer(modifier = Modifier.height(8.dp))
-                    
-                    // Opacity slider
                     SettingsSlider(
-                        label = "Độ mờ nền (Opacity)",
+                        label = stringResource(R.string.widget_opacity),
                         value = settings.widgetOpacity,
                         valueRange = 0.0f..1.0f,
                         displayValue = "${(settings.widgetOpacity * 100).toInt()}%",
-                        onValueChange = {
-                            onSettingsUpdate(settings.copy(widgetOpacity = it))
-                        }
+                        onValueChange = { onSettingsUpdate(settings.copy(widgetOpacity = it)) }
                     )
                 }
             }
 
             // ═══════════════════════════════════════
-            // 🕐 ĐỒNG HỒ & TRẠNG THÁI
+            // 🕐 CLOCK & STATUS
             // ═══════════════════════════════════════
             item {
-                SettingsSection(title = "🕐 Đồng hồ & Trạng thái") {
-                    // Clock format
+                SettingsSection(title = stringResource(R.string.section_clock_status)) {
                     SettingsDropdown(
-                        label = "Định dạng đồng hồ",
-                        value = settings.clockFormat.label,
-                        options = ClockFormat.entries.map { it.label },
+                        label = stringResource(R.string.clock_format),
+                        value = clockFormatLabels[settings.clockFormat] ?: "",
+                        options = ClockFormat.entries.map { clockFormatLabels[it] ?: it.name },
                         onSelect = { label ->
-                            val format = ClockFormat.entries.first { it.label == label }
+                            val format = ClockFormat.entries.first { clockFormatLabels[it] == label }
                             onSettingsUpdate(settings.copy(clockFormat = format))
                         }
                     )
-
                     Spacer(modifier = Modifier.height(12.dp))
-
-                    // Toggle status icons
                     SettingsToggle(
-                        label = "Hiện WiFi",
+                        label = stringResource(R.string.show_wifi),
                         checked = settings.showWifi,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(showWifi = it))
-                        }
+                        onCheckedChange = { onSettingsUpdate(settings.copy(showWifi = it)) }
                     )
                     SettingsToggle(
-                        label = "Hiện Bluetooth",
+                        label = stringResource(R.string.show_bluetooth),
                         checked = settings.showBluetooth,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(showBluetooth = it))
-                        }
+                        onCheckedChange = { onSettingsUpdate(settings.copy(showBluetooth = it)) }
                     )
                     SettingsToggle(
-                        label = "Hiện GPS",
+                        label = stringResource(R.string.show_gps),
                         checked = settings.showGps,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(showGps = it))
-                        }
+                        onCheckedChange = { onSettingsUpdate(settings.copy(showGps = it)) }
                     )
                 }
             }
 
             // ═══════════════════════════════════════
-            // 🌤️ THỜI TIẾT
+            // 🌤️ WEATHER
             // ═══════════════════════════════════════
             item {
-                SettingsSection(title = "🌤️ Thời tiết") {
+                SettingsSection(title = stringResource(R.string.section_weather)) {
                     SettingsToggle(
-                        label = "Hiện thời tiết",
+                        label = stringResource(R.string.show_weather),
                         checked = settings.showWeather,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(showWeather = it))
-                        }
+                        onCheckedChange = { onSettingsUpdate(settings.copy(showWeather = it)) }
                     )
 
                     if (settings.showWeather) {
                         Spacer(modifier = Modifier.height(8.dp))
-
-                        // Location mode
                         SettingsDropdown(
-                            label = "Nguồn vị trí",
-                            value = settings.weatherLocationMode.label,
-                            options = WeatherLocationMode.entries.map { it.label },
+                            label = stringResource(R.string.location_source),
+                            value = weatherModeLabels[settings.weatherLocationMode] ?: "",
+                            options = WeatherLocationMode.entries.map { weatherModeLabels[it] ?: it.name },
                             onSelect = { label ->
-                                val mode = WeatherLocationMode.entries.first { it.label == label }
+                                val mode = WeatherLocationMode.entries.first { weatherModeLabels[it] == label }
                                 onSettingsUpdate(settings.copy(weatherLocationMode = mode))
                             }
                         )
 
-                        // Manual city input
                         if (settings.weatherLocationMode == WeatherLocationMode.MANUAL) {
                             Spacer(modifier = Modifier.height(8.dp))
                             SettingsTextField(
-                                label = "Thành phố",
+                                label = stringResource(R.string.city),
                                 value = settings.weatherCity,
-                                onValueChange = {
-                                    onSettingsUpdate(settings.copy(weatherCity = it))
-                                }
+                                onValueChange = { onSettingsUpdate(settings.copy(weatherCity = it)) }
                             )
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
-
-                        // Temperature unit
                         SettingsDropdown(
-                            label = "Đơn vị",
+                            label = stringResource(R.string.unit),
                             value = settings.temperatureUnit.label,
                             options = TemperatureUnit.entries.map { it.label },
                             onSelect = { label ->
@@ -309,14 +281,10 @@ fun SettingsScreen(
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
-
-                        // API Key
                         SettingsTextField(
-                            label = "API Key (OpenWeatherMap)",
+                            label = stringResource(R.string.api_key_label),
                             value = settings.weatherApiKey,
-                            onValueChange = {
-                                onSettingsUpdate(settings.copy(weatherApiKey = it))
-                            },
+                            onValueChange = { onSettingsUpdate(settings.copy(weatherApiKey = it)) },
                             isPassword = !showApiKey,
                             trailingIcon = {
                                 IconButton(onClick = { showApiKey = !showApiKey }) {
@@ -333,45 +301,63 @@ fun SettingsScreen(
             }
 
             // ═══════════════════════════════════════
-            // ℹ️ THÔNG TIN
+            // 🌐 LANGUAGE
             // ═══════════════════════════════════════
             item {
-                SettingsSection(title = "ℹ️ Thông tin") {
+                SettingsSection(title = stringResource(R.string.section_language)) {
+                    SettingsDropdown(
+                        label = stringResource(R.string.language_label),
+                        value = settings.appLanguage.displayName,
+                        options = AppLanguage.entries.map { it.displayName },
+                        onSelect = { displayName ->
+                            val lang = AppLanguage.entries.first { it.displayName == displayName }
+                            onSettingsUpdate(settings.copy(appLanguage = lang))
+                        }
+                    )
+                }
+            }
+
+            // ═══════════════════════════════════════
+            // ℹ️ ABOUT
+            // ═══════════════════════════════════════
+            item {
+                SettingsSection(title = stringResource(R.string.section_about)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Version", color = TextSecondary, style = MaterialTheme.typography.bodyLarge)
-                        Text("3.0.0", color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            stringResource(R.string.version),
+                            color = TextSecondary,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text("1.0.0", color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Reset button
                     OutlinedButton(
                         onClick = onResetDefaults,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = AccentRed
-                        )
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = AccentRed)
                     ) {
                         Icon(Icons.Default.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Reset về mặc định")
+                        Text(stringResource(R.string.reset_defaults))
                     }
                 }
             }
         }
     }
 
-    // App picker for settings
+    // App picker dialog
     if (showAppPicker) {
         AppPickerDialog(
             apps = installedApps,
             title = when (appPickerTarget) {
-                "frame1" -> "Chọn App Trái / Trên"
-                "frame2" -> "Chọn App Phải / Dưới"
-                else -> "Chọn ứng dụng"
+                "frame1" -> stringResource(R.string.choose_app_left)
+                "frame2" -> stringResource(R.string.choose_app_right)
+                else -> stringResource(R.string.choose_app)
             },
             onAppSelected = { app ->
                 when (appPickerTarget) {
@@ -401,15 +387,13 @@ fun SettingsSection(
         color = DarkSurface,
         tonalElevation = 2.dp
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = AccentCyan,
-                modifier = Modifier.padding(bottom = 12.dp)
+                style = MaterialTheme.typography.titleMedium,
+                color = AccentCyan
             )
+            Spacer(modifier = Modifier.height(12.dp))
             content()
         }
     }
@@ -426,21 +410,56 @@ fun SettingsToggle(
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .clickable { onCheckedChange(!checked) }
-            .padding(vertical = 4.dp),
+            .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = TextPrimary
+            color = TextPrimary,
+            modifier = Modifier.weight(1f)
         )
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = AccentCyan,
-                checkedThumbColor = TextPrimary
+                checkedThumbColor = DarkBackground,
+                checkedTrackColor = AccentCyan
+            )
+        )
+    }
+}
+
+@Composable
+fun SettingsSlider(
+    label: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    displayValue: String,
+    onValueChange: (Float) -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = label, style = MaterialTheme.typography.bodyLarge, color = TextPrimary)
+            Text(
+                text = displayValue,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AccentCyan
+            )
+        }
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            colors = SliderDefaults.colors(
+                thumbColor = AccentCyan,
+                activeTrackColor = AccentCyan,
+                inactiveTrackColor = DarkSurfaceVariant
             )
         )
     }
@@ -457,45 +476,38 @@ fun SettingsDropdown(
     var expanded by remember { mutableStateOf(false) }
 
     Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
-
+        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = TextPrimary)
+        Spacer(modifier = Modifier.height(4.dp))
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = it }
+            onExpandedChange = { expanded = !expanded }
         ) {
             OutlinedTextField(
                 value = value,
                 onValueChange = {},
                 readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor(),
-                shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = DarkSurfaceVariant,
-                    focusedContainerColor = DarkSurfaceVariant,
-                    unfocusedBorderColor = DividerColor,
                     focusedBorderColor = AccentCyan,
+                    unfocusedBorderColor = DarkSurfaceVariant,
+                    focusedTextColor = TextPrimary,
                     unfocusedTextColor = TextPrimary,
-                    focusedTextColor = TextPrimary
-                )
+                    focusedContainerColor = DarkSurface,
+                    unfocusedContainerColor = DarkSurface
+                ),
+                shape = RoundedCornerShape(8.dp)
             )
-
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(DarkSurface)
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option) },
+                        text = { Text(option, color = if (option == value) AccentCyan else TextPrimary) },
                         onClick = {
                             onSelect(option)
                             expanded = false
@@ -508,35 +520,6 @@ fun SettingsDropdown(
 }
 
 @Composable
-fun SettingsSlider(
-    label: String,
-    value: Float,
-    valueRange: ClosedFloatingPointRange<Float>,
-    displayValue: String,
-    onValueChange: (Float) -> Unit
-) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(label, style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
-            Text(displayValue, style = MaterialTheme.typography.bodyMedium, color = AccentCyan)
-        }
-        Slider(
-            value = value,
-            onValueChange = onValueChange,
-            valueRange = valueRange,
-            colors = SliderDefaults.colors(
-                thumbColor = AccentCyan,
-                activeTrackColor = AccentCyan,
-                inactiveTrackColor = DividerColor
-            )
-        )
-    }
-}
-
-@Composable
 fun SettingsTextField(
     label: String,
     value: String,
@@ -545,29 +528,23 @@ fun SettingsTextField(
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
     Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
+        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = TextPrimary)
+        Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            singleLine = true,
-            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             trailingIcon = trailingIcon,
+            visualTransformation = if (isPassword) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = DarkSurfaceVariant,
-                focusedContainerColor = DarkSurfaceVariant,
-                unfocusedBorderColor = DividerColor,
                 focusedBorderColor = AccentCyan,
-                unfocusedTextColor = TextPrimary,
+                unfocusedBorderColor = DarkSurfaceVariant,
                 focusedTextColor = TextPrimary,
-                cursorColor = AccentCyan
-            )
+                unfocusedTextColor = TextPrimary,
+                focusedContainerColor = DarkSurface,
+                unfocusedContainerColor = DarkSurface
+            ),
+            shape = RoundedCornerShape(8.dp)
         )
     }
 }
@@ -580,47 +557,32 @@ fun SettingsAppSelector(
     onClear: () -> Unit
 ) {
     Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
+        Spacer(modifier = Modifier.height(4.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(DarkSurfaceVariant)
-                .clickable(onClick = onClick)
-                .padding(12.dp),
+                .clip(RoundedCornerShape(8.dp))
+                .background(DarkSurface)
+                .clickable { onClick() }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = currentApp,
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (currentApp == "Chưa chọn") TextTertiary else TextPrimary
+                color = TextPrimary,
+                modifier = Modifier.weight(1f)
             )
             Row {
-                if (currentApp != "Chưa chọn") {
-                    IconButton(
-                        onClick = onClear,
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Xóa",
-                            tint = AccentRed,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
+                IconButton(onClick = onClear, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Close, contentDescription = null, tint = AccentRed)
                 }
                 Icon(
-                    imageVector = Icons.Default.ChevronRight,
+                    Icons.Default.ChevronRight,
                     contentDescription = null,
-                    tint = TextTertiary,
-                    modifier = Modifier.size(20.dp)
+                    tint = TextSecondary
                 )
             }
         }

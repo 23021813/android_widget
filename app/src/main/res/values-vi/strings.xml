@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">CarFloat</string>
+
+    <!-- TopBar -->
+    <string name="settings_title">⚙️ Cài đặt CarFloat</string>
+
+    <!-- Split Screen -->
+    <string name="section_split_screen">🚀 Ứng Dụng Chia Màn Hình</string>
+    <string name="split_screen_hint">Thiết lập 2 ứng dụng để khởi chạy chế độ chia màn hình:</string>
+    <string name="app_left_top">App Trái / Trên</string>
+    <string name="app_right_bottom">App Phải / Dưới</string>
+    <string name="not_selected">Chưa chọn</string>
+    <string name="tap_to_select">Nhấn để chọn</string>
+    <string name="launch_split_view">Khởi chạy Split View</string>
+    <string name="choose_app_left">Chọn App Trái / Trên</string>
+    <string name="choose_app_right">Chọn App Phải / Dưới</string>
+    <string name="choose_app">Chọn ứng dụng</string>
+
+    <!-- Assistant -->
+    <string name="section_assistant">🎙️ Trợ lý ảo (Assistant)</string>
+    <string name="assistant_app">Ứng dụng Trợ lý</string>
+
+    <!-- System -->
+    <string name="section_system">⚙️ Hệ thống</string>
+    <string name="auto_start_on_boot">Khởi động cùng xe (Tự động chạy Overlay khi bật máy)</string>
+    <string name="show_status_widget">Hiển thị Widget Trạng thái (Đồng hồ, Icon, Thời tiết)</string>
+    <string name="show_assistant_widget">Hiển thị Nút Trợ lý ảo (Microphone)</string>
+
+    <!-- Widget Appearance -->
+    <string name="section_widget_appearance">🎨 Giao diện Widget Nổi</string>
+    <string name="widget_size">Kích thước Widget</string>
+    <string name="widget_opacity">Độ mờ nền (Opacity)</string>
+
+    <!-- Clock & Status -->
+    <string name="section_clock_status">🕐 Đồng hồ &amp; Trạng thái</string>
+    <string name="clock_format">Định dạng đồng hồ</string>
+    <string name="show_wifi">Hiện WiFi</string>
+    <string name="show_bluetooth">Hiện Bluetooth</string>
+    <string name="show_gps">Hiện GPS</string>
+
+    <!-- Weather -->
+    <string name="section_weather">🌤️ Thời tiết</string>
+    <string name="show_weather">Hiện thời tiết</string>
+    <string name="location_source">Nguồn vị trí</string>
+    <string name="city">Thành phố</string>
+    <string name="unit">Đơn vị</string>
+    <string name="api_key_label">API Key (OpenWeatherMap)</string>
+
+    <!-- Language -->
+    <string name="section_language">🌐 Ngôn ngữ</string>
+    <string name="language_label">Ngôn ngữ ứng dụng</string>
+    <string name="lang_auto">Theo hệ thống</string>
+    <string name="lang_en">English</string>
+    <string name="lang_vi">Tiếng Việt</string>
+    <string name="lang_zh">中文</string>
+    <string name="lang_ja">日本語</string>
+    <string name="lang_ko">한국어</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_de">Deutsch</string>
+
+    <!-- About -->
+    <string name="section_about">ℹ️ Thông tin</string>
+    <string name="version">Phiên bản</string>
+    <string name="reset_defaults">Reset về mặc định</string>
+
+    <!-- Clock Format Labels -->
+    <string name="clock_time_only">Chỉ giờ</string>
+    <string name="clock_date_time">Ngày &amp; Giờ</string>
+    <string name="clock_full">Đầy đủ</string>
+
+    <!-- Weather Location Labels -->
+    <string name="weather_gps">GPS tự động</string>
+    <string name="weather_manual">Thủ công</string>
+
+    <!-- ServiceNotification -->
+    <string name="notif_title">CarFloat</string>
+    <string name="notif_text">Overlay đang hoạt động</string>
+
+    <!-- Accessibility -->
+    <string name="wifi_on">WiFi bật</string>
+    <string name="wifi_off">WiFi tắt</string>
+    <string name="bt_on">Bluetooth bật</string>
+    <string name="bt_off">Bluetooth tắt</string>
+    <string name="gps_on">GPS bật</string>
+    <string name="gps_off">GPS tắt</string>
+    <string name="assistant">Trợ lý</string>
+</resources>
