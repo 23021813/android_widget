@@ -309,7 +309,7 @@ fun SettingsScreen(
                     Column {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.version), color = TextSecondary, style = MaterialTheme.typography.bodyLarge)
-                            Text("1.3.2", color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                            Text("1.3.3", color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
                         }
                         
                         if (updateInfo != null) {
