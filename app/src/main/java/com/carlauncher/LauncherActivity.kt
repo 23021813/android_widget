@@ -134,7 +134,8 @@ class LauncherActivity : ComponentActivity() {
                     // Show update dialog if user hasn't dismissed it or manually checked
                     if (showUpdateDialog) {
                         updateInfo?.let { info ->
-                            val installFileExists = remember(info, isDownloading) {
+                            var cacheClearedTrigger by remember { mutableStateOf(0) }
+                            val installFileExists = remember(info, isDownloading, cacheClearedTrigger) {
                                 OtaUpdateManager.getDownloadedFile(this@LauncherActivity, info) != null
                             }
 
@@ -148,6 +149,7 @@ class LauncherActivity : ComponentActivity() {
                                 },
                                 onClearCache = {
                                     OtaUpdateManager.clearCache(this@LauncherActivity, info)
+                                    cacheClearedTrigger++
                                 },
                                 onDismiss = { 
                                     if (!isDownloading) {
