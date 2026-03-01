@@ -1,7 +1,7 @@
 {
-  "versionCode": 6,
-  "versionName": "1.3.3",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.3.3/CarFloat_1.3.3.apk",
-  "changelog": "- Tính năng thông báo cập nhật mới (Non-intrusive): Có badge báo bản mới trong Cài đặt thay vì popup liên tục.\n- Sửa lỗi 'Phân tích gói' (Parse Error) trên thiết bị thật.\n- Thêm nút 'Xóa & Tải lại' (Clear & Retry) nếu file tải về bị hỏng.\n- Cập nhật icon và tối ưu hóa hệ thống.",
+  "versionCode": 7,
+  "versionName": "1.3.4",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.3.4/CarFloat_1.3.4.apk",
+  "changelog": "- Sửa lỗi 'Quyền ghi bộ nhớ' (Permission Denied) khi tải bản cập nhật trên thiết bị thật.\n- Chuyển thư mục tải về sang bộ nhớ riêng của App để tăng tính bảo mật và ổn định.\n- Tối ưu hóa luồng cài đặt tự động.",
   "forceUpdate": false
 }

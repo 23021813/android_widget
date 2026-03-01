@@ -80,10 +80,8 @@ object OtaUpdateManager {
      */
     fun getDownloadedFile(context: Context, updateInfo: UpdateInfo): File? {
         val fileName = "CarFloat_${updateInfo.versionName}.apk"
-        val file = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            fileName
-        )
+        val downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: return null
+        val file = File(downloadDir, fileName)
         // Only return if it's a reasonably sized APK (>1MB usually, but let's be safe with >0)
         return if (file.exists() && file.length() > 1024) file else null
     }
@@ -114,7 +112,7 @@ object OtaUpdateManager {
             .setTitle("CarFloat Update ${updateInfo.versionName}")
             .setDescription(updateInfo.changelog.take(100))
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+            .setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, fileName)
             .setMimeType("application/vnd.android.package-archive")
 
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -151,11 +149,11 @@ object OtaUpdateManager {
                                 installApkFromUri(context, uri)
                             } else {
                                 // Fallback to file path
-                                val downloadedFile = File(
-                                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                                    fileName
-                                )
-                                installApk(context, downloadedFile)
+                                val downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                                if (downloadDir != null) {
+                                    val downloadedFile = File(downloadDir, fileName)
+                                    installApk(context, downloadedFile)
+                                }
                             }
                             break
                         } else if (status == DownloadManager.STATUS_FAILED) {
