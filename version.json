@@ -1,7 +1,7 @@
 {
   "versionCode": 7,
   "versionName": "1.3.4",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.3.4/CarFloat_1.3.4.apk",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.4/CarFloat_1.3.4.apk",
   "changelog": "- Cập nhật yêu cầu cấp quyền cài đặt ứng dụng chủ động trên thiết bị thật.\n- Xử lý vấn đề UI không cập nhật ngay sau khi dọn dẹp bộ nhớ đệm (Clear & Retry).\n- Khắc phục rò rỉ bộ nhớ (Memory Leak) khi tải bản cập nhật.",
   "forceUpdate": false
 }
