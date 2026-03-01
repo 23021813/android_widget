@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <external-path name="downloads" path="Download/" />
+    <!-- Broad access to various storage roots to prevent FileProvider mapping errors on diverse car head units -->
+    <external-path name="external_storage" path="." />
+    <external-files-path name="external_files" path="." />
+    <files-path name="internal_files" path="." />
+    <cache-path name="internal_cache" path="." />
 </paths>

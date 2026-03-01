@@ -131,6 +131,9 @@ class LauncherActivity : ComponentActivity() {
                             onUpdate = {
                                 OtaUpdateManager.downloadAndInstall(this@LauncherActivity, info)
                             },
+                            onClearCache = {
+                                OtaUpdateManager.clearCache(this@LauncherActivity, info)
+                            },
                             onDismiss = { 
                                 if (!isDownloading) {
                                     updateInfo = null 

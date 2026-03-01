@@ -19,6 +19,7 @@ fun UpdateDialog(
     progress: Float,
     installFileExists: Boolean,
     onUpdate: () -> Unit,
+    onClearCache: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -42,10 +43,9 @@ fun UpdateDialog(
                 
                 if (installFileExists && !isDownloading) {
                     Text(
-                        text = "Update file already downloaded and ready to install.",
+                        text = "Update downloaded. If install fails with 'Parse Error', try clearing cache.",
                         color = AccentGreen,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
@@ -77,22 +77,33 @@ fun UpdateDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = { if (!isDownloading) onUpdate() },
-                enabled = !isDownloading,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AccentCyan, 
-                    contentColor = DarkBackground,
-                    disabledContainerColor = DarkSurface,
-                    disabledContentColor = TextTertiary
-                )
-            ) {
-                val buttonText = when {
-                    isDownloading -> "Downloading..."
-                    installFileExists -> "Install Now"
-                    else -> stringResource(R.string.update_now)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (installFileExists && !isDownloading) {
+                    TextButton(
+                        onClick = onClearCache,
+                        colors = ButtonDefaults.textButtonColors(contentColor = AccentRed)
+                    ) {
+                        Text("Clear & Retry")
+                    }
                 }
-                Text(buttonText)
+                
+                Button(
+                    onClick = { if (!isDownloading) onUpdate() },
+                    enabled = !isDownloading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AccentCyan, 
+                        contentColor = DarkBackground,
+                        disabledContainerColor = DarkSurface,
+                        disabledContentColor = TextTertiary
+                    )
+                ) {
+                    val buttonText = when {
+                        isDownloading -> "Downloading..."
+                        installFileExists -> "Install Now"
+                        else -> stringResource(R.string.update_now)
+                    }
+                    Text(buttonText)
+                }
             }
         },
         dismissButton = {

@@ -84,7 +84,15 @@ object OtaUpdateManager {
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
             fileName
         )
-        return if (file.exists() && file.length() > 0) file else null
+        // Only return if it's a reasonably sized APK (>1MB usually, but let's be safe with >0)
+        return if (file.exists() && file.length() > 1024) file else null
+    }
+
+    fun clearCache(context: Context, updateInfo: UpdateInfo) {
+        val file = getDownloadedFile(context, updateInfo)
+        if (file?.exists() == true) {
+            file.delete()
+        }
     }
 
     fun downloadAndInstall(context: Context, updateInfo: UpdateInfo) {
@@ -94,14 +102,14 @@ object OtaUpdateManager {
         val existingFile = getDownloadedFile(context, updateInfo)
         
         if (existingFile != null) {
-            // File already exists, just install it
+            android.util.Log.d("OtaUpdateManager", "Installing existing file: ${existingFile.absolutePath}, size: ${existingFile.length()}")
             installApk(context, existingFile)
             return
         }
         
         _isDownloading.value = true
         _downloadProgress.value = 0f
-
+        
         val request = DownloadManager.Request(Uri.parse(updateInfo.apkUrl))
             .setTitle("CarFloat Update ${updateInfo.versionName}")
             .setDescription(updateInfo.changelog.take(100))
@@ -132,7 +140,25 @@ object OtaUpdateManager {
                             _downloadProgress.value = downloaded.toFloat() / total.toFloat()
                         }
                         
-                        if (status == DownloadManager.STATUS_SUCCESSFUL || status == DownloadManager.STATUS_FAILED) {
+                        if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                            _isDownloading.value = false
+                            _downloadProgress.value = 1f
+                            cursor.close()
+                            
+                            // Get URI from DownloadManager (more reliable for some devices)
+                            val uri = downloadManager.getUriForDownloadedFile(downloadId)
+                            if (uri != null) {
+                                installApkFromUri(context, uri)
+                            } else {
+                                // Fallback to file path
+                                val downloadedFile = File(
+                                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                                    fileName
+                                )
+                                installApk(context, downloadedFile)
+                            }
+                            break
+                        } else if (status == DownloadManager.STATUS_FAILED) {
                             _isDownloading.value = false
                             cursor.close()
                             break
@@ -144,20 +170,21 @@ object OtaUpdateManager {
             }
         }
 
-        // Listen for download complete
+        // BroadcastReceiver remains as secondary/fallback notification
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context, intent: Intent) {
                 val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
                     ctx.unregisterReceiver(this)
-                    _isDownloading.value = false
-                    _downloadProgress.value = 1f
-                    
-                    val file = File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        fileName
-                    )
-                    installApk(ctx, file)
+                    // Polling usually catches it first, but just in case:
+                    if (_isDownloading.value) {
+                        _isDownloading.value = false
+                        _downloadProgress.value = 1f
+                        val uri = downloadManager.getUriForDownloadedFile(downloadId)
+                        if (uri != null) {
+                            installApkFromUri(ctx, uri)
+                        }
+                    }
                 }
             }
         }
@@ -167,6 +194,21 @@ object OtaUpdateManager {
             context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
         } else {
             context.registerReceiver(receiver, filter)
+        }
+    }
+
+    private fun installApkFromUri(context: Context, uri: Uri) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            android.widget.Toast.makeText(context, "Install failed: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
         }
     }
 
