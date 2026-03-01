@@ -2,6 +2,16 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
+## [1.3.5] - 2026-03-01
+### Added
+- **3-Tier Connectivity States**: Hiển thị trạng thái kết nối Wifi, Bluetooth, GPS theo 3 màu: Xám (Tắt), Trắng (Bật/Chưa kết nối), Xanh Cyan (Đã kết nối).
+- **Home Button Assignment**: Thêm "ứng dụng ảo" Home vào App Picker, cho phép gán phím Home vật lý vào nút Assistant mà không cần quyền Accessibility.
+- **Auto-Mirrored Icons**: Cập nhật hệ thống Icon Pack Material 3 để tự động đối xứng (mirrored) cho các ngôn ngữ RTL (nếu có).
+
+### Fixed
+- Lỗi không nhận diện được trạng thái kết nối Wifi/Bluetooth trên các thiết bị giới hạn quyền runtime hoặc Emulator (Sử dụng ConnectivityManager & AudioManager fallback).
+- Sửa lỗi deprecation warnings trong code của `OverlayService`.
+
 ## [1.3.0] - 2026-03-01
 ### Added
 - **Chế độ Click-Through**: Phép widget đồng hồ tàng hình với cảm ứng.

@@ -20,14 +20,18 @@
     "Click-Through Gestures",
     "Auto Split-Screen",
     "Internationalization (8 languages)",
-    "Non-intrusive OTA Update System via GitHub Releases"
+    "Non-intrusive OTA Update System via GitHub Releases",
+    "3-Tier Connectivity States (Off/Disconnected/Connected)",
+    "System Home Button Mapping for Assistant Widget"
   ],
   "knowledge_items": {
     "gotchas": [
       "System Alert Window permission is required for overlays.",
       "OTA Downloads must use context.getExternalFilesDir to avoid Permission Denied on some head units.",
       "BroadcastReceiver for DownloadManager MUST use applicationContext to prevent memory leaks during config changes.",
-      "FileProvider needs broader paths config for diverse Android Automotive OS versions."
+      "FileProvider needs broader paths config for diverse Android Automotive OS versions.",
+      "Use ConnectivityManager.activeNetwork capabilities to detect 'Connected' Wifi state bypassing networkId reliability issues.",
+      "Use AudioManager.getDevices fallback for Bluetooth connection detection to bypass SecurityExceptions on unprivileged devices."
     ]
   }
 }

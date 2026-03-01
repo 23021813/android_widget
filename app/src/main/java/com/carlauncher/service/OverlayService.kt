@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
@@ -21,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.automirrored.rounded.Chat
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -137,24 +140,72 @@ class OverlayService : Service() {
     // Connectivity State Helpers
     // ═══════════════════════════════════════
 
-    private fun isWifiEnabled(): Boolean {
+    // 0 = Off, 1 = On (Disconnected), 2 = On (Connected)
+    @Suppress("DEPRECATION")
+    private fun getWifiState(): Int {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-        return wifiManager?.isWifiEnabled == true
-    }
-
-    private fun isBluetoothEnabled(): Boolean {
-        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-        return try {
-            bluetoothManager?.adapter?.isEnabled == true
-        } catch (e: SecurityException) {
-            false
+        if (wifiManager?.isWifiEnabled != true) return 0
+        
+        val cm = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        if (cm != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
+                if (capabilities != null && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) || 
+                        capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+                        return 2
+                    }
+                }
+            } else {
+                val activeNetwork = cm.activeNetworkInfo
+                if (activeNetwork != null && activeNetwork.type == ConnectivityManager.TYPE_WIFI && activeNetwork.isConnected) {
+                    return 2
+                }
+            }
         }
+        
+        val info = wifiManager.connectionInfo
+        if (info != null && info.networkId != -1) return 2
+        
+        return 1
     }
 
-    private fun isLocationEnabled(): Boolean {
+    private fun getBluetoothState(): Int {
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        val adapter = bluetoothManager?.adapter ?: return 0
+        if (!adapter.isEnabled) return 0
+        
+        var isConnected = false
+        try {
+            val a2dp = adapter.getProfileConnectionState(android.bluetooth.BluetoothProfile.A2DP) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
+            val headset = adapter.getProfileConnectionState(android.bluetooth.BluetoothProfile.HEADSET) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
+            isConnected = a2dp || headset
+        } catch (e: SecurityException) {
+            // Ignored, fallback to Audio detection below
+        }
+        
+        // Fallback for emulator and lacking BLUETOOTH_CONNECT runtime permission
+        if (!isConnected) {
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
+            if (audioManager != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val devices = audioManager.getDevices(android.media.AudioManager.GET_DEVICES_OUTPUTS)
+                    isConnected = devices.any { it.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP || it.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
+                } else {
+                    @Suppress("DEPRECATION")
+                    isConnected = audioManager.isBluetoothA2dpOn || audioManager.isBluetoothScoOn
+                }
+            }
+        }
+        
+        return if (isConnected) 2 else 1
+    }
+
+    private fun isLocationEnabled(): Int {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
-        return locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true ||
+        val enabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true ||
                locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true
+        return if (enabled) 2 else 0
     }
 
     // ═══════════════════════════════════════
@@ -230,15 +281,15 @@ class OverlayService : Service() {
                 var weatherInfo by remember { mutableStateOf<WeatherInfo?>(null) }
 
                 // Read live connectivity states, refresh every 3 seconds
-                var wifiActive by remember { mutableStateOf(isWifiEnabled()) }
-                var btActive by remember { mutableStateOf(isBluetoothEnabled()) }
-                var gpsActive by remember { mutableStateOf(isLocationEnabled()) }
+                var wifiState by remember { mutableStateOf(getWifiState()) }
+                var btState by remember { mutableStateOf(getBluetoothState()) }
+                var gpsState by remember { mutableStateOf(isLocationEnabled()) }
 
                 LaunchedEffect(Unit) {
                     while (isActive) {
-                        wifiActive = isWifiEnabled()
-                        btActive = isBluetoothEnabled()
-                        gpsActive = isLocationEnabled()
+                        wifiState = getWifiState()
+                        btState = getBluetoothState()
+                        gpsState = isLocationEnabled()
                         delay(3000L)
                     }
                 }
@@ -274,9 +325,9 @@ class OverlayService : Service() {
                 FloatingStatusWidget(
                     settings = settings,
                     weatherInfo = weatherInfo,
-                    wifiActive = wifiActive,
-                    btActive = btActive,
-                    gpsActive = gpsActive,
+                    wifiActive = wifiState,
+                    btActive = btState,
+                    gpsActive = gpsState,
                     onDrag = { dx, dy ->
                         params.x += dx.toInt()
                         params.y += dy.toInt()
@@ -474,7 +525,13 @@ class OverlayService : Service() {
                     },
                     onClick = {
                         try {
-                            if (settings.assistantApp != null) {
+                            if (settings.assistantApp == "com.carlauncher.ACTION_HOME") {
+                                val intent = Intent(Intent.ACTION_MAIN).apply {
+                                    addCategory(Intent.CATEGORY_HOME)
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                startActivity(intent)
+                            } else if (settings.assistantApp != null) {
                                 SplitScreenLauncher.launchApp(this@OverlayService, settings.assistantApp!!)
                             } else {
                                 val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
@@ -488,7 +545,13 @@ class OverlayService : Service() {
                     },
                     onLongPress = {
                         try {
-                            if (settings.assistantLongPressApp != null) {
+                            if (settings.assistantLongPressApp == "com.carlauncher.ACTION_HOME") {
+                                val intent = Intent(Intent.ACTION_MAIN).apply {
+                                    addCategory(Intent.CATEGORY_HOME)
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                startActivity(intent)
+                            } else if (settings.assistantLongPressApp != null) {
                                 SplitScreenLauncher.launchApp(this@OverlayService, settings.assistantLongPressApp!!)
                             }
                         } catch (e: Exception) {
@@ -497,7 +560,13 @@ class OverlayService : Service() {
                     },
                     onDoubleTap = {
                         try {
-                            if (settings.assistantDoubleTapApp != null) {
+                            if (settings.assistantDoubleTapApp == "com.carlauncher.ACTION_HOME") {
+                                val intent = Intent(Intent.ACTION_MAIN).apply {
+                                    addCategory(Intent.CATEGORY_HOME)
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                startActivity(intent)
+                            } else if (settings.assistantDoubleTapApp != null) {
                                 SplitScreenLauncher.launchApp(this@OverlayService, settings.assistantDoubleTapApp!!)
                             }
                         } catch (e: Exception) {
@@ -590,7 +659,7 @@ fun resolveAssistantIcon(icon: AssistantIcon): ImageVector {
         AssistantIcon.ASSISTANT -> Icons.Rounded.SmartToy
         AssistantIcon.RECORD -> Icons.Rounded.FiberManualRecord
         AssistantIcon.VOICE -> Icons.Rounded.RecordVoiceOver
-        AssistantIcon.CHAT -> Icons.Rounded.Chat
+        AssistantIcon.CHAT -> Icons.AutoMirrored.Rounded.Chat
         AssistantIcon.STAR -> Icons.Rounded.Star
         AssistantIcon.HOME -> Icons.Rounded.Home
         AssistantIcon.MUSIC -> Icons.Rounded.MusicNote
@@ -603,9 +672,9 @@ fun resolveAssistantIcon(icon: AssistantIcon): ImageVector {
 fun FloatingStatusWidget(
     settings: LauncherSettings,
     weatherInfo: WeatherInfo?,
-    wifiActive: Boolean,
-    btActive: Boolean,
-    gpsActive: Boolean,
+    wifiActive: Int,
+    btActive: Int,
+    gpsActive: Int,
     onDrag: (Float, Float) -> Unit,
     onClockClick: () -> Unit,
     onClockLongPress: () -> Unit,
@@ -697,9 +766,9 @@ fun FloatingStatusWidget(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp * scale)) {
                     if (settings.showWifi) {
                         Icon(
-                            imageVector = if (wifiActive) Icons.Rounded.Wifi else Icons.Rounded.WifiOff,
+                            imageVector = if (wifiActive > 0) Icons.Rounded.Wifi else Icons.Rounded.WifiOff,
                             contentDescription = null,
-                            tint = if (wifiActive) Color.White else Color.White.copy(alpha = 0.3f),
+                            tint = if (wifiActive == 2) Color(0xFF00E5FF) else if (wifiActive == 1) Color.White else Color.White.copy(alpha = 0.3f),
                             modifier = Modifier
                                 .size(24.dp * scale)
                                 .clip(CircleShape)
@@ -708,9 +777,9 @@ fun FloatingStatusWidget(
                     }
                     if (settings.showBluetooth) {
                         Icon(
-                            imageVector = if (btActive) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
+                            imageVector = if (btActive > 0) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
                             contentDescription = null,
-                            tint = if (btActive) Color.White else Color.White.copy(alpha = 0.3f),
+                            tint = if (btActive == 2) Color(0xFF00E5FF) else if (btActive == 1) Color.White else Color.White.copy(alpha = 0.3f),
                             modifier = Modifier
                                 .size(24.dp * scale)
                                 .clip(CircleShape)
@@ -719,9 +788,9 @@ fun FloatingStatusWidget(
                     }
                     if (settings.showGps) {
                         Icon(
-                            imageVector = if (gpsActive) Icons.Rounded.LocationOn else Icons.Rounded.LocationOff,
+                            imageVector = if (gpsActive > 0) Icons.Rounded.LocationOn else Icons.Rounded.LocationOff,
                             contentDescription = null,
-                            tint = if (gpsActive) Color.White else Color.White.copy(alpha = 0.3f),
+                            tint = if (gpsActive > 0) Color(0xFF00E5FF) else Color.White.copy(alpha = 0.3f),
                             modifier = Modifier
                                 .size(24.dp * scale)
                                 .clip(CircleShape)

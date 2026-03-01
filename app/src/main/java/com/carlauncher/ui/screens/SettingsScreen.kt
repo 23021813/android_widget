@@ -53,6 +53,16 @@ fun SettingsScreen(
         WeatherLocationMode.MANUAL to stringResource(R.string.weather_manual)
     )
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val homeApp = remember {
+        AppInfo(
+            packageName = "com.carlauncher.ACTION_HOME",
+            label = "Trở về màn hình chính (Home)",
+            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_crop)
+        )
+    }
+    val assistantApps = remember(installedApps) { listOf(homeApp) + installedApps }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -112,21 +122,21 @@ fun SettingsScreen(
                 SettingsSection(title = stringResource(R.string.section_assistant)) {
                     SettingsAppSelector(
                         label = stringResource(R.string.assistant_app) + " (Tap)",
-                        currentApp = settings.assistantApp?.let { pkg -> installedApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.tap_to_select),
+                        currentApp = settings.assistantApp?.let { pkg -> assistantApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.tap_to_select),
                         onClick = { appPickerTarget = "assistant"; showAppPicker = true },
                         onClear = { onSettingsUpdate(settings.copy(assistantApp = null)) }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     SettingsAppSelector(
                         label = stringResource(R.string.assistant_long_press_app),
-                        currentApp = settings.assistantLongPressApp?.let { pkg -> installedApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.tap_to_select),
+                        currentApp = settings.assistantLongPressApp?.let { pkg -> assistantApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.tap_to_select),
                         onClick = { appPickerTarget = "assistantLongPress"; showAppPicker = true },
                         onClear = { onSettingsUpdate(settings.copy(assistantLongPressApp = null)) }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     SettingsAppSelector(
                         label = stringResource(R.string.assistant_double_tap_app),
-                        currentApp = settings.assistantDoubleTapApp?.let { pkg -> installedApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.tap_to_select),
+                        currentApp = settings.assistantDoubleTapApp?.let { pkg -> assistantApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.tap_to_select),
                         onClick = { appPickerTarget = "assistantDoubleTap"; showAppPicker = true },
                         onClear = { onSettingsUpdate(settings.copy(assistantDoubleTapApp = null)) }
                     )
@@ -353,8 +363,11 @@ fun SettingsScreen(
 
     // App picker dialog
     if (showAppPicker) {
+        val appsToShow = remember(installedApps, appPickerTarget) {
+            if (appPickerTarget.startsWith("assistant")) assistantApps else installedApps
+        }
         AppPickerDialog(
-            apps = installedApps,
+            apps = appsToShow,
             title = when (appPickerTarget) {
                 "frame1" -> stringResource(R.string.choose_app_left)
                 "frame2" -> stringResource(R.string.choose_app_right)

@@ -1,62 +1,61 @@
 {
-  "updated_at": "2026-03-01T13:16:00+07:00",
+  "updated_at": "2026-03-01T14:10:00+07:00",
   "working_on": {
-    "feature": "UI/UX Redesign",
-    "task": "Planning Material Design UI refactor for Settings and Widgets",
-    "status": "planning",
-    "files": [],
+    "feature": "1.3.5 Release Delivery",
+    "task": "Finalizing documentation and APK packaging",
+    "status": "completed",
+    "files": [
+      "OverlayService.kt",
+      "SettingsScreen.kt",
+      "version.json",
+      "README.md",
+      "CHANGELOG.md"
+    ],
     "blockers": [],
-    "notes": "Transitioning from Glassmorphism/Basic UI to modern Material Design aesthetics."
+    "notes": "Version 1.3.5 successfully packaged and documented with new 3-tier connectivity states and Home button mapping."
   },
-  "pending_tasks": [
-    {
-      "task": "Implement Material 3 guidelines for SettingsScreen",
-      "priority": "high",
-      "notes": "User requested modern UI/UX."
-    },
-    {
-      "task": "Redesign floating widget icons with Material aesthetics",
-      "priority": "medium",
-      "notes": "Align with new Settings UI."
-    }
-  ],
+  "pending_tasks": [],
   "recent_changes": [
     {
-      "timestamp": "2026-03-01T13:00:00+07:00",
-      "type": "feature",
-      "description": "Implemented robust OTA updating (Permission fixes, non-intrusive UI, Parse Error fixes)",
+      "timestamp": "2026-03-01T14:05:00+07:00",
+      "type": "release",
+      "description": "Version 1.3.5: Added 3-tier connectivity states, Home button mapping, and fixed Wi-Fi/BT detection bugs.",
       "files": [
-        "OtaUpdateManager.kt",
-        "LauncherActivity.kt",
-        "SettingsScreen.kt"
+        "OverlayService.kt",
+        "SettingsScreen.kt",
+        "AppPicker.kt"
+      ]
+    },
+    {
+      "timestamp": "2026-03-01T13:40:00+07:00",
+      "type": "refactor",
+      "description": "Rollback Material 3 UI aesthetics to Legacy theme while keeping functional improvements.",
+      "files": [
+        "SettingsScreen.kt",
+        "OverlayService.kt"
       ]
     }
   ],
   "errors_encountered": [
     {
-      "error": "Parse Error during OTA install",
-      "solution": "Use getUriForDownloadedFile from DownloadManager instead of raw File paths.",
+      "error": "Connectivity icons remain White (Disconnected) despite being connected on emulator",
+      "solution": "Refactor to use ConnectivityManager capabilities check and AudioManager fallback for A2DP presence.",
       "resolved": true
     },
     {
-      "error": "Permission Denied (WRITE_EXTERNAL_STORAGE)",
-      "solution": "Switch to getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).",
-      "resolved": true
-    },
-    {
-      "error": "Install unknown apps permission missing",
-      "solution": "Add canRequestPackageInstalls() check and redirect to ACTION_MANAGE_UNKNOWN_APP_SOURCES.",
+      "error": "Deprecation warnings for WifiInfo.connectionInfo and Icons.Rounded.Chat",
+      "solution": "Suppressed Wifi warning and migrated to Icons.AutoMirrored.Rounded.Chat with explicit import.",
       "resolved": true
     }
   ],
   "decisions_made": [
     {
-      "decision": "Use private external files dir for OTA",
-      "reason": "Bypasses need to prompt for generic storage permissions on modern Android."
+      "decision": "Use pseudo-app ACTION_HOME for Home button mapping",
+      "reason": "Avoids the need for Accessibility Service permissions, improving user on-boarding UX."
     },
     {
-      "decision": "Non-intrusive OTA Notifications",
-      "reason": "Avoid nagging the user while driving; use a subtle settings badge instead."
+      "decision": "3-tier color coding: Grey (Off), White (Disconnected), Cyan (Connected)",
+      "reason": "Clearer visual feedback for drive-focused environments."
     }
   ]
 }
