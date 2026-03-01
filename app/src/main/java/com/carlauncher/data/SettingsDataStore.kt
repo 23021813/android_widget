@@ -17,6 +17,8 @@ class SettingsDataStore(private val context: Context) {
         val FRAME2_APP = stringPreferencesKey("frame2_app")
         val ASSISTANT_APP = stringPreferencesKey("assistant_app")
         val AUTO_START_ON_BOOT = booleanPreferencesKey("auto_start_on_boot")
+        val SHOW_STATUS_WIDGET = booleanPreferencesKey("show_status_widget")
+        val SHOW_ASSISTANT_WIDGET = booleanPreferencesKey("show_assistant_widget")
         val WIDGET_SCALE = floatPreferencesKey("widget_scale")
         val WIDGET_OPACITY = floatPreferencesKey("widget_opacity")
 
@@ -38,6 +40,8 @@ class SettingsDataStore(private val context: Context) {
             frame2App = prefs[Keys.FRAME2_APP],
             assistantApp = prefs[Keys.ASSISTANT_APP],
             autoStartOnBoot = prefs[Keys.AUTO_START_ON_BOOT] ?: false,
+            showStatusWidget = prefs[Keys.SHOW_STATUS_WIDGET] ?: true,
+            showAssistantWidget = prefs[Keys.SHOW_ASSISTANT_WIDGET] ?: true,
             widgetScale = prefs[Keys.WIDGET_SCALE] ?: 1.0f,
             widgetOpacity = prefs[Keys.WIDGET_OPACITY] ?: 0.85f,
 
@@ -70,6 +74,8 @@ class SettingsDataStore(private val context: Context) {
             else prefs.remove(Keys.ASSISTANT_APP)
             
             prefs[Keys.AUTO_START_ON_BOOT] = settings.autoStartOnBoot
+            prefs[Keys.SHOW_STATUS_WIDGET] = settings.showStatusWidget
+            prefs[Keys.SHOW_ASSISTANT_WIDGET] = settings.showAssistantWidget
             prefs[Keys.WIDGET_SCALE] = settings.widgetScale
             prefs[Keys.WIDGET_OPACITY] = settings.widgetOpacity
 

@@ -23,6 +23,10 @@ data class LauncherSettings(
     val assistantApp: String? = null,
     val autoStartOnBoot: Boolean = false,
     
+    // Widget Visibility
+    val showStatusWidget: Boolean = true,
+    val showAssistantWidget: Boolean = true,
+
     // Widget Appearance
     val widgetScale: Float = 1.0f,
     val widgetOpacity: Float = 0.85f,

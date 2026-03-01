@@ -1,9 +1,13 @@
 package com.carlauncher.service
 
 import android.app.*
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import android.view.*
@@ -80,9 +84,53 @@ class OverlayService : Service() {
         startForeground(NOTIFICATION_ID, createNotification())
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         
-        showStatusOverlay()
-        showAssistantOverlay()
+        // Observe settings changes for dynamic widget visibility
+        serviceScope.launch {
+            settingsDataStore.settingsFlow.collectLatest { settings ->
+                // Status Widget
+                if (settings.showStatusWidget && statusView == null) {
+                    showStatusOverlay()
+                } else if (!settings.showStatusWidget && statusView != null) {
+                    removeStatusOverlay()
+                }
+
+                // Assistant Widget
+                if (settings.showAssistantWidget && assistantView == null) {
+                    showAssistantOverlay()
+                } else if (!settings.showAssistantWidget && assistantView != null) {
+                    removeAssistantOverlay()
+                }
+            }
+        }
     }
+
+    // ═══════════════════════════════════════
+    // Connectivity State Helpers
+    // ═══════════════════════════════════════
+
+    private fun isWifiEnabled(): Boolean {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        return wifiManager?.isWifiEnabled == true
+    }
+
+    private fun isBluetoothEnabled(): Boolean {
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        return try {
+            bluetoothManager?.adapter?.isEnabled == true
+        } catch (e: SecurityException) {
+            false
+        }
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        return locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true ||
+               locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true
+    }
+
+    // ═══════════════════════════════════════
+    // Status Overlay
+    // ═══════════════════════════════════════
 
     private fun showStatusOverlay() {
         if (statusView != null) return
@@ -107,6 +155,20 @@ class OverlayService : Service() {
                 val settings by settingsDataStore.settingsFlow.collectAsState(initial = LauncherSettings())
                 
                 var weatherInfo by remember { mutableStateOf<WeatherInfo?>(null) }
+
+                // Read live connectivity states, refresh every 3 seconds
+                var wifiActive by remember { mutableStateOf(isWifiEnabled()) }
+                var btActive by remember { mutableStateOf(isBluetoothEnabled()) }
+                var gpsActive by remember { mutableStateOf(isLocationEnabled()) }
+
+                LaunchedEffect(Unit) {
+                    while (isActive) {
+                        wifiActive = isWifiEnabled()
+                        btActive = isBluetoothEnabled()
+                        gpsActive = isLocationEnabled()
+                        delay(3000L)
+                    }
+                }
                 
                 // Fetch weather periodically
                 LaunchedEffect(settings.showWeather, settings.weatherCity, settings.weatherApiKey) {
@@ -127,6 +189,9 @@ class OverlayService : Service() {
                 FloatingStatusWidget(
                     settings = settings,
                     weatherInfo = weatherInfo,
+                    wifiActive = wifiActive,
+                    btActive = btActive,
+                    gpsActive = gpsActive,
                     onDrag = { dx, dy ->
                         params.x += dx.toInt()
                         params.y += dy.toInt()
@@ -161,6 +226,17 @@ class OverlayService : Service() {
             e.printStackTrace()
         }
     }
+
+    private fun removeStatusOverlay() {
+        statusView?.let {
+            try { windowManager?.removeView(it) } catch (_: Exception) {}
+        }
+        statusView = null
+    }
+
+    // ═══════════════════════════════════════
+    // Assistant Overlay
+    // ═══════════════════════════════════════
 
     private fun showAssistantOverlay() {
         if (assistantView != null) return
@@ -217,6 +293,17 @@ class OverlayService : Service() {
         }
     }
 
+    private fun removeAssistantOverlay() {
+        assistantView?.let {
+            try { windowManager?.removeView(it) } catch (_: Exception) {}
+        }
+        assistantView = null
+    }
+
+    // ═══════════════════════════════════════
+    // Notification
+    // ═══════════════════════════════════════
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -249,10 +336,8 @@ class OverlayService : Service() {
     }
 
     override fun onDestroy() {
-        statusView?.let { try { windowManager?.removeView(it) } catch (_: Exception) {} }
-        assistantView?.let { try { windowManager?.removeView(it) } catch (_: Exception) {} }
-        statusView = null
-        assistantView = null
+        removeStatusOverlay()
+        removeAssistantOverlay()
         serviceScope.cancel()
         super.onDestroy()
     }
@@ -277,6 +362,9 @@ class OverlayLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
 fun FloatingStatusWidget(
     settings: LauncherSettings,
     weatherInfo: WeatherInfo?,
+    wifiActive: Boolean,
+    btActive: Boolean,
+    gpsActive: Boolean,
     onDrag: (Float, Float) -> Unit,
     onClockClick: () -> Unit,
     onSettingsClick: () -> Unit
@@ -303,7 +391,6 @@ fun FloatingStatusWidget(
                 .pointerInput(kotlin.Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
-                        // Drag amount exactly matches screen pixels, no need to scale the movement
                         onDrag(dragAmount.x, dragAmount.y)
                     }
                 }
@@ -366,29 +453,29 @@ fun FloatingStatusWidget(
                         Box(modifier = Modifier.height(24.dp * scale).width(1.dp * scale).background(Color.White.copy(alpha = 0.2f)))
                     }
 
-                    // 3. Status icons (Flat Colors)
+                    // 3. Status icons with LIVE connectivity states
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp * scale)) {
                         if (settings.showWifi) {
                             Icon(
-                                imageVector = Icons.Rounded.Wifi,
-                                contentDescription = "WiFi",
-                                tint = Color.White, // Flat White
+                                imageVector = if (wifiActive) Icons.Rounded.Wifi else Icons.Rounded.WifiOff,
+                                contentDescription = if (wifiActive) "WiFi On" else "WiFi Off",
+                                tint = if (wifiActive) Color.White else Color.White.copy(alpha = 0.3f),
                                 modifier = Modifier.size(24.dp * scale)
                             )
                         }
                         if (settings.showBluetooth) {
                             Icon(
-                                imageVector = Icons.Rounded.Bluetooth,
-                                contentDescription = "Bluetooth",
-                                tint = Color.White, // Flat White
+                                imageVector = if (btActive) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
+                                contentDescription = if (btActive) "Bluetooth On" else "Bluetooth Off",
+                                tint = if (btActive) Color.White else Color.White.copy(alpha = 0.3f),
                                 modifier = Modifier.size(24.dp * scale)
                             )
                         }
                         if (settings.showGps) {
                             Icon(
-                                imageVector = Icons.Rounded.LocationOn,
-                                contentDescription = "GPS",
-                                tint = Color.White, // Flat White
+                                imageVector = if (gpsActive) Icons.Rounded.LocationOn else Icons.Rounded.LocationOff,
+                                contentDescription = if (gpsActive) "GPS On" else "GPS Off",
+                                tint = if (gpsActive) Color.White else Color.White.copy(alpha = 0.3f),
                                 modifier = Modifier.size(24.dp * scale)
                             )
                         }

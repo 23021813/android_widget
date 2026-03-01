@@ -163,6 +163,22 @@ fun SettingsScreen(
                             onSettingsUpdate(settings.copy(autoStartOnBoot = it))
                         }
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SettingsToggle(
+                        label = "Hiển thị Widget Trạng thái (Đồng hồ, Icon, Thời tiết)",
+                        checked = settings.showStatusWidget,
+                        onCheckedChange = {
+                            onSettingsUpdate(settings.copy(showStatusWidget = it))
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SettingsToggle(
+                        label = "Hiển thị Nút Trợ lý ảo (Microphone)",
+                        checked = settings.showAssistantWidget,
+                        onCheckedChange = {
+                            onSettingsUpdate(settings.copy(showAssistantWidget = it))
+                        }
+                    )
                 }
             }
             
