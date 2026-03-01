@@ -173,7 +173,7 @@ object OtaUpdateManager {
             override fun onReceive(ctx: Context, intent: Intent) {
                 val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (id == downloadId) {
-                    ctx.unregisterReceiver(this)
+                    ctx.applicationContext.unregisterReceiver(this)
                     // Polling usually catches it first, but just in case:
                     if (_isDownloading.value) {
                         _isDownloading.value = false
@@ -188,10 +188,11 @@ object OtaUpdateManager {
         }
 
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        val appContext = context.applicationContext
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
+            appContext.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
         } else {
-            context.registerReceiver(receiver, filter)
+            appContext.registerReceiver(receiver, filter)
         }
     }
 
