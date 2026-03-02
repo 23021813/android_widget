@@ -126,6 +126,37 @@
     <string name="help_clickthrough_title">Click-Through Mode</string>
     <string name="help_clickthrough_desc">When enabled, touches pass through the widget. Long press the small dot at the corner to drag.</string>
 
+    <!-- Virtual Actions (App Picker) -->
+    <string name="action_home_label">Go to Home Screen</string>
+    <string name="action_voice_command_label">🎙️ Voice Command</string>
+
+    <!-- Schedule Automation -->
+    <string name="section_schedule">📅 Schedule Automation</string>
+    <string name="schedule_enabled">Enable scheduled automation</string>
+    <string name="schedule_days_label">Days of week</string>
+    <string name="schedule_time_label">Trigger time</string>
+    <string name="schedule_auto_navigate">Auto Google Maps navigation</string>
+    <string name="schedule_nav_address">Destination address</string>
+    <string name="schedule_auto_music">Auto YouTube Music search</string>
+    <string name="schedule_music_keyword">Music search keyword</string>
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
+    <string name="day_sun">Sun</string>
+
+    <!-- Voice Command -->
+    <string name="voice_listening">Listening…</string>
+    <string name="voice_processing">Processing…</string>
+    <string name="voice_error_no_match">Could not understand</string>
+    <string name="voice_error_timeout">Timed out</string>
+    <string name="voice_nav_result">Navigating to: %1$s</string>
+    <string name="voice_music_result">Searching music: %1$s</string>
+    <string name="voice_video_result">Opening video: %1$s</string>
+    <string name="voice_unknown">Unknown command</string>
+
     <!-- OTA Update -->
     <string name="update_available">Update Available</string>
     <string name="update_available_badge">New version %1$s is available!</string>

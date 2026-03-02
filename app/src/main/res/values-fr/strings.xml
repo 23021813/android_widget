@@ -91,6 +91,37 @@
 
     <!-- OTA -->
     <string name="update_available">Mise à jour</string>
+
+    <!-- Virtual Actions -->
+    <string name="action_home_label">Retour à l\'écran d\'accueil</string>
+    <string name="action_voice_command_label">🎙️ Commande vocale</string>
+
+    <!-- Schedule Automation -->
+    <string name="section_schedule">📅 Automatisation programmée</string>
+    <string name="schedule_enabled">Activer l\'automatisation programmée</string>
+    <string name="schedule_days_label">Jours de la semaine</string>
+    <string name="schedule_time_label">Heure de déclenchement</string>
+    <string name="schedule_auto_navigate">Navigation Google Maps auto</string>
+    <string name="schedule_nav_address">Adresse de destination</string>
+    <string name="schedule_auto_music">Recherche YouTube Music auto</string>
+    <string name="schedule_music_keyword">Mot-clé de recherche musicale</string>
+    <string name="day_mon">Lun</string>
+    <string name="day_tue">Mar</string>
+    <string name="day_wed">Mer</string>
+    <string name="day_thu">Jeu</string>
+    <string name="day_fri">Ven</string>
+    <string name="day_sat">Sam</string>
+    <string name="day_sun">Dim</string>
+
+    <!-- Voice Command -->
+    <string name="voice_listening">Écoute en cours…</string>
+    <string name="voice_processing">Traitement…</string>
+    <string name="voice_error_no_match">Non reconnu</string>
+    <string name="voice_error_timeout">Délai expiré</string>
+    <string name="voice_nav_result">Navigation vers : %1$s</string>
+    <string name="voice_music_result">Recherche musique : %1$s</string>
+    <string name="voice_video_result">Ouvrir vidéo : %1$s</string>
+    <string name="voice_unknown">Commande inconnue</string>
     <string name="new_version">Nouvelle version</string>
     <string name="update_now">Mettre à jour</string>
     <string name="update_later">Plus tard</string>

@@ -122,6 +122,37 @@
 
     <!-- OTA -->
     <string name="update_available">Có bản cập nhật</string>
+
+    <!-- Virtual Actions -->
+    <string name="action_home_label">Trở về màn hình chính</string>
+    <string name="action_voice_command_label">🎙️ Ra lệnh giọng nói</string>
+
+    <!-- Schedule Automation -->
+    <string name="section_schedule">📅 Lịch trình tự động</string>
+    <string name="schedule_enabled">Bật lịch trình tự động</string>
+    <string name="schedule_days_label">Ngày trong tuần</string>
+    <string name="schedule_time_label">Giờ kích hoạt</string>
+    <string name="schedule_auto_navigate">Tự động dẫn đường Google Maps</string>
+    <string name="schedule_nav_address">Địa chỉ đích</string>
+    <string name="schedule_auto_music">Tự động tìm nhạc YouTube Music</string>
+    <string name="schedule_music_keyword">Từ khóa tìm nhạc</string>
+    <string name="day_mon">T2</string>
+    <string name="day_tue">T3</string>
+    <string name="day_wed">T4</string>
+    <string name="day_thu">T5</string>
+    <string name="day_fri">T6</string>
+    <string name="day_sat">T7</string>
+    <string name="day_sun">CN</string>
+
+    <!-- Voice Command -->
+    <string name="voice_listening">Đang nghe…</string>
+    <string name="voice_processing">Đang xử lý…</string>
+    <string name="voice_error_no_match">Không nhận diện được</string>
+    <string name="voice_error_timeout">Hết thời gian chờ</string>
+    <string name="voice_nav_result">Dẫn đường đến: %1$s</string>
+    <string name="voice_music_result">Tìm nhạc: %1$s</string>
+    <string name="voice_video_result">Mở video: %1$s</string>
+    <string name="voice_unknown">Không hiểu lệnh</string>
     <string name="new_version">Phiên bản mới</string>
     <string name="update_now">Cập nhật ngay</string>
     <string name="update_later">Để sau</string>

@@ -91,7 +91,36 @@
 
     <!-- OTA -->
     <string name="update_available">アップデート利用可能</string>
-    <string name="new_version">新バージョン</string>
+    <!-- Virtual Actions -->
+    <string name="action_home_label">ホーム画面に戻る</string>
+    <string name="action_voice_command_label">🎙️ 音声コマンド</string>
+
+    <!-- Schedule Automation -->
+    <string name="section_schedule">📅 スケジュール自動化</string>
+    <string name="schedule_enabled">スケジュール自動化を有効にする</string>
+    <string name="schedule_days_label">曜日</string>
+    <string name="schedule_time_label">実行時刻</string>
+    <string name="schedule_auto_navigate">Google Maps 自動ナビ</string>
+    <string name="schedule_nav_address">目的地の住所</string>
+    <string name="schedule_auto_music">YouTube Music 自動検索</string>
+    <string name="schedule_music_keyword">音楽検索キーワード</string>
+    <string name="day_mon">月</string>
+    <string name="day_tue">火</string>
+    <string name="day_wed">水</string>
+    <string name="day_thu">木</string>
+    <string name="day_fri">金</string>
+    <string name="day_sat">土</string>
+    <string name="day_sun">日</string>
+
+    <!-- Voice Command -->
+    <string name="voice_listening">聞いています…</string>
+    <string name="voice_processing">処理中…</string>
+    <string name="voice_error_no_match">認識できませんでした</string>
+    <string name="voice_error_timeout">タイムアウト</string>
+    <string name="voice_nav_result">ナビ開始: %1$s</string>
+    <string name="voice_music_result">音楽検索: %1$s</string>
+    <string name="voice_video_result">動画を開く: %1$s</string>
+    <string name="voice_unknown">不明なコマンド</string>    <string name="new_version">新バージョン</string>
     <string name="update_now">今すぐ更新</string>
     <string name="update_later">後で</string>
 </resources>

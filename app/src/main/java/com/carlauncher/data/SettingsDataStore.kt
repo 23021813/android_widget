@@ -56,6 +56,16 @@ class SettingsDataStore(private val context: Context) {
 
         // Boot split
         val AUTO_SPLIT_ON_BOOT = booleanPreferencesKey("auto_split_on_boot")
+
+        // Schedule Automation
+        val SCHEDULE_ENABLED = booleanPreferencesKey("schedule_enabled")
+        val SCHEDULE_DAYS = stringPreferencesKey("schedule_days") // stored as comma-separated ints
+        val SCHEDULE_HOUR = intPreferencesKey("schedule_hour")
+        val SCHEDULE_MINUTE = intPreferencesKey("schedule_minute")
+        val SCHEDULE_AUTO_NAVIGATE = booleanPreferencesKey("schedule_auto_navigate")
+        val SCHEDULE_NAVIGATION_ADDRESS = stringPreferencesKey("schedule_navigation_address")
+        val SCHEDULE_AUTO_MUSIC = booleanPreferencesKey("schedule_auto_music")
+        val SCHEDULE_MUSIC_KEYWORD = stringPreferencesKey("schedule_music_keyword")
     }
 
     val settingsFlow: Flow<LauncherSettings> = context.dataStore.data.map { prefs ->
@@ -106,7 +116,18 @@ class SettingsDataStore(private val context: Context) {
             assistantLongPressApp = prefs[Keys.ASSISTANT_LONG_PRESS_APP],
             assistantDoubleTapApp = prefs[Keys.ASSISTANT_DOUBLE_TAP_APP],
 
-            autoSplitOnBoot = prefs[Keys.AUTO_SPLIT_ON_BOOT] ?: true
+            autoSplitOnBoot = prefs[Keys.AUTO_SPLIT_ON_BOOT] ?: true,
+
+            scheduleEnabled = prefs[Keys.SCHEDULE_ENABLED] ?: false,
+            scheduleDays = prefs[Keys.SCHEDULE_DAYS]?.split(",")
+                ?.mapNotNull { it.trim().toIntOrNull() }?.toSet()
+                ?: setOf(2, 3, 4, 5, 6),
+            scheduleHour = prefs[Keys.SCHEDULE_HOUR] ?: 7,
+            scheduleMinute = prefs[Keys.SCHEDULE_MINUTE] ?: 30,
+            scheduleAutoNavigate = prefs[Keys.SCHEDULE_AUTO_NAVIGATE] ?: false,
+            scheduleNavigationAddress = prefs[Keys.SCHEDULE_NAVIGATION_ADDRESS] ?: "",
+            scheduleAutoMusic = prefs[Keys.SCHEDULE_AUTO_MUSIC] ?: false,
+            scheduleMusicKeyword = prefs[Keys.SCHEDULE_MUSIC_KEYWORD] ?: ""
         )
     }
 
@@ -154,6 +175,16 @@ class SettingsDataStore(private val context: Context) {
 
             prefs[Keys.ASSISTANT_ICON] = settings.assistantIcon.name
             prefs[Keys.AUTO_SPLIT_ON_BOOT] = settings.autoSplitOnBoot
+
+            // Schedule
+            prefs[Keys.SCHEDULE_ENABLED] = settings.scheduleEnabled
+            prefs[Keys.SCHEDULE_DAYS] = settings.scheduleDays.joinToString(",")
+            prefs[Keys.SCHEDULE_HOUR] = settings.scheduleHour
+            prefs[Keys.SCHEDULE_MINUTE] = settings.scheduleMinute
+            prefs[Keys.SCHEDULE_AUTO_NAVIGATE] = settings.scheduleAutoNavigate
+            prefs[Keys.SCHEDULE_NAVIGATION_ADDRESS] = settings.scheduleNavigationAddress
+            prefs[Keys.SCHEDULE_AUTO_MUSIC] = settings.scheduleAutoMusic
+            prefs[Keys.SCHEDULE_MUSIC_KEYWORD] = settings.scheduleMusicKeyword
         }
     }
 

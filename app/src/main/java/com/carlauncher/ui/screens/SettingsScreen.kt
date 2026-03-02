@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.*
@@ -19,10 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.carlauncher.R
 import com.carlauncher.data.models.*
 import com.carlauncher.service.resolveAssistantIcon
+import com.carlauncher.service.ScheduleManager
 import com.carlauncher.ui.components.AppPickerDialog
 import com.carlauncher.ui.theme.*
 import com.carlauncher.update.UpdateInfo
@@ -56,12 +60,19 @@ fun SettingsScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val homeApp = remember {
         AppInfo(
-            packageName = "com.carlauncher.ACTION_HOME",
-            label = "Trở về màn hình chính (Home)",
+            packageName = VirtualActions.ACTION_HOME,
+            label = context.getString(R.string.action_home_label),
             icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_crop)
         )
     }
-    val assistantApps = remember(installedApps) { listOf(homeApp) + installedApps }
+    val voiceCommandApp = remember {
+        AppInfo(
+            packageName = VirtualActions.ACTION_VOICE_COMMAND,
+            label = context.getString(R.string.action_voice_command_label),
+            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_btn_speak_now)
+        )
+    }
+    val assistantApps = remember(installedApps) { listOf(homeApp, voiceCommandApp) + installedApps }
 
     Scaffold(
         topBar = {
@@ -184,6 +195,143 @@ fun SettingsScreen(
                     SettingsToggle(label = stringResource(R.string.allow_overlap_system_bars), checked = settings.allowOverlapSystemBars, onCheckedChange = { onSettingsUpdate(settings.copy(allowOverlapSystemBars = it)) })
                     Spacer(modifier = Modifier.height(8.dp))
                     SettingsToggle(label = stringResource(R.string.clock_click_through), checked = settings.clockClickThrough, onCheckedChange = { onSettingsUpdate(settings.copy(clockClickThrough = it)) })
+                }
+            }
+
+            // ═══ SCHEDULE AUTOMATION ═══
+            item {
+                SettingsSection(title = stringResource(R.string.section_schedule)) {
+                    SettingsToggle(
+                        label = stringResource(R.string.schedule_enabled),
+                        checked = settings.scheduleEnabled,
+                        onCheckedChange = {
+                            onSettingsUpdate(settings.copy(scheduleEnabled = it))
+                            // Register or cancel alarm based on toggle
+                            if (it) {
+                                ScheduleManager.registerAlarm(context)
+                            } else {
+                                ScheduleManager.cancelAlarm(context)
+                            }
+                        }
+                    )
+
+                    if (settings.scheduleEnabled) {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Day of week picker
+                        Text(stringResource(R.string.schedule_days_label), color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val dayLabels = listOf(
+                            2 to stringResource(R.string.day_mon),
+                            3 to stringResource(R.string.day_tue),
+                            4 to stringResource(R.string.day_wed),
+                            5 to stringResource(R.string.day_thu),
+                            6 to stringResource(R.string.day_fri),
+                            7 to stringResource(R.string.day_sat),
+                            1 to stringResource(R.string.day_sun)
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            dayLabels.forEach { (dayValue, label) ->
+                                val isSelected = dayValue in settings.scheduleDays
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            if (isSelected) AccentCyan.copy(alpha = 0.3f)
+                                            else DarkSurfaceVariant
+                                        )
+                                        .clickable {
+                                            val newDays = if (isSelected)
+                                                settings.scheduleDays - dayValue
+                                            else
+                                                settings.scheduleDays + dayValue
+                                            val updated = settings.copy(scheduleDays = newDays)
+                                            onSettingsUpdate(updated)
+                                            ScheduleManager.registerAlarm(context)
+                                        }
+                                        .padding(vertical = 8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        color = if (isSelected) AccentCyan else TextSecondary,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Time picker (hour:minute)
+                        Text(stringResource(R.string.schedule_time_label), color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Hour
+                            SettingsNumberField(
+                                value = settings.scheduleHour,
+                                range = 0..23,
+                                onValueChange = {
+                                    onSettingsUpdate(settings.copy(scheduleHour = it))
+                                    ScheduleManager.registerAlarm(context)
+                                },
+                                modifier = Modifier.width(72.dp)
+                            )
+                            Text(":", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            // Minute
+                            SettingsNumberField(
+                                value = settings.scheduleMinute,
+                                range = 0..59,
+                                onValueChange = {
+                                    onSettingsUpdate(settings.copy(scheduleMinute = it))
+                                    ScheduleManager.registerAlarm(context)
+                                },
+                                modifier = Modifier.width(72.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Google Maps Navigation
+                        SettingsToggle(
+                            label = stringResource(R.string.schedule_auto_navigate),
+                            checked = settings.scheduleAutoNavigate,
+                            onCheckedChange = { onSettingsUpdate(settings.copy(scheduleAutoNavigate = it)) }
+                        )
+                        if (settings.scheduleAutoNavigate) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            SettingsTextField(
+                                label = stringResource(R.string.schedule_nav_address),
+                                value = settings.scheduleNavigationAddress,
+                                onValueChange = { onSettingsUpdate(settings.copy(scheduleNavigationAddress = it)) }
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // YouTube Music
+                        SettingsToggle(
+                            label = stringResource(R.string.schedule_auto_music),
+                            checked = settings.scheduleAutoMusic,
+                            onCheckedChange = { onSettingsUpdate(settings.copy(scheduleAutoMusic = it)) }
+                        )
+                        if (settings.scheduleAutoMusic) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            SettingsTextField(
+                                label = stringResource(R.string.schedule_music_keyword),
+                                value = settings.scheduleMusicKeyword,
+                                onValueChange = { onSettingsUpdate(settings.copy(scheduleMusicKeyword = it)) }
+                            )
+                        }
+                    }
                 }
             }
 
@@ -495,4 +643,38 @@ fun SettingsAppSelector(label: String, currentApp: String, onClick: () -> Unit, 
             }
         }
     }
+}
+
+@Composable
+fun SettingsNumberField(
+    value: Int,
+    range: IntRange,
+    onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var text by remember(value) { mutableStateOf(value.toString().padStart(2, '0')) }
+
+    OutlinedTextField(
+        value = text,
+        onValueChange = { input ->
+            val filtered = input.filter { it.isDigit() }.take(2)
+            text = filtered
+            val num = filtered.toIntOrNull()
+            if (num != null && num in range) {
+                onValueChange(num)
+            }
+        },
+        modifier = modifier,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = AccentCyan,
+            unfocusedBorderColor = DarkSurfaceVariant,
+            focusedTextColor = TextPrimary,
+            unfocusedTextColor = TextPrimary,
+            focusedContainerColor = DarkSurface,
+            unfocusedContainerColor = DarkSurface
+        ),
+        shape = RoundedCornerShape(8.dp)
+    )
 }

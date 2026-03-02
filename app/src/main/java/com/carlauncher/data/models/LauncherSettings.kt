@@ -40,6 +40,12 @@ enum class AssistantIcon(val displayName: String) {
     PHONE("Phone")
 }
 
+/** Special package names for virtual actions (used in App Picker) */
+object VirtualActions {
+    const val ACTION_HOME = "com.carlauncher.ACTION_HOME"
+    const val ACTION_VOICE_COMMAND = "com.carlauncher.ACTION_VOICE_COMMAND"
+}
+
 data class LauncherSettings(
     // App Frames
     val frame1App: String? = null,
@@ -90,5 +96,15 @@ data class LauncherSettings(
     val assistantDoubleTapApp: String? = null,
 
     // Boot Split-View
-    val autoSplitOnBoot: Boolean = true
+    val autoSplitOnBoot: Boolean = true,
+
+    // Schedule Automation
+    val scheduleEnabled: Boolean = false,
+    val scheduleDays: Set<Int> = setOf(2, 3, 4, 5, 6), // Calendar.MONDAY(2)..FRIDAY(6)
+    val scheduleHour: Int = 7,
+    val scheduleMinute: Int = 30,
+    val scheduleAutoNavigate: Boolean = false,
+    val scheduleNavigationAddress: String = "",
+    val scheduleAutoMusic: Boolean = false,
+    val scheduleMusicKeyword: String = ""
 )

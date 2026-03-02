@@ -92,6 +92,37 @@
 
     <!-- OTA -->
     <string name="update_available">有新版本</string>
+
+    <!-- Virtual Actions -->
+    <string name="action_home_label">返回主屏幕</string>
+    <string name="action_voice_command_label">🎙️ 语音指令</string>
+
+    <!-- Schedule Automation -->
+    <string name="section_schedule">📅 定时自动化</string>
+    <string name="schedule_enabled">启用定时自动化</string>
+    <string name="schedule_days_label">星期</string>
+    <string name="schedule_time_label">触发时间</string>
+    <string name="schedule_auto_navigate">自动 Google Maps 导航</string>
+    <string name="schedule_nav_address">目的地地址</string>
+    <string name="schedule_auto_music">自动 YouTube Music 搜索</string>
+    <string name="schedule_music_keyword">音乐搜索关键词</string>
+    <string name="day_mon">周一</string>
+    <string name="day_tue">周二</string>
+    <string name="day_wed">周三</string>
+    <string name="day_thu">周四</string>
+    <string name="day_fri">周五</string>
+    <string name="day_sat">周六</string>
+    <string name="day_sun">周日</string>
+
+    <!-- Voice Command -->
+    <string name="voice_listening">正在听…</string>
+    <string name="voice_processing">处理中…</string>
+    <string name="voice_error_no_match">无法识别</string>
+    <string name="voice_error_timeout">超时</string>
+    <string name="voice_nav_result">导航至: %1$s</string>
+    <string name="voice_music_result">搜索音乐: %1$s</string>
+    <string name="voice_video_result">打开视频: %1$s</string>
+    <string name="voice_unknown">未知指令</string>
     <string name="new_version">新版本</string>
     <string name="update_now">立即更新</string>
     <string name="update_later">稍后</string>

@@ -7,6 +7,7 @@ import android.provider.Settings
 import android.util.Log
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.service.OverlayService
+import com.carlauncher.service.ScheduleManager
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 
@@ -45,6 +46,16 @@ class BootReceiver : BroadcastReceiver() {
                 }
             } else {
                 Log.d(TAG, "Auto-start disabled in settings, skipping")
+            }
+
+            // Re-register schedule alarm (alarms are lost when head unit powers off)
+            try {
+                if (settings?.scheduleEnabled == true) {
+                    Log.d(TAG, "Re-registering schedule alarm after boot")
+                    ScheduleManager.registerAlarm(context)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to re-register schedule alarm", e)
             }
         }
     }

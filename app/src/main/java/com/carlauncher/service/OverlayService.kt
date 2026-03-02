@@ -48,8 +48,10 @@ import com.carlauncher.SplitScreenProxyActivity
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.data.models.AssistantIcon
 import com.carlauncher.data.models.LauncherSettings
+import com.carlauncher.data.models.VirtualActions
 import com.carlauncher.data.models.WeatherInfo
 import com.carlauncher.data.WeatherRepository
+import com.carlauncher.service.voice.VoiceOverlayManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -87,6 +89,7 @@ class OverlayService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var settingsDataStore: SettingsDataStore
     private val weatherRepository = WeatherRepository()
+    private lateinit var voiceOverlayManager: VoiceOverlayManager
 
     // Position save debounce
     private var positionSaveJob: Job? = null
@@ -96,6 +99,7 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         settingsDataStore = SettingsDataStore(this)
+        voiceOverlayManager = VoiceOverlayManager(this)
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification())
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -524,54 +528,13 @@ class OverlayService : Service() {
                         saveWidgetPosition(false, params.x, params.y)
                     },
                     onClick = {
-                        try {
-                            if (settings.assistantApp == "com.carlauncher.ACTION_HOME") {
-                                val intent = Intent(Intent.ACTION_MAIN).apply {
-                                    addCategory(Intent.CATEGORY_HOME)
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                }
-                                startActivity(intent)
-                            } else if (settings.assistantApp != null) {
-                                SplitScreenLauncher.launchApp(this@OverlayService, settings.assistantApp!!)
-                            } else {
-                                val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                startActivity(intent)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+                        handleAssistantAction(settings.assistantApp)
                     },
                     onLongPress = {
-                        try {
-                            if (settings.assistantLongPressApp == "com.carlauncher.ACTION_HOME") {
-                                val intent = Intent(Intent.ACTION_MAIN).apply {
-                                    addCategory(Intent.CATEGORY_HOME)
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                }
-                                startActivity(intent)
-                            } else if (settings.assistantLongPressApp != null) {
-                                SplitScreenLauncher.launchApp(this@OverlayService, settings.assistantLongPressApp!!)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+                        handleAssistantAction(settings.assistantLongPressApp)
                     },
                     onDoubleTap = {
-                        try {
-                            if (settings.assistantDoubleTapApp == "com.carlauncher.ACTION_HOME") {
-                                val intent = Intent(Intent.ACTION_MAIN).apply {
-                                    addCategory(Intent.CATEGORY_HOME)
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                }
-                                startActivity(intent)
-                            } else if (settings.assistantDoubleTapApp != null) {
-                                SplitScreenLauncher.launchApp(this@OverlayService, settings.assistantDoubleTapApp!!)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+                        handleAssistantAction(settings.assistantDoubleTapApp)
                     }
                 )
             }
@@ -580,6 +543,41 @@ class OverlayService : Service() {
         assistantView = composeView
         try {
             windowManager?.addView(composeView, params)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // Assistant Action Handler (shared by all gestures)
+    // ═══════════════════════════════════════
+
+    private fun handleAssistantAction(actionPackage: String?) {
+        try {
+            when (actionPackage) {
+                VirtualActions.ACTION_HOME -> {
+                    val intent = Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_HOME)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    startActivity(intent)
+                }
+                VirtualActions.ACTION_VOICE_COMMAND -> {
+                    if (!voiceOverlayManager.isShowing) {
+                        voiceOverlayManager.show()
+                    }
+                }
+                null -> {
+                    // Default: launch system voice command
+                    val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(intent)
+                }
+                else -> {
+                    SplitScreenLauncher.launchApp(this@OverlayService, actionPackage)
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -630,6 +628,7 @@ class OverlayService : Service() {
     override fun onDestroy() {
         removeStatusOverlay()
         removeAssistantOverlay()
+        voiceOverlayManager.dismiss()
         serviceScope.cancel()
         super.onDestroy()
     }
