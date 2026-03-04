@@ -123,4 +123,20 @@
     <string name="voice_unknown">不明なコマンド</string>    <string name="new_version">新バージョン</string>
     <string name="update_now">今すぐ更新</string>
     <string name="update_later">後で</string>
+    <string name="perm_mic_short">音声コマンドを使用するにはマイクの権限が必要です</string>
+    <string name="perm_mic_settings">音声コマンドにはマイク権限が必要です。設定で許可してください。</string>
+    <string name="voice_speech_not_available">音声認識は利用できません</string>
+    <string name="voice_error_audio">オーディオエラー</string>
+    <string name="voice_error_network">ネットワークエラー</string>
+    <string name="voice_error_network_timeout">ネットワークのタイムアウト</string>
+    <string name="voice_error_client">クライアントエラー</string>
+    <string name="voice_error_permissions">録音権限がありません</string>
+    <string name="voice_error_generic">エラー (%1$d)</string>
+    <string name="voice_error_init_failed">音声認識を初期化できませんでした</string>
+    <string name="voice_unknown_param">不明なコマンド: %1$s</string>
+    <string name="voice_cmd_received">コマンドを受信しました</string>
+    <string name="voice_cmd_unrecognized">認識できないコマンド</string>
+    <string name="voice_cmd_err_maps">Googleマップを開けませんでした</string>
+    <string name="voice_cmd_err_music">YouTube Musicを開けませんでした</string>
+    <string name="voice_cmd_err_youtube">YouTubeを開けませんでした</string>
 </resources>

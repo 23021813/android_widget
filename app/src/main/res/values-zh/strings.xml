@@ -126,4 +126,20 @@
     <string name="new_version">新版本</string>
     <string name="update_now">立即更新</string>
     <string name="update_later">稍后</string>
+    <string name="perm_mic_short">使用语音命令需要麦克风权限</string>
+    <string name="perm_mic_settings">语音命令需要麦克风权限。请在设置中授予。</string>
+    <string name="voice_speech_not_available">语音识别不可用</string>
+    <string name="voice_error_audio">音频错误</string>
+    <string name="voice_error_network">网络错误</string>
+    <string name="voice_error_network_timeout">网络超时</string>
+    <string name="voice_error_client">客户端错误</string>
+    <string name="voice_error_permissions">缺少录音权限</string>
+    <string name="voice_error_generic">错误 (%1$d)</string>
+    <string name="voice_error_init_failed">无法初始化语音识别</string>
+    <string name="voice_unknown_param">未知命令: %1$s</string>
+    <string name="voice_cmd_received">命令已收到</string>
+    <string name="voice_cmd_unrecognized">无法识别的命令</string>
+    <string name="voice_cmd_err_maps">无法打开谷歌地图</string>
+    <string name="voice_cmd_err_music">无法打开YouTube音乐</string>
+    <string name="voice_cmd_err_youtube">无法打开YouTube</string>
 </resources>

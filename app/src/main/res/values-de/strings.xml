@@ -125,4 +125,20 @@
     <string name="new_version">Neue Version</string>
     <string name="update_now">Jetzt aktualisieren</string>
     <string name="update_later">Später</string>
+    <string name="perm_mic_short">Für Sprachbefehle ist die Mikrofonberechtigung erforderlich</string>
+    <string name="perm_mic_settings">Sprachbefehle erfordern die Mikrofonberechtigung. Bitte in den Einstellungen erteilen.</string>
+    <string name="voice_speech_not_available">Spracherkennung nicht verfügbar</string>
+    <string name="voice_error_audio">Audio-Fehler</string>
+    <string name="voice_error_network">Netzwerkfehler</string>
+    <string name="voice_error_network_timeout">Netzwerk-Timeout</string>
+    <string name="voice_error_client">Client-Fehler</string>
+    <string name="voice_error_permissions">Fehlende Audioaufzeichnungsberechtigung</string>
+    <string name="voice_error_generic">Fehler (%1$d)</string>
+    <string name="voice_error_init_failed">Spracherkennung konnte nicht initialisiert werden</string>
+    <string name="voice_unknown_param">Unbekannter Befehl: %1$s</string>
+    <string name="voice_cmd_received">Befehl empfangen</string>
+    <string name="voice_cmd_unrecognized">Unerkannter Befehl</string>
+    <string name="voice_cmd_err_maps">Google Maps konnte nicht geöffnet werden</string>
+    <string name="voice_cmd_err_music">YouTube Music konnte nicht geöffnet werden</string>
+    <string name="voice_cmd_err_youtube">YouTube konnte nicht geöffnet werden</string>
 </resources>

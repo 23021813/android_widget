@@ -58,14 +58,7 @@ class SettingsDataStore(private val context: Context) {
         val AUTO_SPLIT_ON_BOOT = booleanPreferencesKey("auto_split_on_boot")
 
         // Schedule Automation
-        val SCHEDULE_ENABLED = booleanPreferencesKey("schedule_enabled")
-        val SCHEDULE_DAYS = stringPreferencesKey("schedule_days") // stored as comma-separated ints
-        val SCHEDULE_HOUR = intPreferencesKey("schedule_hour")
-        val SCHEDULE_MINUTE = intPreferencesKey("schedule_minute")
-        val SCHEDULE_AUTO_NAVIGATE = booleanPreferencesKey("schedule_auto_navigate")
-        val SCHEDULE_NAVIGATION_ADDRESS = stringPreferencesKey("schedule_navigation_address")
-        val SCHEDULE_AUTO_MUSIC = booleanPreferencesKey("schedule_auto_music")
-        val SCHEDULE_MUSIC_KEYWORD = stringPreferencesKey("schedule_music_keyword")
+        val SCHEDULE_PROFILES = stringPreferencesKey("schedule_profiles")
     }
 
     val settingsFlow: Flow<LauncherSettings> = context.dataStore.data.map { prefs ->
@@ -118,17 +111,45 @@ class SettingsDataStore(private val context: Context) {
 
             autoSplitOnBoot = prefs[Keys.AUTO_SPLIT_ON_BOOT] ?: true,
 
-            scheduleEnabled = prefs[Keys.SCHEDULE_ENABLED] ?: false,
-            scheduleDays = prefs[Keys.SCHEDULE_DAYS]?.split(",")
-                ?.mapNotNull { it.trim().toIntOrNull() }?.toSet()
-                ?: setOf(2, 3, 4, 5, 6),
-            scheduleHour = prefs[Keys.SCHEDULE_HOUR] ?: 7,
-            scheduleMinute = prefs[Keys.SCHEDULE_MINUTE] ?: 30,
-            scheduleAutoNavigate = prefs[Keys.SCHEDULE_AUTO_NAVIGATE] ?: false,
-            scheduleNavigationAddress = prefs[Keys.SCHEDULE_NAVIGATION_ADDRESS] ?: "",
-            scheduleAutoMusic = prefs[Keys.SCHEDULE_AUTO_MUSIC] ?: false,
-            scheduleMusicKeyword = prefs[Keys.SCHEDULE_MUSIC_KEYWORD] ?: ""
+            scheduleProfiles = prefs[Keys.SCHEDULE_PROFILES]?.let { parseScheduleProfiles(it) } ?: emptyList()
         )
+    }
+
+    private fun parseScheduleProfiles(jsonString: String): List<ScheduleProfile> {
+        val list = mutableListOf<ScheduleProfile>()
+        try {
+            val array = org.json.JSONArray(jsonString)
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                val daysArray = obj.optJSONArray("days")
+                val daysSet = mutableSetOf<Int>()
+                if (daysArray != null) {
+                    for (j in 0 until daysArray.length()) {
+                        daysSet.add(daysArray.getInt(j))
+                    }
+                }
+                list.add(
+                    ScheduleProfile(
+                        id = obj.optString("id", java.util.UUID.randomUUID().toString()),
+                        name = obj.optString("name", ""),
+                        enabled = obj.optBoolean("enabled", true),
+                        startHour = obj.optInt("startHour", 7),
+                        startMinute = obj.optInt("startMinute", 0),
+                        endHour = obj.optInt("endHour", 8),
+                        endMinute = obj.optInt("endMinute", 0),
+                        lastTriggeredDayOfYear = obj.optInt("lastTriggeredDayOfYear", -1),
+                        days = daysSet,
+                        autoNavigate = obj.optBoolean("autoNavigate", false),
+                        navAddress = obj.optString("navAddress", ""),
+                        autoMusic = obj.optBoolean("autoMusic", false),
+                        musicKeyword = obj.optString("musicKeyword", "")
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsDataStore", "Failed to parse schedule profiles", e)
+        }
+        return list
     }
 
     suspend fun updateSettings(settings: LauncherSettings) {
@@ -177,14 +198,28 @@ class SettingsDataStore(private val context: Context) {
             prefs[Keys.AUTO_SPLIT_ON_BOOT] = settings.autoSplitOnBoot
 
             // Schedule
-            prefs[Keys.SCHEDULE_ENABLED] = settings.scheduleEnabled
-            prefs[Keys.SCHEDULE_DAYS] = settings.scheduleDays.joinToString(",")
-            prefs[Keys.SCHEDULE_HOUR] = settings.scheduleHour
-            prefs[Keys.SCHEDULE_MINUTE] = settings.scheduleMinute
-            prefs[Keys.SCHEDULE_AUTO_NAVIGATE] = settings.scheduleAutoNavigate
-            prefs[Keys.SCHEDULE_NAVIGATION_ADDRESS] = settings.scheduleNavigationAddress
-            prefs[Keys.SCHEDULE_AUTO_MUSIC] = settings.scheduleAutoMusic
-            prefs[Keys.SCHEDULE_MUSIC_KEYWORD] = settings.scheduleMusicKeyword
+            val jsonArray = org.json.JSONArray()
+            for (profile in settings.scheduleProfiles) {
+                val obj = org.json.JSONObject().apply {
+                    put("id", profile.id)
+                    put("name", profile.name)
+                    put("enabled", profile.enabled)
+                    put("startHour", profile.startHour)
+                    put("startMinute", profile.startMinute)
+                    put("endHour", profile.endHour)
+                    put("endMinute", profile.endMinute)
+                    put("lastTriggeredDayOfYear", profile.lastTriggeredDayOfYear)
+                    val daysArray = org.json.JSONArray()
+                    for (day in profile.days) daysArray.put(day)
+                    put("days", daysArray)
+                    put("autoNavigate", profile.autoNavigate)
+                    put("navAddress", profile.navAddress)
+                    put("autoMusic", profile.autoMusic)
+                    put("musicKeyword", profile.musicKeyword)
+                }
+                jsonArray.put(obj)
+            }
+            prefs[Keys.SCHEDULE_PROFILES] = jsonArray.toString()
         }
     }
 

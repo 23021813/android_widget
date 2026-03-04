@@ -48,14 +48,13 @@ class BootReceiver : BroadcastReceiver() {
                 Log.d(TAG, "Auto-start disabled in settings, skipping")
             }
 
-            // Re-register schedule alarm (alarms are lost when head unit powers off)
+            // Re-register schedule alarms (alarms are lost when head unit powers off)
             try {
-                if (settings?.scheduleEnabled == true) {
-                    Log.d(TAG, "Re-registering schedule alarm after boot")
-                    ScheduleManager.registerAlarm(context)
-                }
+                Log.d(TAG, "Re-registering schedule alarms after boot")
+                ScheduleManager.syncAlarms(context)
+                ScheduleManager.checkAndTriggerMissedSchedules(context)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to re-register schedule alarm", e)
+                Log.e(TAG, "Failed to re-register schedule alarms", e)
             }
         }
     }

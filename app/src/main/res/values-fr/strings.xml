@@ -125,4 +125,20 @@
     <string name="new_version">Nouvelle version</string>
     <string name="update_now">Mettre à jour</string>
     <string name="update_later">Plus tard</string>
+    <string name="perm_mic_short">L\'autorisation du microphone est requise pour la commande vocale</string>
+    <string name="perm_mic_settings">La commande vocale nécessite l\'autorisation du microphone. Veuillez l\'accorder dans les paramètres.</string>
+    <string name="voice_speech_not_available">Reconnaissance vocale non disponible</string>
+    <string name="voice_error_audio">Erreur audio</string>
+    <string name="voice_error_network">Erreur réseau</string>
+    <string name="voice_error_network_timeout">Délai d\'attente du réseau</string>
+    <string name="voice_error_client">Erreur client</string>
+    <string name="voice_error_permissions">Autorisation d\'enregistrement audio manquante</string>
+    <string name="voice_error_generic">Erreur (%1$d)</string>
+    <string name="voice_error_init_failed">Impossible d\'initialiser la reconnaissance vocale</string>
+    <string name="voice_unknown_param">Commande inconnue: %1$s</string>
+    <string name="voice_cmd_received">Commande reçue</string>
+    <string name="voice_cmd_unrecognized">Commande non reconnue</string>
+    <string name="voice_cmd_err_maps">Impossible d\'ouvrir Google Maps</string>
+    <string name="voice_cmd_err_music">Impossible d\'ouvrir YouTube Music</string>
+    <string name="voice_cmd_err_youtube">Impossible d\'ouvrir YouTube</string>
 </resources>

@@ -30,32 +30,44 @@ class ScheduleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         Log.d(TAG, "Schedule alarm fired")
 
+        val profileId = intent?.getStringExtra("PROFILE_ID")
+        if (profileId == null) {
+            Log.e(TAG, "No profile ID in intent, aborting.")
+            return
+        }
+
         val pendingResult = goAsync() // keep receiver alive for coroutine work
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                executeSchedule(context)
+                executeSchedule(context, profileId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error executing schedule", e)
             } finally {
-                // Re-register alarm for next occurrence
-                ScheduleManager.registerAlarm(context)
+                // Re-register alarms to schedule next occurrences
+                ScheduleManager.syncAlarms(context)
                 pendingResult.finish()
             }
         }
     }
 
-    private suspend fun executeSchedule(context: Context) {
+    private suspend fun executeSchedule(context: Context, profileId: String) {
         val settings = SettingsDataStore(context).settingsFlow.first()
+        val profile = settings.scheduleProfiles.find { it.id == profileId }
 
-        if (!settings.scheduleEnabled) {
-            Log.d(TAG, "Schedule disabled, skipping")
+        if (profile == null) {
+            Log.d(TAG, "Profile $profileId not found, skipping")
             return
         }
 
-        // Verify today is in the configured days
+        if (!profile.enabled) {
+            Log.d(TAG, "Profile ${profile.name} disabled, skipping")
+            return
+        }
+
+        // Verify today is in the configured days (just to be safe)
         val today = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)
-        if (today !in settings.scheduleDays) {
-            Log.d(TAG, "Today ($today) not in scheduled days ${settings.scheduleDays}, skipping")
+        if (today !in profile.days) {
+            Log.d(TAG, "Today ($today) not in scheduled days ${profile.days}, skipping")
             return
         }
 
@@ -74,10 +86,10 @@ class ScheduleReceiver : BroadcastReceiver() {
         }
 
         // Step 2: Google Maps navigation (optional)
-        if (settings.scheduleAutoNavigate && settings.scheduleNavigationAddress.isNotBlank()) {
-            Log.d(TAG, "Launching Google Maps navigation to: ${settings.scheduleNavigationAddress}")
+        if (profile.autoNavigate && profile.navAddress.isNotBlank()) {
+            Log.d(TAG, "Launching Google Maps navigation to: ${profile.navAddress}")
             try {
-                val address = settings.scheduleNavigationAddress
+                val address = profile.navAddress
                 val gmmUri = Uri.parse("google.navigation:q=${Uri.encode(address)}&mode=d")
                 val mapIntent = Intent(Intent.ACTION_VIEW, gmmUri).apply {
                     setPackage("com.google.android.apps.maps")
@@ -91,10 +103,10 @@ class ScheduleReceiver : BroadcastReceiver() {
         }
 
         // Step 3: YouTube Music search (optional)
-        if (settings.scheduleAutoMusic && settings.scheduleMusicKeyword.isNotBlank()) {
-            Log.d(TAG, "Launching YouTube Music search: ${settings.scheduleMusicKeyword}")
+        if (profile.autoMusic && profile.musicKeyword.isNotBlank()) {
+            Log.d(TAG, "Launching YouTube Music search: ${profile.musicKeyword}")
             try {
-                val keyword = settings.scheduleMusicKeyword
+                val keyword = profile.musicKeyword
                 val musicUri = Uri.parse("https://music.youtube.com/search?q=${Uri.encode(keyword)}")
                 val musicIntent = Intent(Intent.ACTION_VIEW, musicUri).apply {
                     setPackage("com.google.android.apps.youtube.music")
@@ -106,7 +118,7 @@ class ScheduleReceiver : BroadcastReceiver() {
                 // Fallback: try MEDIA_PLAY_FROM_SEARCH
                 try {
                     val fallbackIntent = Intent(android.provider.MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH).apply {
-                        putExtra(android.app.SearchManager.QUERY, settings.scheduleMusicKeyword)
+                        putExtra(android.app.SearchManager.QUERY, profile.musicKeyword)
                         setPackage("com.google.android.apps.youtube.music")
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
@@ -115,6 +127,18 @@ class ScheduleReceiver : BroadcastReceiver() {
                     Log.e(TAG, "Fallback also failed", e2)
                 }
             }
+        }
+
+        // Record that this profile has been triggered today
+        try {
+            val currentList = settings.scheduleProfiles.toMutableList()
+            val idx = currentList.indexOfFirst { it.id == profileId }
+            if (idx != -1) {
+                currentList[idx] = profile.copy(lastTriggeredDayOfYear = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR))
+                SettingsDataStore(context).updateSettings(settings.copy(scheduleProfiles = currentList))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update lastTriggeredDayOfYear", e)
         }
 
         Log.d(TAG, "Schedule execution completed")

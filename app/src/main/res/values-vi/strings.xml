@@ -132,10 +132,25 @@
     <string name="schedule_enabled">Bật lịch trình tự động</string>
     <string name="schedule_days_label">Ngày trong tuần</string>
     <string name="schedule_time_label">Giờ kích hoạt</string>
+    <string name="schedule_time_range_label">Khung giờ kích hoạt</string>
     <string name="schedule_auto_navigate">Tự động dẫn đường Google Maps</string>
     <string name="schedule_nav_address">Địa chỉ đích</string>
     <string name="schedule_auto_music">Tự động tìm nhạc YouTube Music</string>
     <string name="schedule_music_keyword">Từ khóa tìm nhạc</string>
+    
+    <!-- Dynamic Schedule Profiles -->
+    <string name="schedule_no_profiles">Chưa có lịch trình nào. Hãy thêm mới.</string>
+    <string name="schedule_add_new">Thêm Lịch trình mới</string>
+    <string name="schedule_no_days_selected">Chưa chọn ngày thi hành</string>
+    <string name="schedule_default_name">Lịch trình %1$s</string>
+    <string name="schedule_to_destination">Đến: %1$s</string>
+    <string name="schedule_play_music">Nghe: %1$s</string>
+    <string name="schedule_edit_title">Chỉnh sửa Lịch trình</string>
+    <string name="schedule_create_title">Thêm Lịch trình mới</string>
+    <string name="schedule_profile_name_label">Tên gợi nhớ (VD: Mở sáng đi làm)</string>
+    <string name="action_delete">Xóa</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="action_save">Lưu</string>
     <string name="day_mon">T2</string>
     <string name="day_tue">T3</string>
     <string name="day_wed">T4</string>
@@ -156,5 +171,21 @@
     <string name="new_version">Phiên bản mới</string>
     <string name="update_now">Cập nhật ngay</string>
     <string name="update_later">Để sau</string>
+    <string name="perm_mic_short">Cần quyền Microphone để sử dụng Voice Command</string>
+    <string name="perm_mic_settings">Voice Command cần quyền Microphone. Vui lòng cấp quyền trong Cài đặt.</string>
+    <string name="voice_speech_not_available">Nhận dạng giọng nói không khả dụng</string>
+    <string name="voice_error_audio">Lỗi âm thanh</string>
+    <string name="voice_error_network">Lỗi mạng</string>
+    <string name="voice_error_network_timeout">Mạng quá chậm</string>
+    <string name="voice_error_client">Lỗi client</string>
+    <string name="voice_error_permissions">Thiếu quyền ghi âm</string>
+    <string name="voice_error_generic">Lỗi (%1$d)</string>
+    <string name="voice_error_init_failed">Không thể khởi tạo nhận dạng giọng nói</string>
+    <string name="voice_unknown_param">Không hiểu lệnh: %1$s</string>
+    <string name="voice_cmd_received">Đã nhận lệnh</string>
+    <string name="voice_cmd_unrecognized">Không hiểu lệnh</string>
+    <string name="voice_cmd_err_maps">Không thể mở Google Maps</string>
+    <string name="voice_cmd_err_music">Không thể mở YouTube Music</string>
+    <string name="voice_cmd_err_youtube">Không thể mở YouTube</string>
 </resources>
 

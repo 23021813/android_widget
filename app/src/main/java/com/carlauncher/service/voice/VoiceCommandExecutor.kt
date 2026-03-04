@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import com.carlauncher.R
 
 /**
  * Executes parsed voice commands by launching the appropriate app/intent.
@@ -21,7 +22,7 @@ object VoiceCommandExecutor {
             VoiceCommandParser.CommandType.PLAY_MUSIC -> launchMusicSearch(context, command.parameter)
             VoiceCommandParser.CommandType.OPEN_VIDEO -> launchVideoSearch(context, command.parameter)
             VoiceCommandParser.CommandType.UNKNOWN -> {
-                Toast.makeText(context, "❓ Không hiểu lệnh: ${command.parameter}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "❓ " + context.getString(R.string.voice_unknown_param, command.parameter), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -49,7 +50,7 @@ object VoiceCommandExecutor {
                 }
                 context.startActivity(browserIntent)
             } catch (e2: Exception) {
-                Toast.makeText(context, "Không thể mở Google Maps", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.voice_cmd_err_maps), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -76,7 +77,7 @@ object VoiceCommandExecutor {
                 }
                 context.startActivity(fallbackIntent)
             } catch (e2: Exception) {
-                Toast.makeText(context, "Không thể mở YouTube Music", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.voice_cmd_err_music), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -103,7 +104,7 @@ object VoiceCommandExecutor {
                 }
                 context.startActivity(browserIntent)
             } catch (e2: Exception) {
-                Toast.makeText(context, "Không thể mở YouTube", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.voice_cmd_err_youtube), Toast.LENGTH_SHORT).show()
             }
         }
     }

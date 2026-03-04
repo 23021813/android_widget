@@ -46,6 +46,22 @@ object VirtualActions {
     const val ACTION_VOICE_COMMAND = "com.carlauncher.ACTION_VOICE_COMMAND"
 }
 
+data class ScheduleProfile(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val name: String = "",
+    val enabled: Boolean = true,
+    val startHour: Int = 7,
+    val startMinute: Int = 0,
+    val endHour: Int = 8,
+    val endMinute: Int = 0,
+    val lastTriggeredDayOfYear: Int = -1,
+    val days: Set<Int> = emptySet(), // Calendar.MONDAY(2) .. MONDAY(6) etc.
+    val autoNavigate: Boolean = false,
+    val navAddress: String = "",
+    val autoMusic: Boolean = false,
+    val musicKeyword: String = ""
+)
+
 data class LauncherSettings(
     // App Frames
     val frame1App: String? = null,
@@ -98,13 +114,6 @@ data class LauncherSettings(
     // Boot Split-View
     val autoSplitOnBoot: Boolean = true,
 
-    // Schedule Automation
-    val scheduleEnabled: Boolean = false,
-    val scheduleDays: Set<Int> = setOf(2, 3, 4, 5, 6), // Calendar.MONDAY(2)..FRIDAY(6)
-    val scheduleHour: Int = 7,
-    val scheduleMinute: Int = 30,
-    val scheduleAutoNavigate: Boolean = false,
-    val scheduleNavigationAddress: String = "",
-    val scheduleAutoMusic: Boolean = false,
-    val scheduleMusicKeyword: String = ""
+    // Schedule Automation Profiles
+    val scheduleProfiles: List<ScheduleProfile> = emptyList()
 )

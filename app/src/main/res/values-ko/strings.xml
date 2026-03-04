@@ -125,4 +125,20 @@
     <string name="new_version">새 버전</string>
     <string name="update_now">지금 업데이트</string>
     <string name="update_later">나중에</string>
+    <string name="perm_mic_short">음성 명령을 사용하려면 마이크 권한이 필요합니다</string>
+    <string name="perm_mic_settings">음성 명령에는 마이크 권한이 필요합니다. 설정에서 허용해 주세요.</string>
+    <string name="voice_speech_not_available">음성 인식을 사용할 수 없습니다</string>
+    <string name="voice_error_audio">오디오 오류</string>
+    <string name="voice_error_network">네트워크 오류</string>
+    <string name="voice_error_network_timeout">네트워크 시간 초과</string>
+    <string name="voice_error_client">클라이언트 오류</string>
+    <string name="voice_error_permissions">녹음 권限이 없습니다</string>
+    <string name="voice_error_generic">오류 (%1$d)</string>
+    <string name="voice_error_init_failed">음성 인식을 초기화할 수 없습니다</string>
+    <string name="voice_unknown_param">알 수 없는 명령: %1$s</string>
+    <string name="voice_cmd_received">명령이 수신되었습니다</string>
+    <string name="voice_cmd_unrecognized">인식할 수 없는 명령</string>
+    <string name="voice_cmd_err_maps">Google 지도를 열 수 없습니다</string>
+    <string name="voice_cmd_err_music">YouTube Music을 열 수 없습니다</string>
+    <string name="voice_cmd_err_youtube">YouTube를 열 수 없습니다</string>
 </resources>

@@ -31,6 +31,10 @@ import com.carlauncher.ui.components.AppPickerDialog
 import com.carlauncher.ui.theme.*
 import com.carlauncher.update.UpdateInfo
 import androidx.compose.ui.text.font.FontWeight
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import androidx.compose.ui.window.Dialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +50,7 @@ fun SettingsScreen(
     var showAppPicker by remember { mutableStateOf(false) }
     var appPickerTarget by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    var editingProfile by remember { mutableStateOf<ScheduleProfile?>(null) }
 
     val clockFormatLabels = mapOf(
         ClockFormat.TIME_ONLY to stringResource(R.string.clock_time_only),
@@ -58,6 +63,16 @@ fun SettingsScreen(
     )
 
     val context = androidx.compose.ui.platform.LocalContext.current
+    
+    val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (!isGranted) {
+                android.widget.Toast.makeText(context, context.getString(R.string.perm_mic_short), android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
     val homeApp = remember {
         AppInfo(
             packageName = VirtualActions.ACTION_HOME,
@@ -201,136 +216,35 @@ fun SettingsScreen(
             // ═══ SCHEDULE AUTOMATION ═══
             item {
                 SettingsSection(title = stringResource(R.string.section_schedule)) {
-                    SettingsToggle(
-                        label = stringResource(R.string.schedule_enabled),
-                        checked = settings.scheduleEnabled,
-                        onCheckedChange = {
-                            onSettingsUpdate(settings.copy(scheduleEnabled = it))
-                            // Register or cancel alarm based on toggle
-                            if (it) {
-                                ScheduleManager.registerAlarm(context)
-                            } else {
-                                ScheduleManager.cancelAlarm(context)
-                            }
-                        }
-                    )
-
-                    if (settings.scheduleEnabled) {
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Day of week picker
-                        Text(stringResource(R.string.schedule_days_label), color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        val dayLabels = listOf(
-                            2 to stringResource(R.string.day_mon),
-                            3 to stringResource(R.string.day_tue),
-                            4 to stringResource(R.string.day_wed),
-                            5 to stringResource(R.string.day_thu),
-                            6 to stringResource(R.string.day_fri),
-                            7 to stringResource(R.string.day_sat),
-                            1 to stringResource(R.string.day_sun)
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            dayLabels.forEach { (dayValue, label) ->
-                                val isSelected = dayValue in settings.scheduleDays
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(
-                                            if (isSelected) AccentCyan.copy(alpha = 0.3f)
-                                            else DarkSurfaceVariant
-                                        )
-                                        .clickable {
-                                            val newDays = if (isSelected)
-                                                settings.scheduleDays - dayValue
-                                            else
-                                                settings.scheduleDays + dayValue
-                                            val updated = settings.copy(scheduleDays = newDays)
-                                            onSettingsUpdate(updated)
-                                            ScheduleManager.registerAlarm(context)
-                                        }
-                                        .padding(vertical = 8.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = label,
-                                        color = if (isSelected) AccentCyan else TextSecondary,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Time picker (hour:minute)
-                        Text(stringResource(R.string.schedule_time_label), color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            // Hour
-                            SettingsNumberField(
-                                value = settings.scheduleHour,
-                                range = 0..23,
-                                onValueChange = {
-                                    onSettingsUpdate(settings.copy(scheduleHour = it))
-                                    ScheduleManager.registerAlarm(context)
+                    if (settings.scheduleProfiles.isEmpty()) {
+                        Text(stringResource(R.string.schedule_no_profiles), color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        settings.scheduleProfiles.forEach { profile ->
+                            ScheduleProfileCard(
+                                profile = profile,
+                                onToggle = { isEnabled ->
+                                    val updatedList = settings.scheduleProfiles.map {
+                                        if (it.id == profile.id) it.copy(enabled = isEnabled) else it
+                                    }
+                                    onSettingsUpdate(settings.copy(scheduleProfiles = updatedList))
+                                    ScheduleManager.syncAlarms(context)
                                 },
-                                modifier = Modifier.width(72.dp)
+                                onEdit = { editingProfile = profile }
                             )
-                            Text(":", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                            // Minute
-                            SettingsNumberField(
-                                value = settings.scheduleMinute,
-                                range = 0..59,
-                                onValueChange = {
-                                    onSettingsUpdate(settings.copy(scheduleMinute = it))
-                                    ScheduleManager.registerAlarm(context)
-                                },
-                                modifier = Modifier.width(72.dp)
-                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
+                    }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Google Maps Navigation
-                        SettingsToggle(
-                            label = stringResource(R.string.schedule_auto_navigate),
-                            checked = settings.scheduleAutoNavigate,
-                            onCheckedChange = { onSettingsUpdate(settings.copy(scheduleAutoNavigate = it)) }
-                        )
-                        if (settings.scheduleAutoNavigate) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            SettingsTextField(
-                                label = stringResource(R.string.schedule_nav_address),
-                                value = settings.scheduleNavigationAddress,
-                                onValueChange = { onSettingsUpdate(settings.copy(scheduleNavigationAddress = it)) }
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // YouTube Music
-                        SettingsToggle(
-                            label = stringResource(R.string.schedule_auto_music),
-                            checked = settings.scheduleAutoMusic,
-                            onCheckedChange = { onSettingsUpdate(settings.copy(scheduleAutoMusic = it)) }
-                        )
-                        if (settings.scheduleAutoMusic) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            SettingsTextField(
-                                label = stringResource(R.string.schedule_music_keyword),
-                                value = settings.scheduleMusicKeyword,
-                                onValueChange = { onSettingsUpdate(settings.copy(scheduleMusicKeyword = it)) }
-                            )
-                        }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { editingProfile = ScheduleProfile() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = DarkSurfaceVariant, contentColor = TextPrimary),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.schedule_add_new))
                     }
                 }
             }
@@ -522,6 +436,12 @@ fun SettingsScreen(
                 else -> stringResource(R.string.choose_app)
             },
             onAppSelected = { app ->
+                if (app.packageName == VirtualActions.ACTION_VOICE_COMMAND) {
+                    val hasPerm = androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                    if (!hasPerm) {
+                        recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                }
                 when (appPickerTarget) {
                     "frame1" -> onSettingsUpdate(settings.copy(frame1App = app.packageName))
                     "frame2" -> onSettingsUpdate(settings.copy(frame2App = app.packageName))
@@ -534,9 +454,42 @@ fun SettingsScreen(
             onDismiss = { showAppPicker = false }
         )
     }
-}
 
-// ═══════════════════════════════════════
+    editingProfile?.let { profile ->
+        ScheduleProfileEditorDialog(
+            profile = profile,
+            onSave = { updatedProfile ->
+                if (updatedProfile.enabled && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as android.app.AlarmManager
+                    if (!alarmManager.canScheduleExactAlarms()) {
+                        val intent = android.content.Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                            data = android.net.Uri.parse("package:${context.packageName}")
+                        }
+                        context.startActivity(intent)
+                    }
+                }
+                
+                val currentList = settings.scheduleProfiles.toMutableList()
+                val idx = currentList.indexOfFirst { it.id == updatedProfile.id }
+                if (idx != -1) {
+                    currentList[idx] = updatedProfile
+                } else {
+                    currentList.add(updatedProfile)
+                }
+                onSettingsUpdate(settings.copy(scheduleProfiles = currentList))
+                ScheduleManager.syncAlarms(context)
+                editingProfile = null
+            },
+            onDelete = {
+                val currentList = settings.scheduleProfiles.filterNot { it.id == profile.id }
+                onSettingsUpdate(settings.copy(scheduleProfiles = currentList))
+                ScheduleManager.syncAlarms(context)
+                editingProfile = null
+            },
+            onDismiss = { editingProfile = null }
+        )
+    }
+}// ═══════════════════════════════════════
 // Help Row Component
 // ═══════════════════════════════════════
 
@@ -677,4 +630,231 @@ fun SettingsNumberField(
         ),
         shape = RoundedCornerShape(8.dp)
     )
+}
+
+@Composable
+fun ScheduleProfileCard(
+    profile: ScheduleProfile,
+    onToggle: (Boolean) -> Unit,
+    onEdit: () -> Unit
+) {
+    val dayLabelsMap = mapOf(
+        2 to stringResource(R.string.day_mon), 3 to stringResource(R.string.day_tue),
+        4 to stringResource(R.string.day_wed), 5 to stringResource(R.string.day_thu),
+        6 to stringResource(R.string.day_fri), 7 to stringResource(R.string.day_sat),
+        1 to stringResource(R.string.day_sun)
+    )
+    val daysStr = listOf(2,3,4,5,6,7,1).filter { it in profile.days }.joinToString(", ") { dayLabelsMap[it] ?: "" }
+    val displayDays = if (daysStr.isEmpty()) stringResource(R.string.schedule_no_days_selected) else daysStr
+    val startStr = "${profile.startHour.toString().padStart(2, '0')}:${profile.startMinute.toString().padStart(2, '0')}"
+    val endStr = "${profile.endHour.toString().padStart(2, '0')}:${profile.endMinute.toString().padStart(2, '0')}"
+    val timeStr = "$startStr - $endStr"
+    val nameStr = profile.name.ifBlank { stringResource(R.string.schedule_default_name, timeStr) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(DarkSurfaceVariant)
+            .clickable { onEdit() }
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = nameStr, style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "⏰ $timeStr | 📅 $displayDays", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
+            if (profile.autoNavigate) Text(text = "📍 " + stringResource(R.string.schedule_to_destination, profile.navAddress), style = MaterialTheme.typography.bodySmall, color = AccentCyan)
+            if (profile.autoMusic) Text(text = "🎵 " + stringResource(R.string.schedule_play_music, profile.musicKeyword), style = MaterialTheme.typography.bodySmall, color = AccentGreen)
+        }
+        
+        Switch(
+            checked = profile.enabled,
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = DarkBackground, checkedTrackColor = AccentCyan,
+                uncheckedThumbColor = TextSecondary, uncheckedTrackColor = DarkSurface
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScheduleProfileEditorDialog(
+    profile: ScheduleProfile,
+    onSave: (ScheduleProfile) -> Unit,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var editedProfile by remember { mutableStateOf(profile) }
+    
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            shape = RoundedCornerShape(16.dp),
+            color = DarkSurface
+        ) {
+            LazyColumn(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    Text(
+                        text = if (profile.id.isNotBlank() && profile.name.isNotBlank()) stringResource(R.string.schedule_edit_title) else stringResource(R.string.schedule_create_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = TextPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                
+                // Name
+                item {
+                    SettingsTextField(
+                        label = stringResource(R.string.schedule_profile_name_label),
+                        value = editedProfile.name,
+                        onValueChange = { editedProfile = editedProfile.copy(name = it) }
+                    )
+                }
+
+                // Time Range
+                item {
+                    Text(stringResource(R.string.schedule_time_range_label), color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SettingsNumberField(
+                            value = editedProfile.startHour,
+                            range = 0..23,
+                            onValueChange = { editedProfile = editedProfile.copy(startHour = it) },
+                            modifier = Modifier.width(60.dp)
+                        )
+                        Text(":", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        SettingsNumberField(
+                            value = editedProfile.startMinute,
+                            range = 0..59,
+                            onValueChange = { editedProfile = editedProfile.copy(startMinute = it) },
+                            modifier = Modifier.width(60.dp)
+                        )
+                        
+                        Text("-", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        
+                        SettingsNumberField(
+                            value = editedProfile.endHour,
+                            range = 0..23,
+                            onValueChange = { editedProfile = editedProfile.copy(endHour = it) },
+                            modifier = Modifier.width(60.dp)
+                        )
+                        Text(":", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        SettingsNumberField(
+                            value = editedProfile.endMinute,
+                            range = 0..59,
+                            onValueChange = { editedProfile = editedProfile.copy(endMinute = it) },
+                            modifier = Modifier.width(60.dp)
+                        )
+                    }
+                }
+
+                // Day of week picker
+                item {
+                    Text(stringResource(R.string.schedule_days_label), color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val dayLabels = listOf(
+                        2 to stringResource(R.string.day_mon), 3 to stringResource(R.string.day_tue),
+                        4 to stringResource(R.string.day_wed), 5 to stringResource(R.string.day_thu),
+                        6 to stringResource(R.string.day_fri), 7 to stringResource(R.string.day_sat),
+                        1 to stringResource(R.string.day_sun)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        dayLabels.forEach { (dayValue, label) ->
+                            val isSelected = dayValue in editedProfile.days
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) AccentCyan.copy(alpha = 0.3f) else DarkSurfaceVariant)
+                                    .clickable {
+                                        val newDays = if (isSelected) editedProfile.days - dayValue else editedProfile.days + dayValue
+                                        editedProfile = editedProfile.copy(days = newDays)
+                                    }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = if (isSelected) AccentCyan else TextSecondary,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Actions
+                item {
+                    SettingsToggle(
+                        label = stringResource(R.string.schedule_auto_navigate),
+                        checked = editedProfile.autoNavigate,
+                        onCheckedChange = { editedProfile = editedProfile.copy(autoNavigate = it) }
+                    )
+                    if (editedProfile.autoNavigate) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        SettingsTextField(
+                            label = stringResource(R.string.schedule_nav_address),
+                            value = editedProfile.navAddress,
+                            onValueChange = { editedProfile = editedProfile.copy(navAddress = it) }
+                        )
+                    }
+                }
+
+                item {
+                    SettingsToggle(
+                        label = stringResource(R.string.schedule_auto_music),
+                        checked = editedProfile.autoMusic,
+                        onCheckedChange = { editedProfile = editedProfile.copy(autoMusic = it) }
+                    )
+                    if (editedProfile.autoMusic) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        SettingsTextField(
+                            label = stringResource(R.string.schedule_music_keyword),
+                            value = editedProfile.musicKeyword,
+                            onValueChange = { editedProfile = editedProfile.copy(musicKeyword = it) }
+                        )
+                    }
+                }
+
+                // Buttons
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (profile.name.isNotBlank()) {
+                            TextButton(onClick = onDelete, colors = ButtonDefaults.textButtonColors(contentColor = AccentRed)) {
+                                Text(stringResource(R.string.action_delete))
+                            }
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        TextButton(onClick = onDismiss) {
+                            Text(stringResource(R.string.action_cancel), color = TextSecondary)
+                        }
+                        Button(
+                            onClick = { onSave(editedProfile) },
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentCyan, contentColor = DarkBackground),
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Text(stringResource(R.string.action_save))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

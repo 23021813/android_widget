@@ -168,6 +168,7 @@ class LauncherActivity : ComponentActivity() {
         super.onResume()
         permissionState.value = Settings.canDrawOverlays(this)
         checkOverlayPermissionAndStartService()
+        com.carlauncher.service.ScheduleManager.checkAndTriggerMissedSchedules(this)
     }
 
     private fun checkOverlayPermissionAndStartService() {

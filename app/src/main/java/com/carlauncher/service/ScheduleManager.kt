@@ -9,6 +9,7 @@ import android.util.Log
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.receiver.ScheduleReceiver
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
@@ -25,76 +26,91 @@ object ScheduleManager {
     private const val REQUEST_CODE = 9001
 
     /**
-     * Register (or re-register) the daily alarm based on current settings.
-     * Safe to call from BootReceiver or Settings UI.
+     * Re-calculates and re-registers all enabled schedules.
+     * Cancels alarms for disabled or deleted profiles.
      */
-    fun registerAlarm(context: Context) {
+    fun syncAlarms(context: Context) {
         val settings = runBlocking {
             SettingsDataStore(context).settingsFlow.first()
         }
 
-        if (!settings.scheduleEnabled || settings.scheduleDays.isEmpty()) {
-            Log.d(TAG, "Schedule disabled or no days selected – cancelling any existing alarm")
-            cancelAlarm(context)
-            return
-        }
-
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, ScheduleReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            REQUEST_CODE,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
 
-        // Calculate next trigger time
-        val triggerTime = getNextTriggerTime(
-            settings.scheduleDays,
-            settings.scheduleHour,
-            settings.scheduleMinute
-        )
+        // First, conceptually we would cancel ALL known alarms to start fresh, 
+        // but since we only use ids internally, we'll iterate through settings.
+        // We might leave orphaned alarms if a profile is deleted, so it's best to 
+        // always manually call cancelAlarm(context, profile.id) when deleting.
+        
+        for (profile in settings.scheduleProfiles) {
+            if (!profile.enabled || profile.days.isEmpty()) {
+                cancelAlarm(context, profile.id)
+                continue
+            }
 
-        if (triggerTime <= 0) {
-            Log.w(TAG, "Could not compute next trigger time")
-            return
-        }
+            val requestCode = profile.id.hashCode()
+            val intent = Intent(context, ScheduleReceiver::class.java).apply {
+                data = android.net.Uri.parse("carlauncher://schedule/${profile.id}")
+                putExtra("PROFILE_ID", profile.id)
+            }
+            
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
-        // Use setExactAndAllowWhileIdle for precision (head units are always charging)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+ may need SCHEDULE_EXACT_ALARM permission
-            if (alarmManager.canScheduleExactAlarms()) {
+            // Calculate next exact trigger time based on startHour/startMinute
+            val triggerTime = getNextTriggerTime(
+                profile.days,
+                profile.startHour,
+                profile.startMinute
+            )
+
+            if (triggerTime <= 0) {
+                Log.w(TAG, "Could not compute next trigger time for profile ${profile.id}")
+                continue
+            }
+
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // Android 12+ may need SCHEDULE_EXACT_ALARM permission
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent
+                    )
+                } else {
+                    // Fallback to inexact
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent
+                    )
+                    Log.w(TAG, "Exact alarm permission not granted – using inexact alarm")
+                }
+            } else {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent
                 )
-            } else {
-                // Fallback to inexact
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent
-                )
-                Log.w(TAG, "Exact alarm permission not granted – using inexact alarm")
             }
-        } else {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent
-            )
-        }
 
-        val cal = Calendar.getInstance().apply { timeInMillis = triggerTime }
-        Log.d(TAG, "Alarm registered for ${cal.time}")
+            val cal = Calendar.getInstance().apply { timeInMillis = triggerTime }
+            Log.d(TAG, "Alarm registered for profile '${profile.name}' (${profile.id}) at ${cal.time}")
+        }
     }
 
-    fun cancelAlarm(context: Context) {
+    fun cancelAlarm(context: Context, profileId: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, ScheduleReceiver::class.java)
+        val intent = Intent(context, ScheduleReceiver::class.java).apply {
+            data = android.net.Uri.parse("carlauncher://schedule/$profileId")
+        }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            REQUEST_CODE,
+            profileId.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
-        Log.d(TAG, "Alarm cancelled")
+        Log.d(TAG, "Alarm cancelled for profile $profileId")
     }
 
     /**
@@ -130,5 +146,42 @@ object ScheduleManager {
         }
 
         return -1
+    }
+
+    /**
+     * Checks if the current time falls within any active schedule's start and end range.
+     * If so, and it hasn't triggered today, it triggers the schedule manually.
+     */
+    fun checkAndTriggerMissedSchedules(context: Context) {
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+            try {
+                val settings = SettingsDataStore(context).settingsFlow.first()
+                val now = Calendar.getInstance()
+                val currentDay = now.get(Calendar.DAY_OF_WEEK)
+                val currentDayOfYear = now.get(Calendar.DAY_OF_YEAR)
+                val currentHour = now.get(Calendar.HOUR_OF_DAY)
+                val currentMinute = now.get(Calendar.MINUTE)
+                val currentTotalMinutes = currentHour * 60 + currentMinute
+                
+                for (profile in settings.scheduleProfiles) {
+                    if (!profile.enabled || currentDay !in profile.days) continue
+                    if (profile.lastTriggeredDayOfYear == currentDayOfYear) continue // Already triggered today
+                    
+                    val startTotalMinutes = profile.startHour * 60 + profile.startMinute
+                    val endTotalMinutes = profile.endHour * 60 + profile.endMinute
+                    
+                    if (currentTotalMinutes in startTotalMinutes..endTotalMinutes) {
+                        Log.d(TAG, "Triggering in-range schedule ${profile.id} (${profile.name})")
+                        val intent = Intent(context, ScheduleReceiver::class.java).apply {
+                            data = android.net.Uri.parse("carlauncher://schedule/${profile.id}")
+                            putExtra("PROFILE_ID", profile.id)
+                        }
+                        context.sendBroadcast(intent)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking missed schedules", e)
+            }
+        }
     }
 }

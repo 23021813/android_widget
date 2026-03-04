@@ -135,10 +135,25 @@
     <string name="schedule_enabled">Enable scheduled automation</string>
     <string name="schedule_days_label">Days of week</string>
     <string name="schedule_time_label">Trigger time</string>
+    <string name="schedule_time_range_label">Active time range</string>
     <string name="schedule_auto_navigate">Auto Google Maps navigation</string>
     <string name="schedule_nav_address">Destination address</string>
     <string name="schedule_auto_music">Auto YouTube Music search</string>
     <string name="schedule_music_keyword">Music search keyword</string>
+    
+    <!-- Dynamic Schedule Profiles -->
+    <string name="schedule_no_profiles">No schedules yet. Add a new one.</string>
+    <string name="schedule_add_new">Add New Schedule</string>
+    <string name="schedule_no_days_selected">No days selected</string>
+    <string name="schedule_default_name">Schedule %1$s</string>
+    <string name="schedule_to_destination">To: %1$s</string>
+    <string name="schedule_play_music">Play: %1$s</string>
+    <string name="schedule_edit_title">Edit Schedule</string>
+    <string name="schedule_create_title">Create New Schedule</string>
+    <string name="schedule_profile_name_label">Custom Name (e.g. Morning commute)</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
     <string name="day_mon">Mon</string>
     <string name="day_tue">Tue</string>
     <string name="day_wed">Wed</string>
@@ -163,4 +178,20 @@
     <string name="new_version">New version</string>
     <string name="update_now">Update Now</string>
     <string name="update_later">Later</string>
+    <string name="perm_mic_short">Microphone permission is required to use Voice Command</string>
+    <string name="perm_mic_settings">Voice Command requires Microphone permission. Please grant it in Settings.</string>
+    <string name="voice_speech_not_available">Speech recognition not available</string>
+    <string name="voice_error_audio">Audio error</string>
+    <string name="voice_error_network">Network error</string>
+    <string name="voice_error_network_timeout">Network timeout</string>
+    <string name="voice_error_client">Client error</string>
+    <string name="voice_error_permissions">Missing audio recording permission</string>
+    <string name="voice_error_generic">Error (%1$d)</string>
+    <string name="voice_error_init_failed">Could not initialize speech recognition</string>
+    <string name="voice_unknown_param">Unknown command: %1$s</string>
+    <string name="voice_cmd_received">Command received</string>
+    <string name="voice_cmd_unrecognized">Unrecognized command</string>
+    <string name="voice_cmd_err_maps">Could not open Google Maps</string>
+    <string name="voice_cmd_err_music">Could not open YouTube Music</string>
+    <string name="voice_cmd_err_youtube">Could not open YouTube</string>
 </resources>

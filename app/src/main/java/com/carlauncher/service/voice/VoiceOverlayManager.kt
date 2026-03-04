@@ -8,6 +8,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import com.carlauncher.R
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -74,7 +75,12 @@ class VoiceOverlayManager(private val context: Context) {
 
         if (!SpeechRecognizer.isRecognitionAvailable(context)) {
             Log.e(TAG, "Speech recognition not available on this device")
-            android.widget.Toast.makeText(context, "Speech recognition not available", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(context, context.getString(R.string.voice_speech_not_available), android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            android.widget.Toast.makeText(context, context.getString(R.string.perm_mic_settings), android.widget.Toast.LENGTH_LONG).show()
             return
         }
 
@@ -95,7 +101,7 @@ class VoiceOverlayManager(private val context: Context) {
         _partialText.value = ""
         _finalText.value = ""
         _isListening.value = true
-        _statusText.value = "🎙️ Đang nghe..."
+        _statusText.value = "🎙️ " + context.getString(R.string.voice_listening)
         _commandResult.value = ""
 
         val composeView = ComposeView(context).apply {
@@ -144,13 +150,13 @@ class VoiceOverlayManager(private val context: Context) {
             speechRecognizer?.setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
                     Log.d(TAG, "Ready for speech")
-                    _statusText.value = "🎙️ Đang nghe..."
+                    _statusText.value = "🎙️ " + context.getString(R.string.voice_listening)
                     _isListening.value = true
                 }
 
                 override fun onBeginningOfSpeech() {
                     Log.d(TAG, "Speech started")
-                    _statusText.value = "🎙️ Đang nghe..."
+                    _statusText.value = "🎙️ " + context.getString(R.string.voice_listening)
                 }
 
                 override fun onRmsChanged(rmsdB: Float) {
@@ -161,20 +167,20 @@ class VoiceOverlayManager(private val context: Context) {
 
                 override fun onEndOfSpeech() {
                     Log.d(TAG, "Speech ended")
-                    _statusText.value = "⏳ Đang xử lý..."
+                    _statusText.value = "⏳ " + context.getString(R.string.voice_processing)
                     _isListening.value = false
                 }
 
                 override fun onError(error: Int) {
                     val errorMsg = when (error) {
-                        SpeechRecognizer.ERROR_NO_MATCH -> "Không nhận diện được"
-                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Hết thời gian chờ"
-                        SpeechRecognizer.ERROR_AUDIO -> "Lỗi âm thanh"
-                        SpeechRecognizer.ERROR_NETWORK -> "Lỗi mạng"
-                        SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Mạng quá chậm"
-                        SpeechRecognizer.ERROR_CLIENT -> "Lỗi client"
-                        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Thiếu quyền ghi âm"
-                        else -> "Lỗi ($error)"
+                        SpeechRecognizer.ERROR_NO_MATCH -> context.getString(R.string.voice_error_no_match)
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> context.getString(R.string.voice_error_timeout)
+                        SpeechRecognizer.ERROR_AUDIO -> context.getString(R.string.voice_error_audio)
+                        SpeechRecognizer.ERROR_NETWORK -> context.getString(R.string.voice_error_network)
+                        SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> context.getString(R.string.voice_error_network_timeout)
+                        SpeechRecognizer.ERROR_CLIENT -> context.getString(R.string.voice_error_client)
+                        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> context.getString(R.string.voice_error_permissions)
+                        else -> context.getString(R.string.voice_error_generic, error)
                     }
                     Log.e(TAG, "Speech error: $errorMsg ($error)")
                     _statusText.value = "❌ $errorMsg"
@@ -198,7 +204,7 @@ class VoiceOverlayManager(private val context: Context) {
                     if (text.isNotBlank()) {
                         processCommand(text)
                     } else {
-                        _statusText.value = "❌ Không nhận diện được"
+                        _statusText.value = "❌ " + context.getString(R.string.voice_error_no_match)
                         scope.launch {
                             delay(2000L)
                             dismiss()
@@ -229,7 +235,7 @@ class VoiceOverlayManager(private val context: Context) {
             speechRecognizer?.startListening(recognizerIntent)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start speech recognizer", e)
-            _statusText.value = "❌ Không thể khởi tạo nhận dạng giọng nói"
+            _statusText.value = "❌ " + context.getString(R.string.voice_error_init_failed)
             scope.launch {
                 delay(2000L)
                 dismiss()
@@ -251,7 +257,7 @@ class VoiceOverlayManager(private val context: Context) {
         timeoutJob = scope.launch {
             delay(TIMEOUT_MS)
             if (overlayView != null && _finalText.value.isBlank()) {
-                _statusText.value = "⏰ Hết thời gian chờ"
+                _statusText.value = "⏰ " + context.getString(R.string.voice_error_timeout)
                 delay(1500L)
                 dismiss()
             }
@@ -263,18 +269,18 @@ class VoiceOverlayManager(private val context: Context) {
 
         val resultText = when (command.type) {
             VoiceCommandParser.CommandType.NAVIGATE ->
-                "🗺️ Dẫn đường đến: ${command.parameter}"
+                "🗺️ " + context.getString(R.string.voice_nav_result, command.parameter)
             VoiceCommandParser.CommandType.PLAY_MUSIC ->
-                "🎵 Tìm nhạc: ${command.parameter}"
+                "🎵 " + context.getString(R.string.voice_music_result, command.parameter)
             VoiceCommandParser.CommandType.OPEN_VIDEO ->
-                "▶️ Mở video: ${command.parameter}"
+                "▶️ " + context.getString(R.string.voice_video_result, command.parameter)
             VoiceCommandParser.CommandType.UNKNOWN ->
-                "❓ Không hiểu: ${command.parameter}"
+                "❓ " + context.getString(R.string.voice_unknown_param, command.parameter)
         }
 
         _commandResult.value = resultText
         _statusText.value = if (command.type != VoiceCommandParser.CommandType.UNKNOWN)
-            "✅ Đã nhận lệnh" else "❌ Không hiểu lệnh"
+            "✅ " + context.getString(R.string.voice_cmd_received) else "❌ " + context.getString(R.string.voice_cmd_unrecognized)
 
         // Execute and dismiss
         scope.launch {
