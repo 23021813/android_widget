@@ -1,7 +1,7 @@
 {
-  "versionCode": 10,
-  "versionName": "1.3.6",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.6/CarFloat_1.3.6.apk",
-  "changelog": "- Tính năng CarFloat (Split View): Gán phím tắt mở chia đôi màn hình vào nút Assistant và chấm trắng.\n- Sửa lỗi Lịch trình tự động: Khắc phục xung đột khi khởi động lại thiết bị.\n- Cải thiện giọng nói: Tự động chuyển đổi On-device/Network và yêu cầu quyền Micro lúc khởi động.\n- Thêm nút Tạo kịch bản mẫu giúp test nhanh tính năng Lịch trình.",
+  "versionCode": 11,
+  "versionName": "1.3.7",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.7/CarFloat_1.3.7.apk",
+  "changelog": "- Gỡ bỏ hoàn toàn tính năng lắng nghe giọng nói và quyền micro.\n- Chỉ giữ 2 ngôn ngữ: Tiếng Việt và Tiếng Anh, tự động chọn Tiếng Việt khi hệ thống là vi, còn lại là Tiếng Anh.\n- Thống nhất hiển thị version trong app dùng BuildConfig.VERSION_NAME.\n- Sửa lỗi Lịch trình + auto split: đảm bảo lần đầu mở app khi đang trong khung giờ lịch sẽ vừa chia đôi màn hình vừa gửi action điều hướng Google Maps và tìm nhạc YouTube Music.",
   "forceUpdate": false
 }

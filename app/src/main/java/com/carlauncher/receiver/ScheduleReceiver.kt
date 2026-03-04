@@ -3,7 +3,6 @@ package com.carlauncher.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import com.carlauncher.SplitScreenProxyActivity
 import com.carlauncher.data.SettingsDataStore
@@ -36,7 +35,7 @@ class ScheduleReceiver : BroadcastReceiver() {
             return
         }
 
-        val skipSplitScreen = intent?.getBooleanExtra("SKIP_SPLIT_SCREEN", false) ?: false
+        val skipSplitScreen = intent.getBooleanExtra("SKIP_SPLIT_SCREEN", false)
 
         val pendingResult = goAsync() // keep receiver alive for coroutine work
         CoroutineScope(Dispatchers.Main).launch {
@@ -53,7 +52,8 @@ class ScheduleReceiver : BroadcastReceiver() {
     }
 
     private suspend fun executeSchedule(context: Context, profileId: String, skipSplitScreen: Boolean) {
-        val settings = SettingsDataStore(context).settingsFlow.first()
+        val settingsDataStore = SettingsDataStore(context)
+        val settings = settingsDataStore.settingsFlow.first()
         val profile = settings.scheduleProfiles.find { it.id == profileId }
 
         if (profile == null) {
@@ -66,83 +66,53 @@ class ScheduleReceiver : BroadcastReceiver() {
             return
         }
 
-        // Verify today is in the configured days (just to be safe)
         val today = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)
         if (today !in profile.days) {
             Log.d(TAG, "Today ($today) not in scheduled days ${profile.days}, skipping")
             return
         }
 
-        // Step 1: Split-screen
+        val navAddress = if (profile.autoNavigate) profile.navAddress else ""
+        val musicKeyword = if (profile.autoMusic) profile.musicKeyword else ""
+
         if (!skipSplitScreen) {
             val frame1 = settings.frame1App
             val frame2 = settings.frame2App
             if (frame1 != null && frame2 != null) {
-                Log.d(TAG, "Launching split-screen: $frame1 | $frame2")
+                Log.d(TAG, "Launching split-screen with actions: $frame1 | $frame2 | nav=$navAddress | music=$musicKeyword")
                 val splitIntent = Intent(context, SplitScreenProxyActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     putExtra("pkg1", frame1)
                     putExtra("pkg2", frame2)
+                    if (navAddress.isNotBlank()) putExtra("nav_address", navAddress)
+                    if (musicKeyword.isNotBlank()) putExtra("music_keyword", musicKeyword)
                 }
                 context.startActivity(splitIntent)
-                delay(4000L) // Wait for split-screen to settle
+                delay(4000L)
             }
         } else {
-            Log.d(TAG, "Skipping split-screen execution because system already did auto-split")
-            delay(1000L)
-        }
-
-        // Step 2: Google Maps navigation (optional)
-        if (profile.autoNavigate && profile.navAddress.isNotBlank()) {
-            Log.d(TAG, "Launching Google Maps navigation to: ${profile.navAddress}")
-            try {
-                val address = profile.navAddress
-                val gmmUri = Uri.parse("google.navigation:q=${Uri.encode(address)}&mode=d")
-                val mapIntent = Intent(Intent.ACTION_VIEW, gmmUri).apply {
-                    setPackage("com.google.android.apps.maps")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            Log.d(TAG, "Split-screen already active, sending actions via SplitScreenProxyActivity")
+            val frame1 = settings.frame1App
+            val frame2 = settings.frame2App
+            if (frame1 != null && frame2 != null && (navAddress.isNotBlank() || musicKeyword.isNotBlank())) {
+                val actionIntent = Intent(context, SplitScreenProxyActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra("pkg1", frame1)
+                    putExtra("pkg2", frame2)
+                    if (navAddress.isNotBlank()) putExtra("nav_address", navAddress)
+                    if (musicKeyword.isNotBlank()) putExtra("music_keyword", musicKeyword)
                 }
-                context.startActivity(mapIntent)
-                delay(2000L)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to launch Google Maps", e)
+                context.startActivity(actionIntent)
+                delay(4000L)
             }
         }
 
-        // Step 3: YouTube Music search (optional)
-        if (profile.autoMusic && profile.musicKeyword.isNotBlank()) {
-            Log.d(TAG, "Launching YouTube Music search: ${profile.musicKeyword}")
-            try {
-                val keyword = profile.musicKeyword
-                val musicUri = Uri.parse("https://music.youtube.com/search?q=${Uri.encode(keyword)}")
-                val musicIntent = Intent(Intent.ACTION_VIEW, musicUri).apply {
-                    setPackage("com.google.android.apps.youtube.music")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(musicIntent)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to launch YouTube Music, trying fallback", e)
-                // Fallback: try MEDIA_PLAY_FROM_SEARCH
-                try {
-                    val fallbackIntent = Intent(android.provider.MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH).apply {
-                        putExtra(android.app.SearchManager.QUERY, profile.musicKeyword)
-                        setPackage("com.google.android.apps.youtube.music")
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(fallbackIntent)
-                } catch (e2: Exception) {
-                    Log.e(TAG, "Fallback also failed", e2)
-                }
-            }
-        }
-
-        // Record that this profile has been triggered today
         try {
             val currentList = settings.scheduleProfiles.toMutableList()
             val idx = currentList.indexOfFirst { it.id == profileId }
             if (idx != -1) {
                 currentList[idx] = profile.copy(lastTriggeredDayOfYear = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR))
-                SettingsDataStore(context).updateSettings(settings.copy(scheduleProfiles = currentList))
+                settingsDataStore.updateSettings(settings.copy(scheduleProfiles = currentList))
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update lastTriggeredDayOfYear", e)

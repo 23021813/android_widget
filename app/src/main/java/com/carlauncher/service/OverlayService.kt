@@ -101,24 +101,42 @@ class OverlayService : Service() {
         startForeground(NOTIFICATION_ID, createNotification())
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
-        // Auto split-view on first boot
+        // Auto split-view on first boot, gửi action nếu đang trong bất kỳ khoảng lịch nào khớp
         serviceScope.launch {
             val settings = settingsDataStore.settingsFlow.first()
             if (settings.autoSplitOnBoot && !bootSplitDone
                 && settings.frame1App != null && settings.frame2App != null) {
-                delay(5000L) // Wait for system to stabilize
+                delay(5000L)
                 bootSplitDone = true
+
+                Log.d(
+                    "OverlayService",
+                    "Boot schedules: " + settings.scheduleProfiles.joinToString { profile ->
+                        "name=${profile.name}, enabled=${profile.enabled}, days=${profile.days}, " +
+                            "start=${profile.startHour}:${profile.startMinute}, end=${profile.endHour}:${profile.endMinute}, " +
+                            "autoNav=${profile.autoNavigate}, nav='${profile.navAddress}', " +
+                            "autoMusic=${profile.autoMusic}, music='${profile.musicKeyword}'"
+                    }
+                )
+
+                val profileForFirstOpen = pickScheduleForFirstOpen(settings)
+
+                Log.d("OverlayService", "AutoSplitOnBoot: frame1=${settings.frame1App}, frame2=${settings.frame2App}, profile=$profileForFirstOpen")
+
                 val intent = Intent(this@OverlayService, SplitScreenProxyActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     putExtra("pkg1", settings.frame1App)
                     putExtra("pkg2", settings.frame2App)
+                    if (profileForFirstOpen != null) {
+                        if (profileForFirstOpen.autoNavigate && profileForFirstOpen.navAddress.isNotBlank()) {
+                            putExtra("nav_address", profileForFirstOpen.navAddress)
+                        }
+                        if (profileForFirstOpen.autoMusic && profileForFirstOpen.musicKeyword.isNotBlank()) {
+                            putExtra("music_keyword", profileForFirstOpen.musicKeyword)
+                        }
+                    }
                 }
                 startActivity(intent)
-                
-                delay(4000L) // Wait for split screen to finish
-                ScheduleManager.checkAndTriggerMissedSchedules(this@OverlayService, skipSplitScreen = true)
-            } else {
-                ScheduleManager.checkAndTriggerMissedSchedules(this@OverlayService, skipSplitScreen = false)
             }
         }
 
@@ -230,6 +248,32 @@ class OverlayService : Service() {
             }
             settingsDataStore.updateSettings(updated)
         }
+    }
+
+    // ═══════════════════════════════════════
+    // Schedule helper cho lần mở app đầu tiên
+    // ═══════════════════════════════════════
+
+    private fun pickScheduleForFirstOpen(settings: LauncherSettings): com.carlauncher.data.models.ScheduleProfile? {
+        val now = java.util.Calendar.getInstance()
+        val currentDay = now.get(java.util.Calendar.DAY_OF_WEEK)
+        val currentTotalMinutes = now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
+
+        val candidates = settings.scheduleProfiles.filter { profile ->
+            profile.enabled &&
+                currentDay in profile.days &&
+                currentTotalMinutes in (profile.startHour * 60 + profile.startMinute)..(profile.endHour * 60 + profile.endMinute)
+        }
+
+        if (candidates.isEmpty()) {
+            Log.d("OverlayService", "pickScheduleForFirstOpen: no matching schedule. day=$currentDay minutes=$currentTotalMinutes")
+            return null
+        }
+
+        // Nếu có nhiều lịch cùng khớp, ưu tiên lịch có giờ bắt đầu sớm hơn
+        val chosen = candidates.minByOrNull { it.startHour * 60 + it.startMinute }
+        Log.d("OverlayService", "pickScheduleForFirstOpen: candidates=${candidates.map { it.name }} chosen=${chosen?.name}")
+        return chosen
     }
 
     // ═══════════════════════════════════════
