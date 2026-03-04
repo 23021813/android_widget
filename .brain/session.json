@@ -1,61 +1,71 @@
 {
-  "updated_at": "2026-03-01T14:10:00+07:00",
+  "updated_at": "2026-03-04T20:38:00+07:00",
   "working_on": {
-    "feature": "1.3.5 Release Delivery",
-    "task": "Finalizing documentation and APK packaging",
+    "feature": "1.3.6 Release Delivery",
+    "task": "Knowledge Preservation and Context Update",
     "status": "completed",
     "files": [
+      "VoiceOverlayManager.kt",
       "OverlayService.kt",
+      "ScheduleReceiver.kt",
+      "ScheduleManager.kt",
       "SettingsScreen.kt",
       "version.json",
-      "README.md",
-      "CHANGELOG.md"
+      "app/build.gradle.kts"
     ],
     "blockers": [],
-    "notes": "Version 1.3.5 successfully packaged and documented with new 3-tier connectivity states and Home button mapping."
+    "notes": "Version 1.3.6 released. Fixed critical voice timeout, schedule boot race condition, and added Split-View actions."
   },
-  "pending_tasks": [],
+  "pending_tasks": [
+    {
+      "task": "Test voice commands on real hardware (due to emulator coreaudio host permission issues)",
+      "priority": "low"
+    }
+  ],
   "recent_changes": [
     {
-      "timestamp": "2026-03-01T14:05:00+07:00",
+      "timestamp": "2026-03-04T20:35:00+07:00",
       "type": "release",
-      "description": "Version 1.3.5: Added 3-tier connectivity states, Home button mapping, and fixed Wi-Fi/BT detection bugs.",
+      "description": "Version 1.3.6: Split-View action mapping, Voice Assistant reliability (Error 12 fallback), Fix Schedule Boot race condition.",
       "files": [
+        "VoiceOverlayManager.kt",
         "OverlayService.kt",
-        "SettingsScreen.kt",
-        "AppPicker.kt"
-      ]
-    },
-    {
-      "timestamp": "2026-03-01T13:40:00+07:00",
-      "type": "refactor",
-      "description": "Rollback Material 3 UI aesthetics to Legacy theme while keeping functional improvements.",
-      "files": [
-        "SettingsScreen.kt",
-        "OverlayService.kt"
+        "ScheduleReceiver.kt",
+        "ScheduleManager.kt",
+        "LauncherActivity.kt",
+        "version.json"
       ]
     }
   ],
   "errors_encountered": [
     {
-      "error": "Connectivity icons remain White (Disconnected) despite being connected on emulator",
-      "solution": "Refactor to use ConnectivityManager capabilities check and AudioManager fallback for A2DP presence.",
+      "error": "SpeechRecognizer Error 12 (Language Not Supported) on emulator",
+      "solution": "Implemented auto-fallback from On-Device recognition to Standard (Network) recognition in VoiceOverlayManager.",
       "resolved": true
     },
     {
-      "error": "Deprecation warnings for WifiInfo.connectionInfo and Icons.Rounded.Chat",
-      "solution": "Suppressed Wifi warning and migrated to Icons.AutoMirrored.Rounded.Chat with explicit import.",
+      "error": "kAudioHardwareIllegalOperationError on macOS host",
+      "solution": "Identified as macOS System Privacy setting - requires granting Mic permission to Terminal/Emulator.",
+      "resolved": true
+    },
+    {
+      "error": "Schedule automation intents overwritten by autoSplitOnBoot during startup",
+      "solution": "Introduced 4s delay and Intent flag to skip redundant split-screen execution during boot.",
       "resolved": true
     }
   ],
   "decisions_made": [
     {
-      "decision": "Use pseudo-app ACTION_HOME for Home button mapping",
-      "reason": "Avoids the need for Accessibility Service permissions, improving user on-boarding UX."
+      "decision": "Fallback to Network speech on Error 12",
+      "reason": "Ensures reliability in environments where offline language packs are not installed (like emulators)."
     },
     {
-      "decision": "3-tier color coding: Grey (Off), White (Disconnected), Cyan (Connected)",
-      "reason": "Clearer visual feedback for drive-focused environments."
+      "decision": "Add '+ Thêm Lịch trình mẫu' button",
+      "reason": "Simplifies manual testing of complex schedule/automation flows."
+    },
+    {
+      "decision": "Use SKIP_SPLIT_SCREEN flag in ScheduleReceiver",
+      "reason": "Cleanly resolves boot race conditions without complex service-state monitoring."
     }
   ]
 }

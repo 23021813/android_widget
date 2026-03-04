@@ -1,7 +1,7 @@
 {
-  "versionCode": 8,
-  "versionName": "1.3.5",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.5/CarFloat_1.3.5.apk",
-  "changelog": "- Thêm trạng thái kết nối 3 cấp độ (Xám/Trắng/Xanh) cho Wifi, Bluetooth, GPS.\n- Cho phép gán nút 'Trở về màn hình chính (Home)' vào nút Trợ lý (Assistant Button).\n- Khắc phục lỗi hiển thị trạng thái Wifi/BT trên máy ảo và môi trường thiếu quyền Location.\n- Fix các cảnh báo Deprecation trong code.",
+  "versionCode": 10,
+  "versionName": "1.3.6",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.6/CarFloat_1.3.6.apk",
+  "changelog": "- Tính năng CarFloat (Split View): Gán phím tắt mở chia đôi màn hình vào nút Assistant và chấm trắng.\n- Sửa lỗi Lịch trình tự động: Khắc phục xung đột khi khởi động lại thiết bị.\n- Cải thiện giọng nói: Tự động chuyển đổi On-device/Network và yêu cầu quyền Micro lúc khởi động.\n- Thêm nút Tạo kịch bản mẫu giúp test nhanh tính năng Lịch trình.",
   "forceUpdate": false
 }

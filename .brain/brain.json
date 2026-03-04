@@ -17,21 +17,26 @@
   },
   "features": [
     "Floating Widgets (Clock, Weather, Voice, Status)",
-    "Click-Through Gestures",
-    "Auto Split-Screen",
+    "Click-Through Gestures & Drag Handle Double-Tap",
+    "Auto Split-Screen & ACTION_SPLIT_VIEW Action",
     "Internationalization (8 languages)",
     "Non-intrusive OTA Update System via GitHub Releases",
     "3-Tier Connectivity States (Off/Disconnected/Connected)",
-    "System Home Button Mapping for Assistant Widget"
+    "System Home Button Mapping for Assistant Widget",
+    "Smart Voice Assistant with On-Device/Network Fallback",
+    "Automated Schedules with Boot Race Protection"
   ],
   "knowledge_items": {
     "gotchas": [
       "System Alert Window permission is required for overlays.",
       "OTA Downloads must use context.getExternalFilesDir to avoid Permission Denied on some head units.",
-      "BroadcastReceiver for DownloadManager MUST use applicationContext to prevent memory leaks during config changes.",
-      "FileProvider needs broader paths config for diverse Android Automotive OS versions.",
-      "Use ConnectivityManager.activeNetwork capabilities to detect 'Connected' Wifi state bypassing networkId reliability issues.",
-      "Use AudioManager.getDevices fallback for Bluetooth connection detection to bypass SecurityExceptions on unprivileged devices."
+      "BroadcastReceiver for DownloadManager MUST use applicationContext for leak prevention.",
+      "FileProvider needs broader paths config for diverse Android Automotive versions.",
+      "Use ConnectivityManager.activeNetwork bypasses networkId reliability issues.",
+      "Use AudioManager.getDevices fallback for Bluetooth bypasses SecurityExceptions.",
+      "Schedule auto-launch during boot needs a 4s delay and SKIP_SPLIT_SCREEN flag to avoid race condition with OverlayService.",
+      "On-device SpeechRecognizer (API 31+) returns Error 12 if language pack is missing; always implement network fallback.",
+      "macOS host terminal/emulator requires explicit Microphone permissions in System Settings for coreaudio to work."
     ]
   }
 }

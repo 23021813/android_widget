@@ -2,6 +2,19 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
+## [1.3.6] - 2026-03-04
+### Added
+- **CarFloat (Split View) Action**: Cho phép gán phím tắt mở nhanh 2 ứng dụng chia đôi màn hình vào nút Assistant (Tap/Double Tap/Long Press) và chấm trắng Drag Handle.
+- **Sample Schedule Button**: Thêm nút "+ Thêm Lịch trình mẫu" trong Settings để nhanh chóng tạo kịch bản thử nghiệm.
+
+### Fixed
+- **Schedule Boot Race Condition**: Khắc phục lỗi kịch bản tự động bị gián đoạn khi khởi động lại thiết bị (Race condition giữa OverlayService và ScheduleReceiver).
+- **Voice Assistant Improvements**: 
+    - Tự động nhận diện và yêu cầu quyền Micro (`RECORD_AUDIO`) khi khởi động app.
+    - Cơ chế **Fallback tự động**: Tự động chuyển từ On-Device sang Network recognition nếu gặp lỗi hỗ trợ ngôn ngữ (Error 12).
+    - Cải thiện logic kích hoạt: Nút Assistant luôn ưu tiên mở Voice Overlay tích hợp nếu chưa gán app cụ thể.
+    - Sửa lỗi build do thiếu import `Log` và `Build` trong `OverlayService`.
+
 ## [1.3.5] - 2026-03-01
 ### Added
 - **3-Tier Connectivity States**: Hiển thị trạng thái kết nối Wifi, Bluetooth, GPS theo 3 màu: Xám (Tắt), Trắng (Bật/Chưa kết nối), Xanh Cyan (Đã kết nối).

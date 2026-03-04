@@ -1,28 +1,33 @@
-# CarFloat (Formerly Car Launcher Overlay) - v1.3.5
+# CarFloat (Formerly Car Launcher Overlay) - v1.3.6
 
 CarFloat là một ứng dụng tiện ích chuyên dụng dành cho màn hình xe hơi (Android Automotive / Android Box) với giao diện **Glassmorphism** hiện đại. Ứng dụng cung cấp các Widget nổi (Floating Widgets) thông minh, cho phép điều khiển và truy cập nhanh mà không cần thoát ứng dụng đang chạy.
 
 ---
 
-## 🌟 Có gì mới trong bản v1.3.5?
+## 🌟 Có gì mới trong bản v1.3.6?
 
-Bản cập nhật v1.3.5 mang đến những cải tiến mạnh mẽ về khả năng nhận diện trạng thái và tùy biến nút bấm thông minh:
+Bản cập nhật v1.3.6 tập trung vào tính năng tự động hóa và nâng cao độ ổn định cho Voice Assistant:
 
-### 📡 3-Tier Connectivity States (Nhận diện kết nối 3 cấp độ)
+### 🎭 CarFloat (Split View) Action
+- **Gán nhanh Split View**: Cho phép mở 2 ứng dụng chia đôi màn hình chỉ bằng một cú chạm (Tap), nhấn giữ hoặc chạm đúp vào nút Assistant hoặc chấm trắng Drag Handle.
+- **Tùy biến linh hoạt**: Tích hợp trực tiếp vào hệ thống ảo của App Picker.
+
+### 🕒 Tự động hóa & Lịch trình (Schedule)
+- **Fix Boot Race Condition**: Khắc phục triệt để lỗi kịch bản tự động bị gián đoạn khi khởi động lại thiết bị (Race condition).
+- **Sample Schedule Button**: Nút bấm tiện lợi giúp tạo nhanh kịch bản test trong Settings.
+
+### 🎙️ Voice Assistant Thông Minh
+- **Cơ chế Fallback On-Device/Network**: Tự động chuyển đổi linh hoạt nếu máy ảo hoặc thiết bị chưa tải gói ngôn ngữ tiếng Việt (Error 12).
+- **Quyền Micro**: Chủ động yêu cầu quyền Micro (`RECORD_AUDIO`) ngay khi khởi động app để tránh lỗi timeout âm thầm.
+- **Logic ưu tiên**: Nút Assistant luôn ưu tiên mở Voice Overlay tích hợp nếu người dùng chưa gán ứng dụng cụ thể.
+
+---
+
+## 📡 3-Tier Connectivity States (Nhận diện kết nối 3 cấp độ) - v1.3.5
 - **Hệ thống màu thông minh**: 
     - **Màu Xám mờ**: Đang Tắt (Off).
     - **Màu Trắng**: Đang Bật nhưng chưa kết nối (Enabled, Disconnected).
     - **Màu Xanh Cyan**: Đã kết nối thành công (Connected).
-- **Độ chính xác cao**: Sử dụng `ConnectivityManager` và `AudioManager` fallback để nhận diện chính xác trạng thái Wifi/Bluetooth ngay cả trên Emulator hoặc thiết bị thiếu quyền Location.
-
-### 🏠 Phím Hệ Thống & Assistant Mapping
-- **Gán phím Home**: Cho phép gán chức năng **Trở về màn hình chính (Home)** vào nút Assistant (hành động Chạm, Nhấn giữ, hoặc Chạm đúp). 
-- **Không yêu cầu Trợ năng**: Tối ưu hóa lệnh để không cần quyền Accessibility Service phức tạp.
-- **Icon Pack**: Sửa lỗi hiển thị và cập nhật phím Chat theo chuẩn Material 3 mới nhất.
-
-### 🎮 Thao Tác & Gestures (v1.3.4)
-- **Chế Độ Click-Through (Chạm Xuyên Thấu)**: Widget đồng hồ có thể trở nên tàng hình với cảm ứng, cho phép bạn thao tác với các ứng dụng bên dưới nó. 
-- **Nút Voice Đa Năng**: Hỗ trợ 3 loại hành động (Tap, Long Press, Double Tap) riêng biệt.
 
 ### 🛠 Tính Năng Hệ Thống
 - **Ghi Nhớ Vị Trí**: Tự động lưu và khôi phục vị trí widget.
