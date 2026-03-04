@@ -31,9 +31,6 @@ import com.carlauncher.ui.components.AppPickerDialog
 import com.carlauncher.ui.theme.*
 import com.carlauncher.update.UpdateInfo
 import androidx.compose.ui.text.font.FontWeight
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import android.Manifest
 import androidx.compose.ui.window.Dialog
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,28 +60,12 @@ fun SettingsScreen(
     )
 
     val context = androidx.compose.ui.platform.LocalContext.current
-    
-    val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (!isGranted) {
-                android.widget.Toast.makeText(context, context.getString(R.string.perm_mic_short), android.widget.Toast.LENGTH_SHORT).show()
-            }
-        }
-    )
 
     val homeApp = remember {
         AppInfo(
             packageName = VirtualActions.ACTION_HOME,
             label = context.getString(R.string.action_home_label),
             icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_crop)
-        )
-    }
-    val voiceCommandApp = remember {
-        AppInfo(
-            packageName = VirtualActions.ACTION_VOICE_COMMAND,
-            label = context.getString(R.string.action_voice_command_label),
-            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_btn_speak_now)
         )
     }
     val splitViewApp = remember {
@@ -94,7 +75,7 @@ fun SettingsScreen(
             icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_sort_by_size)
         )
     }
-    val assistantApps = remember(installedApps) { listOf(homeApp, voiceCommandApp, splitViewApp) + installedApps }
+    val assistantApps = remember(installedApps) { listOf(homeApp, splitViewApp) + installedApps }
 
     Scaffold(
         topBar = {
@@ -402,13 +383,6 @@ fun SettingsScreen(
                         stringResource(R.string.help_icons_tap)
                     ))
                     Spacer(modifier = Modifier.height(12.dp))
-                    HelpRow(emoji = "🎙️", title = stringResource(R.string.help_voice_title), lines = listOf(
-                        stringResource(R.string.help_voice_tap),
-                        stringResource(R.string.help_voice_long),
-                        stringResource(R.string.help_voice_double),
-                        stringResource(R.string.help_voice_drag)
-                    ))
-                    Spacer(modifier = Modifier.height(12.dp))
                     HelpRow(emoji = "👻", title = stringResource(R.string.help_clickthrough_title), lines = listOf(
                         stringResource(R.string.help_clickthrough_desc),
                         stringResource(R.string.help_drag_handle_double_tap)
@@ -422,7 +396,7 @@ fun SettingsScreen(
                     Column {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.version), color = TextSecondary, style = MaterialTheme.typography.bodyLarge)
-                            Text("1.3.4", color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                            Text(com.carlauncher.BuildConfig.VERSION_NAME, color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
                         }
                         
                         if (updateInfo != null) {
@@ -477,12 +451,6 @@ fun SettingsScreen(
                 else -> stringResource(R.string.choose_app)
             },
             onAppSelected = { app ->
-                if (app.packageName == VirtualActions.ACTION_VOICE_COMMAND) {
-                    val hasPerm = androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
-                    if (!hasPerm) {
-                        recordAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                    }
-                }
                 when (appPickerTarget) {
                     "frame1" -> onSettingsUpdate(settings.copy(frame1App = app.packageName))
                     "frame2" -> onSettingsUpdate(settings.copy(frame2App = app.packageName))

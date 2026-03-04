@@ -54,11 +54,6 @@
     <string name="lang_auto">Theo hệ thống</string>
     <string name="lang_en">English</string>
     <string name="lang_vi">Tiếng Việt</string>
-    <string name="lang_zh">中文</string>
-    <string name="lang_ja">日本語</string>
-    <string name="lang_ko">한국어</string>
-    <string name="lang_fr">Français</string>
-    <string name="lang_de">Deutsch</string>
 
     <!-- About -->
     <string name="section_about">ℹ️ Thông tin</string>
@@ -112,11 +107,6 @@
     <string name="help_weather_tap">Chạm → Vào Cài đặt</string>
     <string name="help_icons_title">Icons WiFi / BT / GPS</string>
     <string name="help_icons_tap">Chạm → Mở cài đặt hệ thống tương ứng</string>
-    <string name="help_voice_title">Nút Trợ lý</string>
-    <string name="help_voice_tap">Chạm → Mở app đã gán</string>
-    <string name="help_voice_long">Giữ lâu → Mở app thứ 2</string>
-    <string name="help_voice_double">Bấm đúp → Mở app thứ 3</string>
-    <string name="help_voice_drag">Kéo thả → Di chuyển nút</string>
     <string name="help_clickthrough_title">Chế độ xuyên qua</string>
     <string name="help_clickthrough_desc">Khi bật, thao tác chạm truyền xuyên widget. Giữ lâu chấm nhỏ ở góc để kéo.</string>
 
@@ -125,7 +115,6 @@
 
     <!-- Virtual Actions -->
     <string name="action_home_label">Trở về màn hình chính</string>
-    <string name="action_voice_command_label">🎙️ Ra lệnh giọng nói</string>
     <string name="action_split_view_label">🚗 CarFloat (Chia màn hình)</string>
     <string name="help_drag_handle_double_tap">Chạm đúp nút chấm trắng: Kích hoạt chia đôi màn hình</string>
 
@@ -162,33 +151,8 @@
     <string name="day_sat">T7</string>
     <string name="day_sun">CN</string>
 
-    <!-- Voice Command -->
-    <string name="voice_listening">Đang nghe…</string>
-    <string name="voice_processing">Đang xử lý…</string>
-    <string name="voice_error_no_match">Không nhận diện được</string>
-    <string name="voice_error_timeout">Hết thời gian chờ</string>
-    <string name="voice_nav_result">Dẫn đường đến: %1$s</string>
-    <string name="voice_music_result">Tìm nhạc: %1$s</string>
-    <string name="voice_video_result">Mở video: %1$s</string>
-    <string name="voice_unknown">Không hiểu lệnh</string>
     <string name="new_version">Phiên bản mới</string>
     <string name="update_now">Cập nhật ngay</string>
     <string name="update_later">Để sau</string>
-    <string name="perm_mic_short">Cần quyền Microphone để sử dụng Voice Command</string>
-    <string name="perm_mic_settings">Voice Command cần quyền Microphone. Vui lòng cấp quyền trong Cài đặt.</string>
-    <string name="voice_speech_not_available">Nhận dạng giọng nói không khả dụng</string>
-    <string name="voice_error_audio">Lỗi âm thanh</string>
-    <string name="voice_error_network">Lỗi mạng</string>
-    <string name="voice_error_network_timeout">Mạng quá chậm</string>
-    <string name="voice_error_client">Lỗi client</string>
-    <string name="voice_error_permissions">Thiếu quyền ghi âm</string>
-    <string name="voice_error_generic">Lỗi (%1$d)</string>
-    <string name="voice_error_init_failed">Không thể khởi tạo nhận dạng giọng nói</string>
-    <string name="voice_unknown_param">Không hiểu lệnh: %1$s</string>
-    <string name="voice_cmd_received">Đã nhận lệnh</string>
-    <string name="voice_cmd_unrecognized">Không hiểu lệnh</string>
-    <string name="voice_cmd_err_maps">Không thể mở Google Maps</string>
-    <string name="voice_cmd_err_music">Không thể mở YouTube Music</string>
-    <string name="voice_cmd_err_youtube">Không thể mở YouTube</string>
 </resources>
 

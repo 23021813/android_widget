@@ -30,9 +30,6 @@ import com.carlauncher.data.models.AppInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import androidx.core.app.ActivityCompat
-import android.content.pm.PackageManager
-import android.Manifest
 
 class LauncherActivity : ComponentActivity() {
 
@@ -74,11 +71,6 @@ class LauncherActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 installedApps = appRepository.getInstalledApps()
-                
-                // Request Mic permission for voice commands
-                if (ActivityCompat.checkSelfPermission(this@LauncherActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this@LauncherActivity, arrayOf(Manifest.permission.RECORD_AUDIO), 1002)
-                }
 
                 val info = OtaUpdateManager.checkForUpdate(this@LauncherActivity)
                 if (info != null) {

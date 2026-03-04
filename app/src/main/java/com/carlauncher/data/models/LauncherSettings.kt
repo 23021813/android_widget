@@ -19,12 +19,7 @@ enum class TemperatureUnit(val label: String) {
 enum class AppLanguage(val locale: String, val displayName: String) {
     SYSTEM("", "System Default"),
     ENGLISH("en", "English"),
-    VIETNAMESE("vi", "Tiếng Việt"),
-    CHINESE("zh", "中文"),
-    JAPANESE("ja", "日本語"),
-    KOREAN("ko", "한국어"),
-    FRENCH("fr", "Français"),
-    GERMAN("de", "Deutsch")
+    VIETNAMESE("vi", "Tiếng Việt")
 }
 
 enum class AssistantIcon(val displayName: String) {
@@ -43,7 +38,6 @@ enum class AssistantIcon(val displayName: String) {
 /** Special package names for virtual actions (used in App Picker) */
 object VirtualActions {
     const val ACTION_HOME = "com.carlauncher.ACTION_HOME"
-    const val ACTION_VOICE_COMMAND = "com.carlauncher.ACTION_VOICE_COMMAND"
     const val ACTION_SPLIT_VIEW = "com.carlauncher.ACTION_SPLIT_VIEW"
 }
 
@@ -107,7 +101,7 @@ data class LauncherSettings(
     // Language
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
 
-    // Voice button
+    // Assistant button
     val assistantIcon: AssistantIcon = AssistantIcon.MIC,
     val assistantLongPressApp: String? = null,
     val assistantDoubleTapApp: String? = null,

@@ -13,9 +13,13 @@ object LocaleHelper {
      * when the language setting changes (triggers Activity.recreate()).
      */
     fun applyLocale(context: Context, localeCode: String): Context {
-        if (localeCode.isEmpty()) return context // "SYSTEM" – do nothing, use default
+        val effectiveCode = if (localeCode.isEmpty()) {
+            if (Locale.getDefault().language == "vi") "vi" else "en"
+        } else {
+            localeCode
+        }
 
-        val locale = Locale(localeCode)
+        val locale = Locale(effectiveCode)
         Locale.setDefault(locale)
 
         val config = Configuration(context.resources.configuration)

@@ -49,7 +49,7 @@ class SettingsDataStore(private val context: Context) {
         val WEATHER_API_KEY = stringPreferencesKey("weather_api_key")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
 
-        // Voice button
+        // Assistant button
         val ASSISTANT_ICON = stringPreferencesKey("assistant_icon")
         val ASSISTANT_LONG_PRESS_APP = stringPreferencesKey("assistant_long_press_app")
         val ASSISTANT_DOUBLE_TAP_APP = stringPreferencesKey("assistant_double_tap_app")

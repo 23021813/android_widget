@@ -52,7 +52,6 @@ import com.carlauncher.data.models.LauncherSettings
 import com.carlauncher.data.models.VirtualActions
 import com.carlauncher.data.models.WeatherInfo
 import com.carlauncher.data.WeatherRepository
-import com.carlauncher.service.voice.VoiceOverlayManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -90,8 +89,6 @@ class OverlayService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var settingsDataStore: SettingsDataStore
     private val weatherRepository = WeatherRepository()
-    private lateinit var voiceOverlayManager: VoiceOverlayManager
-
     // Position save debounce
     private var positionSaveJob: Job? = null
 
@@ -100,7 +97,6 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         settingsDataStore = SettingsDataStore(this)
-        voiceOverlayManager = VoiceOverlayManager(this)
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification())
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -587,11 +583,6 @@ class OverlayService : Service() {
                     }
                     startActivity(intent)
                 }
-                VirtualActions.ACTION_VOICE_COMMAND -> {
-                    if (!voiceOverlayManager.isShowing) {
-                        voiceOverlayManager.show()
-                    }
-                }
                 VirtualActions.ACTION_SPLIT_VIEW -> {
                     serviceScope.launch {
                         val settings = settingsDataStore.settingsFlow.first()
@@ -608,10 +599,7 @@ class OverlayService : Service() {
                     }
                 }
                 null -> {
-                    // Default to internal voice command if no app assigned
-                    if (!voiceOverlayManager.isShowing) {
-                        voiceOverlayManager.show()
-                    }
+                    // No app assigned — do nothing
                 }
                 else -> {
                     SplitScreenLauncher.launchApp(this@OverlayService, actionPackage)
@@ -667,7 +655,6 @@ class OverlayService : Service() {
     override fun onDestroy() {
         removeStatusOverlay()
         removeAssistantOverlay()
-        voiceOverlayManager.dismiss()
         serviceScope.cancel()
         super.onDestroy()
     }

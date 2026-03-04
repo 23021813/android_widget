@@ -54,11 +54,6 @@
     <string name="lang_auto">System Default</string>
     <string name="lang_en">English</string>
     <string name="lang_vi">Tiếng Việt</string>
-    <string name="lang_zh">中文</string>
-    <string name="lang_ja">日本語</string>
-    <string name="lang_ko">한국어</string>
-    <string name="lang_fr">Français</string>
-    <string name="lang_de">Deutsch</string>
 
     <!-- About -->
     <string name="section_about">ℹ️ About</string>
@@ -118,17 +113,11 @@
     <string name="help_weather_tap">Tap → Open CarFloat Settings</string>
     <string name="help_icons_title">WiFi / BT / GPS Icons</string>
     <string name="help_icons_tap">Tap → Open corresponding System Settings</string>
-    <string name="help_voice_title">Voice / Assistant Button</string>
-    <string name="help_voice_tap">Tap → Open assigned app</string>
-    <string name="help_voice_long">Long Press → Open 2nd app</string>
-    <string name="help_voice_double">Double Tap → Open 3rd app</string>
-    <string name="help_voice_drag">Drag → Move button</string>
     <string name="help_clickthrough_title">Click-Through Mode</string>
     <string name="help_clickthrough_desc">When enabled, touches pass through the widget. Long press the small dot at the corner to drag.</string>
 
     <!-- Virtual Actions (App Picker) -->
     <string name="action_home_label">Go to Home Screen</string>
-    <string name="action_voice_command_label">🎙️ Voice Command</string>
     <string name="action_split_view_label">🚗 CarFloat (Split View)</string>
     <string name="help_drag_handle_double_tap">Double tap the white dot: Activate split view</string>
 
@@ -165,36 +154,10 @@
     <string name="day_sat">Sat</string>
     <string name="day_sun">Sun</string>
 
-    <!-- Voice Command -->
-    <string name="voice_listening">Listening…</string>
-    <string name="voice_processing">Processing…</string>
-    <string name="voice_error_no_match">Could not understand</string>
-    <string name="voice_error_timeout">Timed out</string>
-    <string name="voice_nav_result">Navigating to: %1$s</string>
-    <string name="voice_music_result">Searching music: %1$s</string>
-    <string name="voice_video_result">Opening video: %1$s</string>
-    <string name="voice_unknown">Unknown command</string>
-
     <!-- OTA Update -->
     <string name="update_available">Update Available</string>
     <string name="update_available_badge">New version %1$s is available!</string>
     <string name="new_version">New version</string>
     <string name="update_now">Update Now</string>
     <string name="update_later">Later</string>
-    <string name="perm_mic_short">Microphone permission is required to use Voice Command</string>
-    <string name="perm_mic_settings">Voice Command requires Microphone permission. Please grant it in Settings.</string>
-    <string name="voice_speech_not_available">Speech recognition not available</string>
-    <string name="voice_error_audio">Audio error</string>
-    <string name="voice_error_network">Network error</string>
-    <string name="voice_error_network_timeout">Network timeout</string>
-    <string name="voice_error_client">Client error</string>
-    <string name="voice_error_permissions">Missing audio recording permission</string>
-    <string name="voice_error_generic">Error (%1$d)</string>
-    <string name="voice_error_init_failed">Could not initialize speech recognition</string>
-    <string name="voice_unknown_param">Unknown command: %1$s</string>
-    <string name="voice_cmd_received">Command received</string>
-    <string name="voice_cmd_unrecognized">Unrecognized command</string>
-    <string name="voice_cmd_err_maps">Could not open Google Maps</string>
-    <string name="voice_cmd_err_music">Could not open YouTube Music</string>
-    <string name="voice_cmd_err_youtube">Could not open YouTube</string>
 </resources>
