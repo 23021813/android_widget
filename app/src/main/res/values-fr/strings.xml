@@ -95,10 +95,15 @@
     <!-- Virtual Actions -->
     <string name="action_home_label">Retour à l\'écran d\'accueil</string>
     <string name="action_voice_command_label">🎙️ Commande vocale</string>
+    <string name="action_split_view_label">🚗 CarFloat (Écran partagé)</string>
+    <string name="help_drag_handle_double_tap">Double appui sur le point blanc : Activer l\'écran partagé</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 Automatisation programmée</string>
     <string name="schedule_enabled">Activer l\'automatisation programmée</string>
+    <string name="schedule_add_new">Ajouter un nouveau planning</string>
+    <string name="schedule_add_sample">+ Ajouter un exemple d\'horaire (Test)</string>
+    <string name="schedule_no_days_selected">Aucun jour sélectionné</string>
     <string name="schedule_days_label">Jours de la semaine</string>
     <string name="schedule_time_label">Heure de déclenchement</string>
     <string name="schedule_auto_navigate">Navigation Google Maps auto</string>

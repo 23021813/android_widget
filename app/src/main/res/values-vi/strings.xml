@@ -126,6 +126,8 @@
     <!-- Virtual Actions -->
     <string name="action_home_label">Trở về màn hình chính</string>
     <string name="action_voice_command_label">🎙️ Ra lệnh giọng nói</string>
+    <string name="action_split_view_label">🚗 CarFloat (Chia màn hình)</string>
+    <string name="help_drag_handle_double_tap">Chạm đúp nút chấm trắng: Kích hoạt chia đôi màn hình</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 Lịch trình tự động</string>
@@ -141,6 +143,7 @@
     <!-- Dynamic Schedule Profiles -->
     <string name="schedule_no_profiles">Chưa có lịch trình nào. Hãy thêm mới.</string>
     <string name="schedule_add_new">Thêm Lịch trình mới</string>
+    <string name="schedule_add_sample">+ Thêm Lịch trình mẫu (Test)</string>
     <string name="schedule_no_days_selected">Chưa chọn ngày thi hành</string>
     <string name="schedule_default_name">Lịch trình %1$s</string>
     <string name="schedule_to_destination">Đến: %1$s</string>

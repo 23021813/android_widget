@@ -36,10 +36,12 @@ class ScheduleReceiver : BroadcastReceiver() {
             return
         }
 
+        val skipSplitScreen = intent?.getBooleanExtra("SKIP_SPLIT_SCREEN", false) ?: false
+
         val pendingResult = goAsync() // keep receiver alive for coroutine work
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                executeSchedule(context, profileId)
+                executeSchedule(context, profileId, skipSplitScreen)
             } catch (e: Exception) {
                 Log.e(TAG, "Error executing schedule", e)
             } finally {
@@ -50,7 +52,7 @@ class ScheduleReceiver : BroadcastReceiver() {
         }
     }
 
-    private suspend fun executeSchedule(context: Context, profileId: String) {
+    private suspend fun executeSchedule(context: Context, profileId: String, skipSplitScreen: Boolean) {
         val settings = SettingsDataStore(context).settingsFlow.first()
         val profile = settings.scheduleProfiles.find { it.id == profileId }
 
@@ -72,17 +74,22 @@ class ScheduleReceiver : BroadcastReceiver() {
         }
 
         // Step 1: Split-screen
-        val frame1 = settings.frame1App
-        val frame2 = settings.frame2App
-        if (frame1 != null && frame2 != null) {
-            Log.d(TAG, "Launching split-screen: $frame1 | $frame2")
-            val splitIntent = Intent(context, SplitScreenProxyActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                putExtra("pkg1", frame1)
-                putExtra("pkg2", frame2)
+        if (!skipSplitScreen) {
+            val frame1 = settings.frame1App
+            val frame2 = settings.frame2App
+            if (frame1 != null && frame2 != null) {
+                Log.d(TAG, "Launching split-screen: $frame1 | $frame2")
+                val splitIntent = Intent(context, SplitScreenProxyActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra("pkg1", frame1)
+                    putExtra("pkg2", frame2)
+                }
+                context.startActivity(splitIntent)
+                delay(4000L) // Wait for split-screen to settle
             }
-            context.startActivity(splitIntent)
-            delay(4000L) // Wait for split-screen to settle
+        } else {
+            Log.d(TAG, "Skipping split-screen execution because system already did auto-split")
+            delay(1000L)
         }
 
         // Step 2: Google Maps navigation (optional)

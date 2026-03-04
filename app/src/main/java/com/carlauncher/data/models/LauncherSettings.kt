@@ -44,6 +44,7 @@ enum class AssistantIcon(val displayName: String) {
 object VirtualActions {
     const val ACTION_HOME = "com.carlauncher.ACTION_HOME"
     const val ACTION_VOICE_COMMAND = "com.carlauncher.ACTION_VOICE_COMMAND"
+    const val ACTION_SPLIT_VIEW = "com.carlauncher.ACTION_SPLIT_VIEW"
 }
 
 data class ScheduleProfile(

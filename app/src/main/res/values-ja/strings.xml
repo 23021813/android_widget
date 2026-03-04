@@ -94,9 +94,14 @@
     <!-- Virtual Actions -->
     <string name="action_home_label">ホーム画面に戻る</string>
     <string name="action_voice_command_label">🎙️ 音声コマンド</string>
+    <string name="action_split_view_label">🚗 CarFloat (分割表示)</string>
+    <string name="help_drag_handle_double_tap">白い点をダブルタップ：分割表示を起動</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 スケジュール自動化</string>
+    <string name="schedule_add_new">新しいスケジュールを追加</string>
+    <string name="schedule_add_sample">+ サンプルスケジュールを追加 (テスト)</string>
+    <string name="schedule_no_days_selected">曜日が選択されていません</string>
     <string name="schedule_enabled">スケジュール自動化を有効にする</string>
     <string name="schedule_days_label">曜日</string>
     <string name="schedule_time_label">実行時刻</string>

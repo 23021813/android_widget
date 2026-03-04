@@ -3,6 +3,7 @@ package com.carlauncher.service.voice
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -55,6 +56,7 @@ class VoiceOverlayManager(private val context: Context) {
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
     private var speechRecognizer: SpeechRecognizer? = null
+    private var isUsingOnDevice = false
     private var timeoutJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -144,18 +146,33 @@ class VoiceOverlayManager(private val context: Context) {
         _isListening.value = false
     }
 
-    private fun startListening() {
+    private fun startListening(forceStandard: Boolean = false) {
+        Log.d(TAG, "startListening() called")
         try {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+            // Use on-device recognizer for API 31+ if available
+            if (forceStandard) {
+                Log.d(TAG, "Forcing Standard Speech Recognizer")
+                isUsingOnDevice = false
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(context)) {
+                Log.d(TAG, "Using On-Device Speech Recognizer")
+                isUsingOnDevice = true
+                speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
+            } else {
+                Log.d(TAG, "Using Standard Speech Recognizer")
+                isUsingOnDevice = false
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+            }
+            
             speechRecognizer?.setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
-                    Log.d(TAG, "Ready for speech")
+                    Log.d(TAG, "Ready for speech (onReadyForSpeech)")
                     _statusText.value = "🎙️ " + context.getString(R.string.voice_listening)
                     _isListening.value = true
                 }
 
                 override fun onBeginningOfSpeech() {
-                    Log.d(TAG, "Speech started")
+                    Log.d(TAG, "Speech started (onBeginningOfSpeech)")
                     _statusText.value = "🎙️ " + context.getString(R.string.voice_listening)
                 }
 
@@ -172,6 +189,17 @@ class VoiceOverlayManager(private val context: Context) {
                 }
 
                 override fun onError(error: Int) {
+                    // Fallback logic for Error 12 (Language Not Supported in On-Device mode)
+                    if (isUsingOnDevice && error == 12) {
+                        Log.w(TAG, "On-device recognition doesn't support language, falling back to standard...")
+                        scope.launch {
+                            stopListening()
+                            delay(300L)
+                            startListening(forceStandard = true)
+                        }
+                        return
+                    }
+
                     val errorMsg = when (error) {
                         SpeechRecognizer.ERROR_NO_MATCH -> context.getString(R.string.voice_error_no_match)
                         SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> context.getString(R.string.voice_error_timeout)
@@ -180,9 +208,10 @@ class VoiceOverlayManager(private val context: Context) {
                         SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> context.getString(R.string.voice_error_network_timeout)
                         SpeechRecognizer.ERROR_CLIENT -> context.getString(R.string.voice_error_client)
                         SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> context.getString(R.string.voice_error_permissions)
+                        12 -> "Ngôn ngữ không hỗ trợ (Cần tải offline pack)"
                         else -> context.getString(R.string.voice_error_generic, error)
                     }
-                    Log.e(TAG, "Speech error: $errorMsg ($error)")
+                    Log.e(TAG, "Speech recognition error: $error ($errorMsg)")
                     _statusText.value = "❌ $errorMsg"
                     _isListening.value = false
 
@@ -196,7 +225,7 @@ class VoiceOverlayManager(private val context: Context) {
                 override fun onResults(results: Bundle?) {
                     val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     val text = matches?.firstOrNull() ?: ""
-                    Log.d(TAG, "Final result: $text")
+                    Log.d(TAG, "Recognition results: $text")
 
                     _finalText.value = text
                     _partialText.value = ""
@@ -216,6 +245,7 @@ class VoiceOverlayManager(private val context: Context) {
                     val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     val text = matches?.firstOrNull() ?: ""
                     if (text.isNotBlank()) {
+                        Log.d(TAG, "Recognition partial: $text")
                         _partialText.value = text
                     }
                 }
@@ -225,16 +255,19 @@ class VoiceOverlayManager(private val context: Context) {
 
             val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN") // Primary: Vietnamese
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN")
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "vi-VN")
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 3000L)
+                // Add stabilization extras
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 2000L)
             }
 
+            Log.d(TAG, "SpeechRecognizer.startListening() called")
             speechRecognizer?.startListening(recognizerIntent)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to start speech recognizer", e)
+            Log.e(TAG, "Failed to initialize SpeechRecognizer", e)
             _statusText.value = "❌ " + context.getString(R.string.voice_error_init_failed)
             scope.launch {
                 delay(2000L)

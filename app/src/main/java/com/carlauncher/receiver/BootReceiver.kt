@@ -52,7 +52,6 @@ class BootReceiver : BroadcastReceiver() {
             try {
                 Log.d(TAG, "Re-registering schedule alarms after boot")
                 ScheduleManager.syncAlarms(context)
-                ScheduleManager.checkAndTriggerMissedSchedules(context)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to re-register schedule alarms", e)
             }

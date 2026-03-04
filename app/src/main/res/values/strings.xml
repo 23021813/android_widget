@@ -129,6 +129,8 @@
     <!-- Virtual Actions (App Picker) -->
     <string name="action_home_label">Go to Home Screen</string>
     <string name="action_voice_command_label">🎙️ Voice Command</string>
+    <string name="action_split_view_label">🚗 CarFloat (Split View)</string>
+    <string name="help_drag_handle_double_tap">Double tap the white dot: Activate split view</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 Schedule Automation</string>
@@ -144,6 +146,7 @@
     <!-- Dynamic Schedule Profiles -->
     <string name="schedule_no_profiles">No schedules yet. Add a new one.</string>
     <string name="schedule_add_new">Add New Schedule</string>
+    <string name="schedule_add_sample">+ Add Sample Schedule (Test)</string>
     <string name="schedule_no_days_selected">No days selected</string>
     <string name="schedule_default_name">Schedule %1$s</string>
     <string name="schedule_to_destination">To: %1$s</string>

@@ -95,9 +95,14 @@
     <!-- Virtual Actions -->
     <string name="action_home_label">홈 화면으로 돌아가기</string>
     <string name="action_voice_command_label">🎙️ 음성 명령</string>
+    <string name="action_split_view_label">🚗 CarFloat (화면 분할)</string>
+    <string name="help_drag_handle_double_tap">흰색 점 더블 탭: 화면 분할 활성화</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 일정 자동화</string>
+    <string name="schedule_add_new">새 일정 추가</string>
+    <string name="schedule_add_sample">+ 샘플 일정 추가 (테스트)</string>
+    <string name="schedule_no_days_selected">요일이 선택되지 않았습니다</string>
     <string name="schedule_enabled">일정 자동화 활성화</string>
     <string name="schedule_days_label">요일</string>
     <string name="schedule_time_label">실행 시간</string>

@@ -95,10 +95,15 @@
     <!-- Virtual Actions -->
     <string name="action_home_label">Zum Startbildschirm</string>
     <string name="action_voice_command_label">🎙️ Sprachbefehl</string>
+    <string name="action_split_view_label">🚗 CarFloat (Geteilter Bildschirm)</string>
+    <string name="help_drag_handle_double_tap">Doppeltipp auf den weißen Punkt: Geteilten Bildschirm aktivieren</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 Zeitplan-Automatisierung</string>
     <string name="schedule_enabled">Zeitplan-Automatisierung aktivieren</string>
+    <string name="schedule_add_new">Neuen Zeitplan hinzufügen</string>
+    <string name="schedule_add_sample">+ Beispielplan hinzufügen (Test)</string>
+    <string name="schedule_no_days_selected">Keine Tage ausgewählt</string>
     <string name="schedule_days_label">Wochentage</string>
     <string name="schedule_time_label">Auslösezeit</string>
     <string name="schedule_auto_navigate">Auto Google Maps Navigation</string>

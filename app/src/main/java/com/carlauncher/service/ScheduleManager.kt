@@ -152,7 +152,7 @@ object ScheduleManager {
      * Checks if the current time falls within any active schedule's start and end range.
      * If so, and it hasn't triggered today, it triggers the schedule manually.
      */
-    fun checkAndTriggerMissedSchedules(context: Context) {
+    fun checkAndTriggerMissedSchedules(context: Context, skipSplitScreen: Boolean = false) {
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
             try {
                 val settings = SettingsDataStore(context).settingsFlow.first()
@@ -175,6 +175,7 @@ object ScheduleManager {
                         val intent = Intent(context, ScheduleReceiver::class.java).apply {
                             data = android.net.Uri.parse("carlauncher://schedule/${profile.id}")
                             putExtra("PROFILE_ID", profile.id)
+                            putExtra("SKIP_SPLIT_SCREEN", skipSplitScreen)
                         }
                         context.sendBroadcast(intent)
                     }

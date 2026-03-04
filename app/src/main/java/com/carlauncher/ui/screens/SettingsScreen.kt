@@ -87,7 +87,14 @@ fun SettingsScreen(
             icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_btn_speak_now)
         )
     }
-    val assistantApps = remember(installedApps) { listOf(homeApp, voiceCommandApp) + installedApps }
+    val splitViewApp = remember {
+        AppInfo(
+            packageName = VirtualActions.ACTION_SPLIT_VIEW,
+            label = context.getString(R.string.action_split_view_label),
+            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_sort_by_size)
+        )
+    }
+    val assistantApps = remember(installedApps) { listOf(homeApp, voiceCommandApp, splitViewApp) + installedApps }
 
     Scaffold(
         topBar = {
@@ -246,6 +253,39 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.schedule_add_new))
                     }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            val now = java.util.Calendar.getInstance()
+                            val startTotal = now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE) + 2
+                            val endTotal = startTotal + 60
+                            
+                            val sample = ScheduleProfile(
+                                name = "Test Schedule",
+                                startHour = (startTotal / 60) % 24,
+                                startMinute = startTotal % 60,
+                                endHour = (endTotal / 60) % 24,
+                                endMinute = endTotal % 60,
+                                days = setOf(1, 2, 3, 4, 5, 6, 7), // All days
+                                autoNavigate = true,
+                                navAddress = "Hanoi",
+                                autoMusic = true,
+                                musicKeyword = "Nhạc trẻ"
+                            )
+                            val currentList = settings.scheduleProfiles.toMutableList()
+                            currentList.add(sample)
+                            onSettingsUpdate(settings.copy(scheduleProfiles = currentList))
+                            ScheduleManager.syncAlarms(context)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.schedule_add_sample))
+                    }
                 }
             }
 
@@ -370,7 +410,8 @@ fun SettingsScreen(
                     ))
                     Spacer(modifier = Modifier.height(12.dp))
                     HelpRow(emoji = "👻", title = stringResource(R.string.help_clickthrough_title), lines = listOf(
-                        stringResource(R.string.help_clickthrough_desc)
+                        stringResource(R.string.help_clickthrough_desc),
+                        stringResource(R.string.help_drag_handle_double_tap)
                     ))
                 }
             }

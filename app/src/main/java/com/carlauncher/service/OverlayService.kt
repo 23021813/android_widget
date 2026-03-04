@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -117,6 +118,11 @@ class OverlayService : Service() {
                     putExtra("pkg2", settings.frame2App)
                 }
                 startActivity(intent)
+                
+                delay(4000L) // Wait for split screen to finish
+                ScheduleManager.checkAndTriggerMissedSchedules(this@OverlayService, skipSplitScreen = true)
+            } else {
+                ScheduleManager.checkAndTriggerMissedSchedules(this@OverlayService, skipSplitScreen = false)
             }
         }
 
@@ -436,6 +442,25 @@ class OverlayService : Service() {
                     modifier = Modifier
                         .size(48.dp)
                         .pointerInput(Unit) {
+                            detectTapGestures(
+                                onDoubleTap = {
+                                    serviceScope.launch {
+                                        val settings = settingsDataStore.settingsFlow.first()
+                                        val f1 = settings.frame1App
+                                        val f2 = settings.frame2App
+                                        if (f1 != null && f2 != null) {
+                                            val intent = Intent(this@OverlayService, SplitScreenProxyActivity::class.java).apply {
+                                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                                putExtra("pkg1", f1)
+                                                putExtra("pkg2", f2)
+                                            }
+                                            startActivity(intent)
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        .pointerInput(Unit) {
                             detectDragGesturesAfterLongPress(
                                 onDrag = { change: androidx.compose.ui.input.pointer.PointerInputChange, dragAmount: androidx.compose.ui.geometry.Offset ->
                                     change.consume()
@@ -567,12 +592,26 @@ class OverlayService : Service() {
                         voiceOverlayManager.show()
                     }
                 }
-                null -> {
-                    // Default: launch system voice command
-                    val intent = Intent(Intent.ACTION_VOICE_COMMAND).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                VirtualActions.ACTION_SPLIT_VIEW -> {
+                    serviceScope.launch {
+                        val settings = settingsDataStore.settingsFlow.first()
+                        val f1 = settings.frame1App
+                        val f2 = settings.frame2App
+                        if (f1 != null && f2 != null) {
+                            val intent = Intent(this@OverlayService, SplitScreenProxyActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                putExtra("pkg1", f1)
+                                putExtra("pkg2", f2)
+                            }
+                            startActivity(intent)
+                        }
                     }
-                    startActivity(intent)
+                }
+                null -> {
+                    // Default to internal voice command if no app assigned
+                    if (!voiceOverlayManager.isShowing) {
+                        voiceOverlayManager.show()
+                    }
                 }
                 else -> {
                     SplitScreenLauncher.launchApp(this@OverlayService, actionPackage)

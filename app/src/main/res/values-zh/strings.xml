@@ -96,11 +96,16 @@
     <!-- Virtual Actions -->
     <string name="action_home_label">返回主屏幕</string>
     <string name="action_voice_command_label">🎙️ 语音指令</string>
+    <string name="action_split_view_label">🚗 CarFloat (分屏模式)</string>
+    <string name="help_drag_handle_double_tap">双击白点：激活分屏模式</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 定时自动化</string>
     <string name="schedule_enabled">启用定时自动化</string>
     <string name="schedule_days_label">星期</string>
+    <string name="schedule_add_new">添加新日程</string>
+    <string name="schedule_add_sample">+ 添加示例时间表 (测试)</string>
+    <string name="schedule_no_days_selected">未选择日期</string>
     <string name="schedule_time_label">触发时间</string>
     <string name="schedule_auto_navigate">自动 Google Maps 导航</string>
     <string name="schedule_nav_address">目的地地址</string>
