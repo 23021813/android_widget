@@ -45,7 +45,10 @@ object OtaUpdateManager {
      */
     suspend fun checkForUpdate(context: Context): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val url = URL(VERSION_CHECK_URL)
+            val timestamp = System.currentTimeMillis()
+            val urlWithCacheBuster = "$VERSION_CHECK_URL?t=$timestamp"
+            android.util.Log.d("OtaUpdateManager", "Checking for update: $urlWithCacheBuster")
+            val url = URL(urlWithCacheBuster)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.connectTimeout = 10000
@@ -57,8 +60,10 @@ object OtaUpdateManager {
             val json = JSONObject(response)
             val remoteVersionCode = json.getInt("versionCode")
             val currentVersionCode = getCurrentVersionCode(context)
+            android.util.Log.d("OtaUpdateManager", "Remote version: $remoteVersionCode, Current version: $currentVersionCode")
 
             if (remoteVersionCode > currentVersionCode) {
+                android.util.Log.d("OtaUpdateManager", "New version available!")
                 UpdateInfo(
                     versionCode = remoteVersionCode,
                     versionName = json.getString("versionName"),
@@ -67,6 +72,7 @@ object OtaUpdateManager {
                     forceUpdate = json.optBoolean("forceUpdate", false)
                 )
             } else {
+                android.util.Log.d("OtaUpdateManager", "No update needed.")
                 null
             }
         } catch (e: Exception) {

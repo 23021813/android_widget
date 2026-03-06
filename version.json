@@ -1,7 +1,7 @@
 {
-  "versionCode": 11,
-  "versionName": "1.3.7",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.7/CarFloat_1.3.7.apk",
-  "changelog": "- Gỡ bỏ hoàn toàn tính năng lắng nghe giọng nói và quyền micro.\n- Chỉ giữ 2 ngôn ngữ: Tiếng Việt và Tiếng Anh, tự động chọn Tiếng Việt khi hệ thống là vi, còn lại là Tiếng Anh.\n- Thống nhất hiển thị version trong app dùng BuildConfig.VERSION_NAME.\n- Sửa lỗi Lịch trình + auto split: đảm bảo lần đầu mở app khi đang trong khung giờ lịch sẽ vừa chia đôi màn hình vừa gửi action điều hướng Google Maps và tìm nhạc YouTube Music.",
+  "versionCode": 12,
+  "versionName": "1.3.8",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.8/CarFloat_1.3.8.apk",
+  "changelog": "- Sửa lỗi Lịch trình: Luôn chọn đúng lịch gần nhất với hiện tại khi mở app (fix lỗi luôn chọn lịch sáng).\n- Thêm Log chi tiết để theo dõi quá trình trigger Lịch trình (ScheduleManager, ScheduleReceiver).\n- Sửa lỗi thông báo cập nhật ảo (thêm cache-buster cho OTA check).\n- Tối ưu hiệu năng chọn lịch trình khi khởi động.",
   "forceUpdate": false
 }

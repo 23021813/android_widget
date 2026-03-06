@@ -36,13 +36,17 @@ object ScheduleManager {
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        // First, conceptually we would cancel ALL known alarms to start fresh, 
-        // but since we only use ids internally, we'll iterate through settings.
-        // We might leave orphaned alarms if a profile is deleted, so it's best to 
-        // always manually call cancelAlarm(context, profile.id) when deleting.
+        Log.d(TAG, "═══ syncAlarms START ═══ profiles=${settings.scheduleProfiles.size}")
+        for ((i, p) in settings.scheduleProfiles.withIndex()) {
+            Log.d(TAG, "  [$i] id=${p.id.take(8)} name='${p.name}' enabled=${p.enabled} " +
+                "days=${p.days} ${p.startHour}:${String.format("%02d", p.startMinute)}-${p.endHour}:${String.format("%02d", p.endMinute)} " +
+                "nav=${p.autoNavigate}/'${p.navAddress}' music=${p.autoMusic}/'${p.musicKeyword}' " +
+                "lastTriggered=${p.lastTriggeredDayOfYear}")
+        }
         
         for (profile in settings.scheduleProfiles) {
             if (!profile.enabled || profile.days.isEmpty()) {
+                Log.d(TAG, "  SKIP profile '${profile.name}' (enabled=${profile.enabled}, days=${profile.days})")
                 cancelAlarm(context, profile.id)
                 continue
             }
@@ -68,7 +72,7 @@ object ScheduleManager {
             )
 
             if (triggerTime <= 0) {
-                Log.w(TAG, "Could not compute next trigger time for profile ${profile.id}")
+                Log.w(TAG, "  SKIP profile '${profile.name}': could not compute next trigger time")
                 continue
             }
 
@@ -94,8 +98,11 @@ object ScheduleManager {
             }
 
             val cal = Calendar.getInstance().apply { timeInMillis = triggerTime }
-            Log.d(TAG, "Alarm registered for profile '${profile.name}' (${profile.id}) at ${cal.time}")
+            Log.d(TAG, "  ✓ ALARM SET profile '${profile.name}' id=${profile.id.take(8)} " +
+                "requestCode=${profile.id.hashCode()} at ${cal.time} " +
+                "nav='${profile.navAddress}' music='${profile.musicKeyword}'")
         }
+        Log.d(TAG, "═══ syncAlarms END ═══")
     }
 
     fun cancelAlarm(context: Context, profileId: String) {
@@ -162,24 +169,41 @@ object ScheduleManager {
                 val currentHour = now.get(Calendar.HOUR_OF_DAY)
                 val currentMinute = now.get(Calendar.MINUTE)
                 val currentTotalMinutes = currentHour * 60 + currentMinute
+
+                Log.d(TAG, "═══ checkAndTriggerMissedSchedules ═══ day=$currentDay time=$currentHour:${String.format("%02d", currentMinute)} dayOfYear=$currentDayOfYear skipSplit=$skipSplitScreen")
                 
                 for (profile in settings.scheduleProfiles) {
-                    if (!profile.enabled || currentDay !in profile.days) continue
-                    if (profile.lastTriggeredDayOfYear == currentDayOfYear) continue // Already triggered today
-                    
                     val startTotalMinutes = profile.startHour * 60 + profile.startMinute
                     val endTotalMinutes = profile.endHour * 60 + profile.endMinute
+
+                    if (!profile.enabled) {
+                        Log.d(TAG, "  SKIP '${profile.name}': disabled")
+                        continue
+                    }
+                    if (currentDay !in profile.days) {
+                        Log.d(TAG, "  SKIP '${profile.name}': day $currentDay not in ${profile.days}")
+                        continue
+                    }
+                    if (profile.lastTriggeredDayOfYear == currentDayOfYear) {
+                        Log.d(TAG, "  SKIP '${profile.name}': already triggered today (dayOfYear=$currentDayOfYear)")
+                        continue
+                    }
                     
                     if (currentTotalMinutes in startTotalMinutes..endTotalMinutes) {
-                        Log.d(TAG, "Triggering in-range schedule ${profile.id} (${profile.name})")
+                        Log.d(TAG, "  ✓ MATCH '${profile.name}' id=${profile.id.take(8)} " +
+                            "range=${profile.startHour}:${String.format("%02d", profile.startMinute)}-${profile.endHour}:${String.format("%02d", profile.endMinute)} " +
+                            "nav='${profile.navAddress}' music='${profile.musicKeyword}'")
                         val intent = Intent(context, ScheduleReceiver::class.java).apply {
                             data = android.net.Uri.parse("carlauncher://schedule/${profile.id}")
                             putExtra("PROFILE_ID", profile.id)
                             putExtra("SKIP_SPLIT_SCREEN", skipSplitScreen)
                         }
                         context.sendBroadcast(intent)
+                    } else {
+                        Log.d(TAG, "  SKIP '${profile.name}': time $currentTotalMinutes not in $startTotalMinutes..$endTotalMinutes")
                     }
                 }
+                Log.d(TAG, "═══ checkAndTriggerMissedSchedules END ═══")
             } catch (e: Exception) {
                 Log.e(TAG, "Error checking missed schedules", e)
             }

@@ -27,13 +27,16 @@ class ScheduleReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        Log.d(TAG, "Schedule alarm fired")
+        Log.d(TAG, "═══ Schedule alarm fired ═══")
+        Log.d(TAG, "  intent.data=${intent?.data}")
+        Log.d(TAG, "  intent.extras=${intent?.extras?.keySet()?.joinToString { "$it=${intent.extras?.get(it)}" }}")
 
         val profileId = intent?.getStringExtra("PROFILE_ID")
         if (profileId == null) {
-            Log.e(TAG, "No profile ID in intent, aborting.")
+            Log.e(TAG, "  No profile ID in intent, aborting.")
             return
         }
+        Log.d(TAG, "  PROFILE_ID=$profileId")
 
         val skipSplitScreen = intent.getBooleanExtra("SKIP_SPLIT_SCREEN", false)
 
@@ -57,12 +60,14 @@ class ScheduleReceiver : BroadcastReceiver() {
         val profile = settings.scheduleProfiles.find { it.id == profileId }
 
         if (profile == null) {
-            Log.d(TAG, "Profile $profileId not found, skipping")
+            Log.e(TAG, "  Profile $profileId NOT FOUND in ${settings.scheduleProfiles.map { "${it.id.take(8)}='${it.name}'" }}, skipping")
             return
         }
 
+        Log.d(TAG, "  Found profile: name='${profile.name}' nav=${profile.autoNavigate}/'${profile.navAddress}' music=${profile.autoMusic}/'${profile.musicKeyword}'")
+
         if (!profile.enabled) {
-            Log.d(TAG, "Profile ${profile.name} disabled, skipping")
+            Log.d(TAG, "  Profile '${profile.name}' disabled, skipping")
             return
         }
 
@@ -74,6 +79,7 @@ class ScheduleReceiver : BroadcastReceiver() {
 
         val navAddress = if (profile.autoNavigate) profile.navAddress else ""
         val musicKeyword = if (profile.autoMusic) profile.musicKeyword else ""
+        Log.d(TAG, "  Resolved action params: navAddress='$navAddress' musicKeyword='$musicKeyword'")
 
         if (!skipSplitScreen) {
             val frame1 = settings.frame1App

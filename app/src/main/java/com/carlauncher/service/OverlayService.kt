@@ -257,7 +257,20 @@ class OverlayService : Service() {
     private fun pickScheduleForFirstOpen(settings: LauncherSettings): com.carlauncher.data.models.ScheduleProfile? {
         val now = java.util.Calendar.getInstance()
         val currentDay = now.get(java.util.Calendar.DAY_OF_WEEK)
-        val currentTotalMinutes = now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE)
+        val currentHour = now.get(java.util.Calendar.HOUR_OF_DAY)
+        val currentMinute = now.get(java.util.Calendar.MINUTE)
+        val currentTotalMinutes = currentHour * 60 + currentMinute
+
+        Log.d("OverlayService", "═══ pickScheduleForFirstOpen ═══ day=$currentDay time=$currentHour:${String.format("%02d", currentMinute)}")
+
+        for (profile in settings.scheduleProfiles) {
+            val startMin = profile.startHour * 60 + profile.startMinute
+            val endMin = profile.endHour * 60 + profile.endMinute
+            val inRange = currentTotalMinutes in startMin..endMin
+            Log.d("OverlayService", "  '${profile.name}' enabled=${profile.enabled} dayMatch=${currentDay in profile.days} " +
+                "range=${profile.startHour}:${String.format("%02d", profile.startMinute)}-${profile.endHour}:${String.format("%02d", profile.endMinute)} " +
+                "inRange=$inRange nav='${profile.navAddress}'")
+        }
 
         val candidates = settings.scheduleProfiles.filter { profile ->
             profile.enabled &&
@@ -266,13 +279,16 @@ class OverlayService : Service() {
         }
 
         if (candidates.isEmpty()) {
-            Log.d("OverlayService", "pickScheduleForFirstOpen: no matching schedule. day=$currentDay minutes=$currentTotalMinutes")
+            Log.d("OverlayService", "  → No matching schedule")
             return null
         }
 
-        // Nếu có nhiều lịch cùng khớp, ưu tiên lịch có giờ bắt đầu sớm hơn
-        val chosen = candidates.minByOrNull { it.startHour * 60 + it.startMinute }
-        Log.d("OverlayService", "pickScheduleForFirstOpen: candidates=${candidates.map { it.name }} chosen=${chosen?.name}")
+        // Ưu tiên lịch có khoảng thời gian gần nhất với hiện tại (thay vì startHour sớm nhất)
+        val chosen = candidates.minByOrNull {
+            val midpoint = (it.startHour * 60 + it.startMinute + it.endHour * 60 + it.endMinute) / 2
+            kotlin.math.abs(currentTotalMinutes - midpoint)
+        }
+        Log.d("OverlayService", "  → candidates=${candidates.map { "'${it.name}'/nav='${it.navAddress}'" }} chosen='${chosen?.name}' nav='${chosen?.navAddress}'")
         return chosen
     }
 

@@ -11,8 +11,8 @@ android {
         applicationId = "com.carlauncher"
         minSdk = 28
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.3.7"
+        versionCode = 12
+        versionName = "1.3.8"
     }
 
     buildTypes {
