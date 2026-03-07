@@ -19,14 +19,19 @@
     "Floating Widgets (Clock, Weather, Voice, Status)",
     "Click-Through Gestures & Drag Handle Double-Tap",
     "Auto Split-Screen & ACTION_SPLIT_VIEW Action",
-    "Internationalization (8 languages)",
+    "Internationalization (Manual/Auto detect Vietnamese)",
     "Non-intrusive OTA Update System via GitHub Releases",
     "3-Tier Connectivity States (Off/Disconnected/Connected)",
     "System Home Button Mapping for Assistant Widget",
-    "Smart Voice Assistant with On-Device/Network Fallback",
-    "Automated Schedules with Boot Race Protection"
+    "Smart Voice Assistant (Legacy/Core functionality)",
+    "Automated Schedules with Closest-to-Current Logic",
+    "OTA Cache-Bustering (Force fresh version check)"
   ],
   "knowledge_items": {
+    "patterns": [
+      "Use 'SplitScreenProxyActivity' for background-triggered split-screen launches.",
+      "Use 'OtaUpdateManager' with timestamp query params to bypass GitHub Raw cache."
+    ],
     "gotchas": [
       "System Alert Window permission is required for overlays.",
       "OTA Downloads must use context.getExternalFilesDir to avoid Permission Denied on some head units.",
@@ -34,9 +39,9 @@
       "FileProvider needs broader paths config for diverse Android Automotive versions.",
       "Use ConnectivityManager.activeNetwork bypasses networkId reliability issues.",
       "Use AudioManager.getDevices fallback for Bluetooth bypasses SecurityExceptions.",
-      "Schedule auto-launch during boot needs a 4s delay and SKIP_SPLIT_SCREEN flag to avoid race condition with OverlayService.",
-      "On-device SpeechRecognizer (API 31+) returns Error 12 if language pack is missing; always implement network fallback.",
-      "macOS host terminal/emulator requires explicit Microphone permissions in System Settings for coreaudio to work."
+      "Schedule auto-launch during boot needs a 4s delay and SKIP_SPLIT_SCREEN flag to avoid race condition.",
+      "GitHub Raw version.json is cached by proxies; add '?t={timestamp}' to force fresh data.",
+      "Schedule selection must check if current time is WITHIN the range to avoid picking the earliest 'active' schedule erroneously (e.g., picking morning in afternoon)."
     ]
   }
 }

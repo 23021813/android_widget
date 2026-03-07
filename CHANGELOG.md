@@ -2,6 +2,21 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
+## [1.3.8] - 2026-03-07
+### Fixed
+- **Schedule Selection Logic**: Sửa lỗi luôn chọn lịch trình buổi sáng. Giờ đây app ưu tiên chọn lịch trình khớp với khung giờ hiện tại hoặc gần nhất (Closest-to-current logic).
+- **OTA Ghost Notification**: Thêm cơ chế cache-buster (timestamp query) khi kiểm tra bản cập nhật từ GitHub để tránh thông báo ảo do cache.
+- **Overlay Boot Trigger**: Đảm bảo vừa chia đôi màn hình vừa thực hiện action (Nav/Music) chính xác khi mở app trong khung giờ lịch.
+
+### Added
+- **Detailed Logging**: Bổ sung log hệ thống chuyên sâu cho `ScheduleManager`, `ScheduleReceiver` và `OtaUpdateManager` để dễ dàng chẩn đoán lỗi vận hành.
+
+## [1.3.7] - 2026-03-06
+### Changed
+- **Voice Removal**: Gỡ bỏ hoàn toàn tính năng lắng nghe giọng nói chủ động và quyền micro (`RECORD_AUDIO`) để tăng tính riêng tư.
+- **Language Optimization**: Rút gọn chỉ còn 2 ngôn ngữ chính (Tiếng Việt, Tiếng Anh). Tự động nhận diện hệ thống Việt Nam để ưu tiên hiển thị.
+- **Version Display**: Thống nhất hiển thị version bằng `BuildConfig.VERSION_NAME` xuyên suốt ứng dụng.
+
 ## [1.3.6] - 2026-03-04
 ### Added
 - **CarFloat (Split View) Action**: Cho phép gán phím tắt mở nhanh 2 ứng dụng chia đôi màn hình vào nút Assistant (Tap/Double Tap/Long Press) và chấm trắng Drag Handle.

@@ -1,25 +1,24 @@
-# CarFloat (Formerly Car Launcher Overlay) - v1.3.6
+# CarFloat (Formerly Car Launcher Overlay) - v1.3.8
 
 CarFloat là một ứng dụng tiện ích chuyên dụng dành cho màn hình xe hơi (Android Automotive / Android Box) với giao diện **Glassmorphism** hiện đại. Ứng dụng cung cấp các Widget nổi (Floating Widgets) thông minh, cho phép điều khiển và truy cập nhanh mà không cần thoát ứng dụng đang chạy.
 
 ---
 
-## 🌟 Có gì mới trong bản v1.3.6?
+## 🌟 Có gì mới trong bản v1.3.8?
 
-Bản cập nhật v1.3.6 tập trung vào tính năng tự động hóa và nâng cao độ ổn định cho Voice Assistant:
+Bản cập nhật v1.3.8 tập trung vào độ chính xác của tự động hóa và khắc phục các lỗi về thông báo:
 
-### 🎭 CarFloat (Split View) Action
-- **Gán nhanh Split View**: Cho phép mở 2 ứng dụng chia đôi màn hình chỉ bằng một cú chạm (Tap), nhấn giữ hoặc chạm đúp vào nút Assistant hoặc chấm trắng Drag Handle.
-- **Tùy biến linh hoạt**: Tích hợp trực tiếp vào hệ thống ảo của App Picker.
+### 🕒 Tự động hóa Lịch trình Thông minh
+- **Logic "Closest-to-current"**: Sửa lỗi app luôn chọn nhầm lịch trình buổi sáng khi khởi động vào buổi chiều. Hệ thống giờ đây sẽ phân tích và chọn lịch trình khớp nhất với khung giờ hiện tại.
+- **Overlay Boot Trigger**: Đảm bảo thực hiện đồng thời việc chia đôi màn hình và gửi action điều hướng/tìm nhạc một cách ổn định ngay giây đầu tiên mở app.
 
-### 🕒 Tự động hóa & Lịch trình (Schedule)
-- **Fix Boot Race Condition**: Khắc phục triệt để lỗi kịch bản tự động bị gián đoạn khi khởi động lại thiết bị (Race condition).
-- **Sample Schedule Button**: Nút bấm tiện lợi giúp tạo nhanh kịch bản test trong Settings.
+### 📡 Hệ thống OTA & Ghost Notification
+- **Fix Thông báo cập nhật ảo**: Giải quyết triệt để vấn đề "luôn báo có bản mới" sau khi đã update bằng cách thêm cơ chế **Cache-Buster** cho URL kiểm tra version.
+- **Logging Nâng cao**: Tích hợp log chi tiết cho các module `Schedule` và `OTA` để hỗ trợ chẩn đoán từ xa.
 
-### 🎙️ Voice Assistant Thông Minh
-- **Cơ chế Fallback On-Device/Network**: Tự động chuyển đổi linh hoạt nếu máy ảo hoặc thiết bị chưa tải gói ngôn ngữ tiếng Việt (Error 12).
-- **Quyền Micro**: Chủ động yêu cầu quyền Micro (`RECORD_AUDIO`) ngay khi khởi động app để tránh lỗi timeout âm thầm.
-- **Logic ưu tiên**: Nút Assistant luôn ưu tiên mở Voice Overlay tích hợp nếu người dùng chưa gán ứng dụng cụ thể.
+### 🎙️ Cải tiến Quyền riêng tư (v1.3.7)
+- **Gỡ bỏ nghe lén**: Loại bỏ hoàn toàn tính năng listener micro để đảm bảo sự riêng tư tuyệt đối cho người dùng.
+- **Tối ưu ngôn ngữ**: Chỉ giữ lại Tiếng Việt và Tiếng Anh, tự động điều chỉnh theo ngôn ngữ hệ thống.
 
 ---
 

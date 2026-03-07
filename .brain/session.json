@@ -1,71 +1,71 @@
 {
-  "updated_at": "2026-03-04T20:38:00+07:00",
+  "updated_at": "2026-03-07T18:30:00+07:00",
   "working_on": {
-    "feature": "1.3.6 Release Delivery",
-    "task": "Knowledge Preservation and Context Update",
+    "feature": "1.3.8 Release & Schedule Fix",
+    "task": "Brain Save & Documentation Update",
     "status": "completed",
     "files": [
-      "VoiceOverlayManager.kt",
-      "OverlayService.kt",
-      "ScheduleReceiver.kt",
-      "ScheduleManager.kt",
-      "SettingsScreen.kt",
+      "CHANGELOG.md",
+      "README.md",
       "version.json",
-      "app/build.gradle.kts"
+      "app/build.gradle.kts",
+      "OverlayService.kt",
+      "OtaUpdateManager.kt",
+      ".brain/brain.json",
+      ".brain/session.json"
     ],
     "blockers": [],
-    "notes": "Version 1.3.6 released. Fixed critical voice timeout, schedule boot race condition, and added Split-View actions."
+    "notes": "Version 1.3.8 released. Fixed morning-schedule-bias bug and OTA ghost notification. Added detailed logging."
   },
   "pending_tasks": [
     {
-      "task": "Test voice commands on real hardware (due to emulator coreaudio host permission issues)",
+      "task": "Monitor user feedback on OTA update reliability with cache-buster",
       "priority": "low"
     }
   ],
   "recent_changes": [
     {
-      "timestamp": "2026-03-04T20:35:00+07:00",
-      "type": "release",
-      "description": "Version 1.3.6: Split-View action mapping, Voice Assistant reliability (Error 12 fallback), Fix Schedule Boot race condition.",
+      "timestamp": "2026-03-07T18:20:00+07:00",
+      "type": "fix",
+      "description": "Version 1.3.8: Fixed schedule selection logic (closest-to-current), Added OTA cache-buster, Detailed system logs.",
       "files": [
-        "VoiceOverlayManager.kt",
         "OverlayService.kt",
-        "ScheduleReceiver.kt",
+        "OtaUpdateManager.kt",
         "ScheduleManager.kt",
-        "LauncherActivity.kt",
+        "ScheduleReceiver.kt",
+        "version.json"
+      ]
+    },
+    {
+      "timestamp": "2026-03-06T10:00:00+07:00",
+      "type": "clean-up",
+      "description": "Version 1.3.7: Removed active voice listening for privacy, optimized languages to VN/EN, unified version display.",
+      "files": [
+        "app/build.gradle.kts",
         "version.json"
       ]
     }
   ],
   "errors_encountered": [
     {
-      "error": "SpeechRecognizer Error 12 (Language Not Supported) on emulator",
-      "solution": "Implemented auto-fallback from On-Device recognition to Standard (Network) recognition in VoiceOverlayManager.",
+      "error": "OTA Update notification persisted after successful upgrade",
+      "solution": "Added System.currentTimeMillis() as a query parameter to the GitHub Raw URL to bypass cache.",
       "resolved": true
     },
     {
-      "error": "kAudioHardwareIllegalOperationError on macOS host",
-      "solution": "Identified as macOS System Privacy setting - requires granting Mic permission to Terminal/Emulator.",
-      "resolved": true
-    },
-    {
-      "error": "Schedule automation intents overwritten by autoSplitOnBoot during startup",
-      "solution": "Introduced 4s delay and Intent flag to skip redundant split-screen execution during boot.",
+      "error": "Afternoon schedule triggered morning destination",
+      "solution": "Updated pickScheduleForFirstOpen to filter for currently active range and choose the closest midpoint.",
       "resolved": true
     }
   ],
   "decisions_made": [
     {
-      "decision": "Fallback to Network speech on Error 12",
-      "reason": "Ensures reliability in environments where offline language packs are not installed (like emulators)."
+      "decision": "Remove RECORD_AUDIO requirement",
+      "reason": "Increases user trust and simplifies Google Play/security compliance since active listening was non-essential."
     },
     {
-      "decision": "Add '+ Thêm Lịch trình mẫu' button",
-      "reason": "Simplifies manual testing of complex schedule/automation flows."
-    },
-    {
-      "decision": "Use SKIP_SPLIT_SCREEN flag in ScheduleReceiver",
-      "reason": "Cleanly resolves boot race conditions without complex service-state monitoring."
+      "decision": "Use timestamp query for version check",
+      "reason": "Prevents stale version data from GitHub CDN/Proxies without requiring a dedicated backend."
     }
   ]
 }
