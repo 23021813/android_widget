@@ -2,6 +2,11 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
+## [1.3.9] - 2026-03-11
+### Added
+- **TimeSyncMonitor**: Cơ chế mới chờ kết nối mạng và xác thực giờ chuẩn từ máy chủ Google trước khi xếp lịch (Sync Alarms). Đảm bảo trigger đúng giờ ngay cả khi Android Box bị mất giờ hệ thống (reset về 1970).
+- **Robustness Improvements**: Tự động thử lại (Retry) khi WiFi mới kết nối và chống xung đột logic khi OS cập nhật giờ.
+
 ## [1.3.8] - 2026-03-07
 ### Fixed
 - **Schedule Selection Logic**: Sửa lỗi luôn chọn lịch trình buổi sáng. Giờ đây app ưu tiên chọn lịch trình khớp với khung giờ hiện tại hoặc gần nhất (Closest-to-current logic).

@@ -1,7 +1,7 @@
 {
-  "versionCode": 12,
-  "versionName": "1.3.8",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.8/CarFloat_1.3.8.apk",
-  "changelog": "- Sửa lỗi Lịch trình: Luôn chọn đúng lịch gần nhất với hiện tại khi mở app (fix lỗi luôn chọn lịch sáng).\n- Thêm Log chi tiết để theo dõi quá trình trigger Lịch trình (ScheduleManager, ScheduleReceiver).\n- Sửa lỗi thông báo cập nhật ảo (thêm cache-buster cho OTA check).\n- Tối ưu hiệu năng chọn lịch trình khi khởi động.",
+  "versionCode": 13,
+  "versionName": "1.3.9",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.3.9/CarFloat_1.3.9.apk",
+  "changelog": "- Thêm tính năng TimeSyncMonitor: Tự động chờ có mạng và đồng bộ giờ chuẩn từ Internet (Google) trước khi kích hoạt lịch trình.\n- Khắc phục lỗi Android Box mất giờ/reset về 1970 khi khởi động lại, giúp trigger đúng Google Maps và Youtube Music.\n- Tối ưu hóa độ tin cậy của dịch vụ chạy ngầm với cơ chế retry và chống xung đột (race condition) khi cập nhật thời gian.",
   "forceUpdate": false
 }

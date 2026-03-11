@@ -30,6 +30,11 @@ object ScheduleManager {
      * Cancels alarms for disabled or deleted profiles.
      */
     fun syncAlarms(context: Context) {
+        if (!TimeSyncMonitor.hasSynced) {
+            Log.w(TAG, "System time not yet validated via network, skipping syncAlarms")
+            return
+        }
+
         val settings = runBlocking {
             SettingsDataStore(context).settingsFlow.first()
         }
@@ -160,6 +165,11 @@ object ScheduleManager {
      * If so, and it hasn't triggered today, it triggers the schedule manually.
      */
     fun checkAndTriggerMissedSchedules(context: Context, skipSplitScreen: Boolean = false) {
+        if (!TimeSyncMonitor.hasSynced) {
+            Log.w(TAG, "System time not yet validated via network, skipping checkAndTriggerMissedSchedules")
+            return
+        }
+
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
             try {
                 val settings = SettingsDataStore(context).settingsFlow.first()

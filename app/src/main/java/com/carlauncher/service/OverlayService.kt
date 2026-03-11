@@ -140,6 +140,9 @@ class OverlayService : Service() {
             }
         }
 
+        // Start watching for network/time sync to initialize alarms
+        TimeSyncMonitor.startMonitoring(this)
+
         // Observe settings changes for dynamic widget visibility
         serviceScope.launch {
             settingsDataStore.settingsFlow.collectLatest { settings ->
@@ -715,6 +718,7 @@ class OverlayService : Service() {
     override fun onDestroy() {
         removeStatusOverlay()
         removeAssistantOverlay()
+        TimeSyncMonitor.stopMonitoring(this)
         serviceScope.cancel()
         super.onDestroy()
     }

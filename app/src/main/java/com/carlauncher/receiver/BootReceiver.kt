@@ -48,12 +48,11 @@ class BootReceiver : BroadcastReceiver() {
                 Log.d(TAG, "Auto-start disabled in settings, skipping")
             }
 
-            // Re-register schedule alarms (alarms are lost when head unit powers off)
+            // Schedule alarms will be registered by TimeSyncMonitor when network/time is verified
             try {
-                Log.d(TAG, "Re-registering schedule alarms after boot")
-                ScheduleManager.syncAlarms(context)
+                Log.d(TAG, "Boot received, TimeSyncMonitor will handle schedule alarms")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to re-register schedule alarms", e)
+                Log.e(TAG, "Failed to initialize schedule alarms logic", e)
             }
         }
     }
