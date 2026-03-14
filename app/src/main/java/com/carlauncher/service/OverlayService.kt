@@ -106,7 +106,26 @@ class OverlayService : Service() {
             val settings = settingsDataStore.settingsFlow.first()
             if (settings.autoSplitOnBoot && !bootSplitDone
                 && settings.frame1App != null && settings.frame2App != null) {
-                delay(5000L)
+                
+                Log.d("OverlayService", "AutoSplitOnBoot: Waiting for TimeSyncMonitor before starting...")
+                
+                val synced = TimeSyncMonitor.waitForSyncOrTimeout(
+                    timeoutMs = 180_000L,
+                    checkIntervalMs = 10_000L,
+                    onWaiting = {
+                        android.widget.Toast.makeText(
+                            applicationContext,
+                            "Đang chờ kết nối Internet và đồng bộ giờ...",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                    }
+                )
+                
+                if (!synced) {
+                    Log.e("OverlayService", "AutoSplitOnBoot: Wait for time sync timed out after 3 minutes")
+                    return@launch
+                }
+                
                 bootSplitDone = true
 
                 Log.d(

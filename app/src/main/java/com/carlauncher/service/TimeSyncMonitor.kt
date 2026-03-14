@@ -154,6 +154,50 @@ object TimeSyncMonitor {
         timeReceiver = null
     }
 
+    suspend fun waitForSyncOrTimeout(
+        timeoutMs: Long = 3 * 60 * 1000L,
+        checkIntervalMs: Long = 10 * 1000L,
+        onWaiting: () -> Unit
+    ): Boolean {
+        if (hasSynced) return true
+        
+        Log.d(TAG, "waitForSyncOrTimeout: starting wait sequence (timeout=${timeoutMs}ms)")
+        var elapsedMs = 0L
+        var notifiedWait = false
+
+        while (elapsedMs < timeoutMs) {
+            if (hasSynced) {
+                Log.d(TAG, "waitForSyncOrTimeout: sync achieved after ${elapsedMs}ms")
+                return true
+            }
+
+            // Fallback check if the main monitor didn't trigger
+            if (!isChecking) {
+                if (isTimeAccurate()) {
+                    synchronized(this) {
+                        hasSynced = true
+                    }
+                    Log.d(TAG, "waitForSyncOrTimeout: active check succeeded")
+                    return true
+                }
+            }
+
+            if (elapsedMs >= 30_000L && !notifiedWait) {
+                notifiedWait = true
+                Log.d(TAG, "waitForSyncOrTimeout: waited 30s, calling onWaiting callback")
+                withContext(Dispatchers.Main) {
+                    onWaiting()
+                }
+            }
+
+            delay(checkIntervalMs)
+            elapsedMs += checkIntervalMs
+        }
+
+        Log.e(TAG, "waitForSyncOrTimeout: timed out after ${timeoutMs}ms")
+        return false
+    }
+
     private suspend fun isTimeAccurate(): Boolean {
         // Quick Year check (Fast path)
         val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
