@@ -1,10 +1,13 @@
 package com.carlauncher.service
 
+import android.Manifest
 import android.app.*
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.PixelFormat
+import android.location.Location
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -42,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.savedstate.*
 import com.carlauncher.LauncherActivity
@@ -89,6 +93,7 @@ class OverlayService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var settingsDataStore: SettingsDataStore
     private val weatherRepository = WeatherRepository()
+    private val defaultWeatherCity = LauncherSettings().weatherCity
     // Position save debounce
     private var positionSaveJob: Job? = null
 
@@ -254,6 +259,129 @@ class OverlayService : Service() {
         return if (enabled) 2 else 0
     }
 
+    private fun hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    @Suppress("MissingPermission")
+    private fun getBestLastKnownLocation(): Location? {
+        if (!hasLocationPermission()) return null
+
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return null
+        val providers = listOf(
+            LocationManager.GPS_PROVIDER,
+            LocationManager.NETWORK_PROVIDER,
+            LocationManager.PASSIVE_PROVIDER
+        )
+
+        return providers.mapNotNull { provider ->
+            runCatching { locationManager.getLastKnownLocation(provider) }
+                .onFailure { Log.w("OverlayService", "Failed to read last known location from $provider", it) }
+                .getOrNull()
+        }.maxByOrNull { it.time }
+    }
+
+    private suspend fun fetchWeatherForSettings(settings: LauncherSettings): WeatherInfo? {
+        val apiKey = settings.weatherApiKey.trim()
+        if (!settings.showWeather || apiKey.isBlank()) return null
+
+        return when (settings.weatherLocationMode) {
+            com.carlauncher.data.models.WeatherLocationMode.GPS -> {
+                val location = getBestLastKnownLocation()
+                val weatherFromGps = if (location != null) {
+                    weatherRepository.getWeatherByLocation(
+                        lat = location.latitude,
+                        lon = location.longitude,
+                        apiKey = apiKey,
+                        unit = settings.temperatureUnit
+                    )
+                } else {
+                    null
+                }
+
+                weatherFromGps ?: weatherRepository.getWeatherByCity(
+                    city = settings.weatherCity.trim().ifBlank { defaultWeatherCity },
+                    apiKey = apiKey,
+                    unit = settings.temperatureUnit
+                )
+            }
+            com.carlauncher.data.models.WeatherLocationMode.MANUAL -> {
+                weatherRepository.getWeatherByCity(
+                    city = settings.weatherCity.trim().ifBlank { defaultWeatherCity },
+                    apiKey = apiKey,
+                    unit = settings.temperatureUnit
+                )
+            }
+        }
+    }
+
+    private fun normalizeStatusOverlayToAbsolutePosition(
+        statusWidget: View,
+        statusParams: WindowManager.LayoutParams
+    ): Boolean {
+        val currentGravity = statusParams.gravity
+        if ((currentGravity and Gravity.START) == Gravity.START) return false
+
+        val location = IntArray(2)
+        return runCatching {
+            statusWidget.getLocationOnScreen(location)
+            statusParams.gravity = Gravity.TOP or Gravity.START
+            statusParams.x = location[0]
+            statusParams.y = location[1]
+            true
+        }.getOrElse {
+            Log.w("OverlayService", "Failed to normalize status overlay position", it)
+            false
+        }
+    }
+
+    private fun resolveStatusOverlayPosition(
+        statusParams: WindowManager.LayoutParams,
+        preferActualViewPosition: Boolean = false
+    ): Pair<Int, Int> {
+        if (preferActualViewPosition) {
+            val location = IntArray(2)
+            val viewPosition = statusView
+                ?.takeIf { it.isAttachedToWindow }
+                ?.let { view ->
+                    runCatching {
+                        view.getLocationOnScreen(location)
+                        location[0] to location[1]
+                    }.getOrNull()
+                }
+
+            if (viewPosition != null) return viewPosition
+        }
+
+        return statusParams.x to statusParams.y
+    }
+
+    private fun syncDragHandleToStatus(
+        statusParams: WindowManager.LayoutParams,
+        preferActualViewPosition: Boolean = false
+    ) {
+        val handleView = dragHandleView ?: return
+        val handleParams = handleView.layoutParams as? WindowManager.LayoutParams ?: return
+        val (x, y) = resolveStatusOverlayPosition(statusParams, preferActualViewPosition)
+
+        handleParams.gravity = Gravity.TOP or Gravity.START
+        handleParams.x = x
+        handleParams.y = y
+
+        try {
+            windowManager?.updateViewLayout(handleView, handleParams)
+        } catch (e: Exception) {
+            Log.w("OverlayService", "Failed to sync drag handle position", e)
+        }
+    }
+
     // ═══════════════════════════════════════
     // Position Save (debounced)
     // ═══════════════════════════════════════
@@ -337,25 +465,39 @@ class OverlayService : Service() {
     private fun showStatusOverlay() {
         if (statusView != null) return
 
-        val initialSettings = runBlocking { settingsDataStore.settingsFlow.first() }
+        val defaultSettings = LauncherSettings()
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             buildOverlayFlags(
-                clickThrough = initialSettings.clockClickThrough,
-                overlap = initialSettings.allowOverlapSystemBars
+                clickThrough = defaultSettings.clockClickThrough,
+                overlap = defaultSettings.allowOverlapSystemBars
             ),
             PixelFormat.TRANSLUCENT
         ).apply {
+            gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            y = 16
+        }
+
+        serviceScope.launch {
+            val initialSettings = settingsDataStore.settingsFlow.first()
             if (initialSettings.statusWidgetX != Int.MIN_VALUE) {
-                gravity = Gravity.TOP or Gravity.START
-                x = initialSettings.statusWidgetX
-                y = initialSettings.statusWidgetY
-            } else {
-                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                y = 16
+                params.gravity = Gravity.TOP or Gravity.START
+                params.x = initialSettings.statusWidgetX
+                params.y = initialSettings.statusWidgetY
+                params.flags = buildOverlayFlags(
+                    clickThrough = initialSettings.clockClickThrough,
+                    overlap = initialSettings.allowOverlapSystemBars
+                )
+                try {
+                    windowManager?.updateViewLayout(statusView, params)
+                } catch (_: Exception) {}
+                if (initialSettings.clockClickThrough) {
+                    if (dragHandleView == null) showDragHandle(params)
+                    syncDragHandleToStatus(params)
+                }
             }
         }
 
@@ -385,25 +527,31 @@ class OverlayService : Service() {
                 // Update flags dynamically when click-through or overlap changes
                 LaunchedEffect(settings.clockClickThrough, settings.allowOverlapSystemBars) {
                     params.flags = buildOverlayFlags(settings.clockClickThrough, settings.allowOverlapSystemBars)
+                    if (settings.clockClickThrough && normalizeStatusOverlayToAbsolutePosition(this@apply, params)) {
+                        saveWidgetPosition(true, params.x, params.y)
+                    }
                     try { windowManager?.updateViewLayout(this@apply, params) } catch (_: Exception) {}
                     // Show/hide drag handle based on click-through
                     if (settings.clockClickThrough) {
                         showDragHandle(params)
+                        this@apply.post { syncDragHandleToStatus(params, preferActualViewPosition = true) }
                     } else {
                         removeDragHandle()
                     }
                 }
 
                 // Fetch weather periodically
-                LaunchedEffect(settings.showWeather, settings.weatherCity, settings.weatherApiKey) {
-                    if (settings.showWeather && settings.weatherCity.isNotBlank() && settings.weatherApiKey.isNotBlank()) {
+                LaunchedEffect(
+                    settings.showWeather,
+                    settings.weatherLocationMode,
+                    settings.weatherCity,
+                    settings.weatherApiKey,
+                    settings.temperatureUnit
+                ) {
+                    if (settings.showWeather && settings.weatherApiKey.isNotBlank()) {
                         while (isActive) {
-                            weatherInfo = weatherRepository.getWeatherByCity(
-                                city = settings.weatherCity,
-                                apiKey = settings.weatherApiKey,
-                                unit = settings.temperatureUnit
-                            )
-                            delay(10 * 60 * 1000L)
+                            weatherInfo = fetchWeatherForSettings(settings)
+                            delay(if (weatherInfo == null) 60_000L else 10 * 60 * 1000L)
                         }
                     } else {
                         weatherInfo = null
@@ -507,8 +655,12 @@ class OverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = statusParams.x
-            y = statusParams.y
+            val (initialX, initialY) = resolveStatusOverlayPosition(
+                statusParams,
+                preferActualViewPosition = true
+            )
+            x = initialX
+            y = initialY
         }
 
         val handleView = ComposeView(this).apply {
@@ -547,9 +699,7 @@ class OverlayService : Service() {
                                     statusParams.gravity = Gravity.TOP or Gravity.START
                                     try {
                                         statusView?.let { windowManager?.updateViewLayout(it, statusParams) }
-                                        handleParams.x = statusParams.x
-                                        handleParams.y = statusParams.y
-                                        windowManager?.updateViewLayout(this@apply, handleParams)
+                                        syncDragHandleToStatus(statusParams)
                                     } catch (_: Exception) {}
                                     saveWidgetPosition(true, statusParams.x, statusParams.y)
                                 }
@@ -570,6 +720,7 @@ class OverlayService : Service() {
         dragHandleView = handleView
         try {
             windowManager?.addView(handleView, handleParams)
+            handleView.post { syncDragHandleToStatus(statusParams, preferActualViewPosition = true) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -589,22 +740,28 @@ class OverlayService : Service() {
     private fun showAssistantOverlay() {
         if (assistantView != null) return
 
-        val initialSettings = runBlocking { settingsDataStore.settingsFlow.first() }
+        val defaultSettings = LauncherSettings()
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            buildOverlayFlags(overlap = initialSettings.allowOverlapSystemBars),
+            buildOverlayFlags(overlap = defaultSettings.allowOverlapSystemBars),
             PixelFormat.TRANSLUCENT
         ).apply {
+            gravity = Gravity.CENTER_VERTICAL or Gravity.END
+            x = 32
+        }
+
+        serviceScope.launch {
+            val initialSettings = settingsDataStore.settingsFlow.first()
             if (initialSettings.assistantWidgetX != Int.MIN_VALUE) {
-                gravity = Gravity.TOP or Gravity.START
-                x = initialSettings.assistantWidgetX
-                y = initialSettings.assistantWidgetY
-            } else {
-                gravity = Gravity.CENTER_VERTICAL or Gravity.END
-                x = 32
+                params.gravity = Gravity.TOP or Gravity.START
+                params.x = initialSettings.assistantWidgetX
+                params.y = initialSettings.assistantWidgetY
+                try {
+                    windowManager?.updateViewLayout(assistantView, params)
+                } catch (_: Exception) {}
             }
         }
 

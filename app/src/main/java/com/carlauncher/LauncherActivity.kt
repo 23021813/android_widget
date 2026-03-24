@@ -1,10 +1,13 @@
 package com.carlauncher
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -15,9 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.data.models.AppLanguage
 import com.carlauncher.data.models.LauncherSettings
+import com.carlauncher.data.models.WeatherLocationMode
 import com.carlauncher.service.OverlayService
 import com.carlauncher.ui.navigation.NavGraph
 import com.carlauncher.ui.theme.CarLauncherTheme
@@ -36,6 +41,9 @@ class LauncherActivity : ComponentActivity() {
     private lateinit var settingsDataStore: SettingsDataStore
 
     private val permissionState = mutableStateOf(false)
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { }
 
     // Read locale synchronously before UI is set up
     override fun attachBaseContext(newBase: Context) {
@@ -86,6 +94,26 @@ class LauncherActivity : ComponentActivity() {
                     lastLang = settings.appLanguage
                     kotlinx.coroutines.delay(200)
                     recreate()
+                }
+            }
+
+            var hasRequestedLocationPermission by remember { mutableStateOf(false) }
+            LaunchedEffect(settings.showWeather, settings.weatherLocationMode) {
+                val shouldRequestLocation =
+                    settings.showWeather &&
+                        settings.weatherLocationMode == WeatherLocationMode.GPS &&
+                        !hasLocationPermission()
+
+                if (shouldRequestLocation && !hasRequestedLocationPermission) {
+                    hasRequestedLocationPermission = true
+                    locationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                } else if (!shouldRequestLocation) {
+                    hasRequestedLocationPermission = false
                 }
             }
 
@@ -176,6 +204,17 @@ class LauncherActivity : ComponentActivity() {
         if (Settings.canDrawOverlays(this)) {
             OverlayService.start(this)
         }
+    }
+
+    private fun hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
     }
 }
 

@@ -1,8 +1,10 @@
 package com.carlauncher.data.models
 
+import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+@Keep
 @JsonClass(generateAdapter = false)
 data class WeatherResponse(
     @Json(name = "main") val main: WeatherMain,
@@ -10,6 +12,7 @@ data class WeatherResponse(
     @Json(name = "name") val cityName: String
 )
 
+@Keep
 @JsonClass(generateAdapter = false)
 data class WeatherMain(
     @Json(name = "temp") val temp: Double,
@@ -17,6 +20,7 @@ data class WeatherMain(
     @Json(name = "humidity") val humidity: Int
 )
 
+@Keep
 @JsonClass(generateAdapter = false)
 data class WeatherCondition(
     @Json(name = "id") val id: Int,

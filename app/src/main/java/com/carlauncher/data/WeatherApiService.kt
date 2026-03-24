@@ -1,9 +1,11 @@
 package com.carlauncher.data
 
+import androidx.annotation.Keep
 import com.carlauncher.data.models.WeatherResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+@Keep
 interface WeatherApiService {
 
     @GET("data/2.5/weather")

@@ -172,7 +172,8 @@ object ScheduleManager {
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
             try {
-                val settings = SettingsDataStore(context).settingsFlow.first()
+                val settingsDataStore = SettingsDataStore(context)
+                val settings = settingsDataStore.settingsFlow.first()
                 val now = Calendar.getInstance()
                 val currentDay = now.get(Calendar.DAY_OF_WEEK)
                 val currentDayOfYear = now.get(Calendar.DAY_OF_YEAR)
@@ -203,6 +204,13 @@ object ScheduleManager {
                         Log.d(TAG, "  ✓ MATCH '${profile.name}' id=${profile.id.take(8)} " +
                             "range=${profile.startHour}:${String.format("%02d", profile.startMinute)}-${profile.endHour}:${String.format("%02d", profile.endMinute)} " +
                             "nav='${profile.navAddress}' music='${profile.musicKeyword}'")
+                        
+                        // Update lastTriggeredDayOfYear BEFORE sending broadcast to prevent duplicate triggers
+                        val updatedProfiles = settings.scheduleProfiles.map { p ->
+                            if (p.id == profile.id) p.copy(lastTriggeredDayOfYear = currentDayOfYear) else p
+                        }
+                        settingsDataStore.updateSettings(settings.copy(scheduleProfiles = updatedProfiles))
+                        
                         val intent = Intent(context, ScheduleReceiver::class.java).apply {
                             data = android.net.Uri.parse("carlauncher://schedule/${profile.id}")
                             putExtra("PROFILE_ID", profile.id)

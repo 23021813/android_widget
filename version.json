@@ -1,7 +1,7 @@
 {
-  "versionCode": 14,
-  "versionName": "1.4.0",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.0/CarFloat_1.4.0.apk",
-  "changelog": "- Thêm tính năng TimeSyncMonitor: Tự động chờ có mạng và đồng bộ giờ chuẩn từ Internet (Google) trước khi kích hoạt lịch trình.\n- Khắc phục lỗi Android Box mất giờ/reset về 1970 khi khởi động lại, giúp trigger đúng Google Maps và Youtube Music.\n- Tối ưu hóa độ tin cậy của dịch vụ chạy ngầm với cơ chế retry và chống xung đột (race condition) khi cập nhật thời gian.",
+  "versionCode": 15,
+  "versionName": "1.4.1",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.1/CarFloat_1.4.1.apk",
+  "changelog": "- Fix thời tiết không hiển thị, icon touch and move nằm sai vị trí",
   "forceUpdate": false
 }
