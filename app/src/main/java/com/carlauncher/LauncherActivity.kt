@@ -19,6 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.carlauncher.bridge.core.NavigationBridgeRepository
+import com.carlauncher.bridge.permission.NavigationBridgePermissionHelper
+import com.carlauncher.bridge.service.BridgeServiceController
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.data.models.AppLanguage
 import com.carlauncher.data.models.LauncherSettings
@@ -94,6 +97,14 @@ class LauncherActivity : ComponentActivity() {
                     lastLang = settings.appLanguage
                     kotlinx.coroutines.delay(200)
                     recreate()
+                }
+            }
+
+            LaunchedEffect(settings.navigationBridge.enabled) {
+                if (settings.navigationBridge.enabled) {
+                    BridgeServiceController.enable(this@LauncherActivity)
+                } else {
+                    BridgeServiceController.disable(this@LauncherActivity)
                 }
             }
 
@@ -198,6 +209,9 @@ class LauncherActivity : ComponentActivity() {
         permissionState.value = Settings.canDrawOverlays(this)
         checkOverlayPermissionAndStartService()
         com.carlauncher.service.ScheduleManager.checkAndTriggerMissedSchedules(this)
+        NavigationBridgeRepository.updatePermissions(
+            NavigationBridgePermissionHelper.currentState(this)
+        )
     }
 
     private fun checkOverlayPermissionAndStartService() {

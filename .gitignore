@@ -13,6 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+keystore.properties
+*.jks
+*.keystore
+*.p12
 
 # App-specific overrides
 /app/build/

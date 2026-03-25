@@ -1,7 +1,32 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use(keystoreProperties::load)
+}
+
+fun signingSecret(name: String): String? {
+    val propertyValue = keystoreProperties.getProperty(name)?.trim().orEmpty()
+    if (propertyValue.isNotEmpty()) return propertyValue
+    return System.getenv(name)?.trim()?.takeIf { it.isNotEmpty() }
+}
+
+val releaseStoreFilePath = signingSecret("RELEASE_STORE_FILE")
+val releaseStorePassword = signingSecret("RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = signingSecret("RELEASE_KEY_ALIAS")
+val releaseKeyPassword = signingSecret("RELEASE_KEY_PASSWORD")
+val hasReleaseSigning = listOf(
+    releaseStoreFilePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.carlauncher"
@@ -11,14 +36,28 @@ android {
         applicationId = "com.carlauncher"
         minSdk = 28
         targetSdk = 34
-        versionCode = 15
-        versionName = "1.4.1"
+        versionCode = 16
+        versionName = "1.4.2"
+    }
+
+    signingConfigs {
+        create("release") {
+            if (hasReleaseSigning) {
+                storeFile = rootProject.file(requireNotNull(releaseStoreFilePath))
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -95,4 +134,6 @@ dependencies {
 
     // Core
     implementation(libs.core.ktx)
+
+    testImplementation("junit:junit:4.13.2")
 }

@@ -10,112 +10,182 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "car_launcher_settings")
 
-class SettingsDataStore(private val context: Context) {
+internal object SettingsKeys {
+    val FRAME1_APP = stringPreferencesKey("frame1_app")
+    val FRAME2_APP = stringPreferencesKey("frame2_app")
+    val ASSISTANT_APP = stringPreferencesKey("assistant_app")
+    val AUTO_START_ON_BOOT = booleanPreferencesKey("auto_start_on_boot")
+    val SHOW_STATUS_WIDGET = booleanPreferencesKey("show_status_widget")
+    val SHOW_ASSISTANT_WIDGET = booleanPreferencesKey("show_assistant_widget")
 
-    private object Keys {
-        val FRAME1_APP = stringPreferencesKey("frame1_app")
-        val FRAME2_APP = stringPreferencesKey("frame2_app")
-        val ASSISTANT_APP = stringPreferencesKey("assistant_app")
-        val AUTO_START_ON_BOOT = booleanPreferencesKey("auto_start_on_boot")
-        val SHOW_STATUS_WIDGET = booleanPreferencesKey("show_status_widget")
-        val SHOW_ASSISTANT_WIDGET = booleanPreferencesKey("show_assistant_widget")
+    val STATUS_WIDGET_SCALE = floatPreferencesKey("status_widget_scale")
+    val ASSISTANT_BUTTON_SCALE = floatPreferencesKey("assistant_button_scale")
+    val WIDGET_OPACITY = floatPreferencesKey("widget_opacity")
 
-        // Independent sizing
-        val STATUS_WIDGET_SCALE = floatPreferencesKey("status_widget_scale")
-        val ASSISTANT_BUTTON_SCALE = floatPreferencesKey("assistant_button_scale")
-        val WIDGET_OPACITY = floatPreferencesKey("widget_opacity")
+    val STATUS_WIDGET_X = intPreferencesKey("status_widget_x")
+    val STATUS_WIDGET_Y = intPreferencesKey("status_widget_y")
+    val ASSISTANT_WIDGET_X = intPreferencesKey("assistant_widget_x")
+    val ASSISTANT_WIDGET_Y = intPreferencesKey("assistant_widget_y")
 
-        // Widget position
-        val STATUS_WIDGET_X = intPreferencesKey("status_widget_x")
-        val STATUS_WIDGET_Y = intPreferencesKey("status_widget_y")
-        val ASSISTANT_WIDGET_X = intPreferencesKey("assistant_widget_x")
-        val ASSISTANT_WIDGET_Y = intPreferencesKey("assistant_widget_y")
+    val ALLOW_OVERLAP_SYSTEM_BARS = booleanPreferencesKey("allow_overlap_system_bars")
 
-        // System bar overlap
-        val ALLOW_OVERLAP_SYSTEM_BARS = booleanPreferencesKey("allow_overlap_system_bars")
+    val CLOCK_FORMAT = stringPreferencesKey("clock_format")
+    val SHOW_WIFI = booleanPreferencesKey("show_wifi")
+    val SHOW_BLUETOOTH = booleanPreferencesKey("show_bluetooth")
+    val SHOW_GPS = booleanPreferencesKey("show_gps")
 
-        val CLOCK_FORMAT = stringPreferencesKey("clock_format")
-        val SHOW_WIFI = booleanPreferencesKey("show_wifi")
-        val SHOW_BLUETOOTH = booleanPreferencesKey("show_bluetooth")
-        val SHOW_GPS = booleanPreferencesKey("show_gps")
+    val CLOCK_CLICK_THROUGH = booleanPreferencesKey("clock_click_through")
 
-        // Click-through
-        val CLOCK_CLICK_THROUGH = booleanPreferencesKey("clock_click_through")
+    val SHOW_WEATHER = booleanPreferencesKey("show_weather")
+    val WEATHER_LOCATION_MODE = stringPreferencesKey("weather_location_mode")
+    val WEATHER_CITY = stringPreferencesKey("weather_city")
+    val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
+    val WEATHER_API_KEY = stringPreferencesKey("weather_api_key")
+    val APP_LANGUAGE = stringPreferencesKey("app_language")
 
-        val SHOW_WEATHER = booleanPreferencesKey("show_weather")
-        val WEATHER_LOCATION_MODE = stringPreferencesKey("weather_location_mode")
-        val WEATHER_CITY = stringPreferencesKey("weather_city")
-        val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
-        val WEATHER_API_KEY = stringPreferencesKey("weather_api_key")
-        val APP_LANGUAGE = stringPreferencesKey("app_language")
+    val ASSISTANT_ICON = stringPreferencesKey("assistant_icon")
+    val ASSISTANT_LONG_PRESS_APP = stringPreferencesKey("assistant_long_press_app")
+    val ASSISTANT_DOUBLE_TAP_APP = stringPreferencesKey("assistant_double_tap_app")
 
-        // Assistant button
-        val ASSISTANT_ICON = stringPreferencesKey("assistant_icon")
-        val ASSISTANT_LONG_PRESS_APP = stringPreferencesKey("assistant_long_press_app")
-        val ASSISTANT_DOUBLE_TAP_APP = stringPreferencesKey("assistant_double_tap_app")
+    val AUTO_SPLIT_ON_BOOT = booleanPreferencesKey("auto_split_on_boot")
+    val SCHEDULE_PROFILES = stringPreferencesKey("schedule_profiles")
 
-        // Boot split
-        val AUTO_SPLIT_ON_BOOT = booleanPreferencesKey("auto_split_on_boot")
+    val BRIDGE_ENABLED = booleanPreferencesKey("bridge_enabled")
+    val BRIDGE_LAST_DEVICE_NAME = stringPreferencesKey("bridge_last_device_name")
+    val BRIDGE_LAST_DEVICE_ADDRESS = stringPreferencesKey("bridge_last_device_address")
+    val BRIDGE_LIGHT_THEME = booleanPreferencesKey("bridge_light_theme")
+    val BRIDGE_BRIGHTNESS = intPreferencesKey("bridge_brightness")
+    val BRIDGE_SPEED_WARNING_LIMIT = intPreferencesKey("bridge_speed_warning_limit")
+}
 
-        // Schedule Automation
-        val SCHEDULE_PROFILES = stringPreferencesKey("schedule_profiles")
-    }
+internal object SettingsPreferencesMapper {
+    fun read(prefs: Preferences): LauncherSettings {
+        return LauncherSettings(
+            frame1App = prefs[SettingsKeys.FRAME1_APP],
+            frame2App = prefs[SettingsKeys.FRAME2_APP],
+            assistantApp = prefs[SettingsKeys.ASSISTANT_APP],
+            autoStartOnBoot = prefs[SettingsKeys.AUTO_START_ON_BOOT] ?: false,
+            showStatusWidget = prefs[SettingsKeys.SHOW_STATUS_WIDGET] ?: true,
+            showAssistantWidget = prefs[SettingsKeys.SHOW_ASSISTANT_WIDGET] ?: true,
 
-    val settingsFlow: Flow<LauncherSettings> = context.dataStore.data.map { prefs ->
-        LauncherSettings(
-            frame1App = prefs[Keys.FRAME1_APP],
-            frame2App = prefs[Keys.FRAME2_APP],
-            assistantApp = prefs[Keys.ASSISTANT_APP],
-            autoStartOnBoot = prefs[Keys.AUTO_START_ON_BOOT] ?: false,
-            showStatusWidget = prefs[Keys.SHOW_STATUS_WIDGET] ?: true,
-            showAssistantWidget = prefs[Keys.SHOW_ASSISTANT_WIDGET] ?: true,
+            statusWidgetScale = prefs[SettingsKeys.STATUS_WIDGET_SCALE] ?: 1.0f,
+            assistantButtonScale = prefs[SettingsKeys.ASSISTANT_BUTTON_SCALE] ?: 1.0f,
+            widgetOpacity = prefs[SettingsKeys.WIDGET_OPACITY] ?: 0.85f,
 
-            statusWidgetScale = prefs[Keys.STATUS_WIDGET_SCALE] ?: 1.0f,
-            assistantButtonScale = prefs[Keys.ASSISTANT_BUTTON_SCALE] ?: 1.0f,
-            widgetOpacity = prefs[Keys.WIDGET_OPACITY] ?: 0.85f,
+            statusWidgetX = prefs[SettingsKeys.STATUS_WIDGET_X] ?: Int.MIN_VALUE,
+            statusWidgetY = prefs[SettingsKeys.STATUS_WIDGET_Y] ?: Int.MIN_VALUE,
+            assistantWidgetX = prefs[SettingsKeys.ASSISTANT_WIDGET_X] ?: Int.MIN_VALUE,
+            assistantWidgetY = prefs[SettingsKeys.ASSISTANT_WIDGET_Y] ?: Int.MIN_VALUE,
 
-            statusWidgetX = prefs[Keys.STATUS_WIDGET_X] ?: Int.MIN_VALUE,
-            statusWidgetY = prefs[Keys.STATUS_WIDGET_Y] ?: Int.MIN_VALUE,
-            assistantWidgetX = prefs[Keys.ASSISTANT_WIDGET_X] ?: Int.MIN_VALUE,
-            assistantWidgetY = prefs[Keys.ASSISTANT_WIDGET_Y] ?: Int.MIN_VALUE,
+            allowOverlapSystemBars = prefs[SettingsKeys.ALLOW_OVERLAP_SYSTEM_BARS] ?: false,
 
-            allowOverlapSystemBars = prefs[Keys.ALLOW_OVERLAP_SYSTEM_BARS] ?: false,
-
-            clockFormat = prefs[Keys.CLOCK_FORMAT]?.let {
-                try { ClockFormat.valueOf(it) } catch (e: Exception) { ClockFormat.TIME_ONLY }
+            clockFormat = prefs[SettingsKeys.CLOCK_FORMAT]?.let {
+                try { ClockFormat.valueOf(it) } catch (_: Exception) { ClockFormat.TIME_ONLY }
             } ?: ClockFormat.TIME_ONLY,
-            showWifi = prefs[Keys.SHOW_WIFI] ?: true,
-            showBluetooth = prefs[Keys.SHOW_BLUETOOTH] ?: true,
-            showGps = prefs[Keys.SHOW_GPS] ?: true,
+            showWifi = prefs[SettingsKeys.SHOW_WIFI] ?: true,
+            showBluetooth = prefs[SettingsKeys.SHOW_BLUETOOTH] ?: true,
+            showGps = prefs[SettingsKeys.SHOW_GPS] ?: true,
 
-            clockClickThrough = prefs[Keys.CLOCK_CLICK_THROUGH] ?: false,
+            clockClickThrough = prefs[SettingsKeys.CLOCK_CLICK_THROUGH] ?: false,
 
-            showWeather = prefs[Keys.SHOW_WEATHER] ?: true,
-            weatherLocationMode = prefs[Keys.WEATHER_LOCATION_MODE]?.let {
-                try { WeatherLocationMode.valueOf(it) } catch (e: Exception) { WeatherLocationMode.GPS }
+            showWeather = prefs[SettingsKeys.SHOW_WEATHER] ?: true,
+            weatherLocationMode = prefs[SettingsKeys.WEATHER_LOCATION_MODE]?.let {
+                try { WeatherLocationMode.valueOf(it) } catch (_: Exception) { WeatherLocationMode.GPS }
             } ?: WeatherLocationMode.GPS,
-            weatherCity = prefs[Keys.WEATHER_CITY] ?: "Hanoi",
-            temperatureUnit = prefs[Keys.TEMPERATURE_UNIT]?.let {
-                try { TemperatureUnit.valueOf(it) } catch (e: Exception) { TemperatureUnit.CELSIUS }
+            weatherCity = prefs[SettingsKeys.WEATHER_CITY] ?: "Hanoi",
+            temperatureUnit = prefs[SettingsKeys.TEMPERATURE_UNIT]?.let {
+                try { TemperatureUnit.valueOf(it) } catch (_: Exception) { TemperatureUnit.CELSIUS }
             } ?: TemperatureUnit.CELSIUS,
-            weatherApiKey = prefs[Keys.WEATHER_API_KEY] ?: "",
-            appLanguage = prefs[Keys.APP_LANGUAGE]?.let {
-                try { AppLanguage.valueOf(it) } catch (e: Exception) { AppLanguage.SYSTEM }
+            weatherApiKey = prefs[SettingsKeys.WEATHER_API_KEY] ?: "",
+            appLanguage = prefs[SettingsKeys.APP_LANGUAGE]?.let {
+                try { AppLanguage.valueOf(it) } catch (_: Exception) { AppLanguage.SYSTEM }
             } ?: AppLanguage.SYSTEM,
 
-            assistantIcon = prefs[Keys.ASSISTANT_ICON]?.let {
-                try { AssistantIcon.valueOf(it) } catch (e: Exception) { AssistantIcon.MIC }
+            assistantIcon = prefs[SettingsKeys.ASSISTANT_ICON]?.let {
+                try { AssistantIcon.valueOf(it) } catch (_: Exception) { AssistantIcon.MIC }
             } ?: AssistantIcon.MIC,
-            assistantLongPressApp = prefs[Keys.ASSISTANT_LONG_PRESS_APP],
-            assistantDoubleTapApp = prefs[Keys.ASSISTANT_DOUBLE_TAP_APP],
+            assistantLongPressApp = prefs[SettingsKeys.ASSISTANT_LONG_PRESS_APP],
+            assistantDoubleTapApp = prefs[SettingsKeys.ASSISTANT_DOUBLE_TAP_APP],
 
-            autoSplitOnBoot = prefs[Keys.AUTO_SPLIT_ON_BOOT] ?: true,
+            autoSplitOnBoot = prefs[SettingsKeys.AUTO_SPLIT_ON_BOOT] ?: true,
 
-            scheduleProfiles = prefs[Keys.SCHEDULE_PROFILES]?.let { parseScheduleProfiles(it) } ?: emptyList()
+            scheduleProfiles = prefs[SettingsKeys.SCHEDULE_PROFILES]?.let {
+                parseScheduleProfiles(it)
+            } ?: emptyList(),
+
+            navigationBridge = NavigationBridgeSettings(
+                enabled = prefs[SettingsKeys.BRIDGE_ENABLED] ?: false,
+                lastDeviceName = prefs[SettingsKeys.BRIDGE_LAST_DEVICE_NAME],
+                lastDeviceAddress = prefs[SettingsKeys.BRIDGE_LAST_DEVICE_ADDRESS],
+                displayLightTheme = prefs[SettingsKeys.BRIDGE_LIGHT_THEME] ?: true,
+                displayBrightness = prefs[SettingsKeys.BRIDGE_BRIGHTNESS] ?: 50,
+                speedWarningLimit = prefs[SettingsKeys.BRIDGE_SPEED_WARNING_LIMIT] ?: 50
+            )
         )
     }
 
-    private fun parseScheduleProfiles(jsonString: String): List<ScheduleProfile> {
+    fun write(prefs: MutablePreferences, settings: LauncherSettings) {
+        if (settings.frame1App != null) prefs[SettingsKeys.FRAME1_APP] = settings.frame1App
+        else prefs.remove(SettingsKeys.FRAME1_APP)
+        if (settings.frame2App != null) prefs[SettingsKeys.FRAME2_APP] = settings.frame2App
+        else prefs.remove(SettingsKeys.FRAME2_APP)
+        if (settings.assistantApp != null) prefs[SettingsKeys.ASSISTANT_APP] = settings.assistantApp
+        else prefs.remove(SettingsKeys.ASSISTANT_APP)
+        if (settings.assistantLongPressApp != null) {
+            prefs[SettingsKeys.ASSISTANT_LONG_PRESS_APP] = settings.assistantLongPressApp
+        } else prefs.remove(SettingsKeys.ASSISTANT_LONG_PRESS_APP)
+        if (settings.assistantDoubleTapApp != null) {
+            prefs[SettingsKeys.ASSISTANT_DOUBLE_TAP_APP] = settings.assistantDoubleTapApp
+        } else prefs.remove(SettingsKeys.ASSISTANT_DOUBLE_TAP_APP)
+
+        prefs[SettingsKeys.AUTO_START_ON_BOOT] = settings.autoStartOnBoot
+        prefs[SettingsKeys.SHOW_STATUS_WIDGET] = settings.showStatusWidget
+        prefs[SettingsKeys.SHOW_ASSISTANT_WIDGET] = settings.showAssistantWidget
+
+        prefs[SettingsKeys.STATUS_WIDGET_SCALE] = settings.statusWidgetScale
+        prefs[SettingsKeys.ASSISTANT_BUTTON_SCALE] = settings.assistantButtonScale
+        prefs[SettingsKeys.WIDGET_OPACITY] = settings.widgetOpacity
+
+        prefs[SettingsKeys.STATUS_WIDGET_X] = settings.statusWidgetX
+        prefs[SettingsKeys.STATUS_WIDGET_Y] = settings.statusWidgetY
+        prefs[SettingsKeys.ASSISTANT_WIDGET_X] = settings.assistantWidgetX
+        prefs[SettingsKeys.ASSISTANT_WIDGET_Y] = settings.assistantWidgetY
+
+        prefs[SettingsKeys.ALLOW_OVERLAP_SYSTEM_BARS] = settings.allowOverlapSystemBars
+
+        prefs[SettingsKeys.CLOCK_FORMAT] = settings.clockFormat.name
+        prefs[SettingsKeys.SHOW_WIFI] = settings.showWifi
+        prefs[SettingsKeys.SHOW_BLUETOOTH] = settings.showBluetooth
+        prefs[SettingsKeys.SHOW_GPS] = settings.showGps
+
+        prefs[SettingsKeys.CLOCK_CLICK_THROUGH] = settings.clockClickThrough
+
+        prefs[SettingsKeys.SHOW_WEATHER] = settings.showWeather
+        prefs[SettingsKeys.WEATHER_LOCATION_MODE] = settings.weatherLocationMode.name
+        prefs[SettingsKeys.WEATHER_CITY] = settings.weatherCity
+        prefs[SettingsKeys.TEMPERATURE_UNIT] = settings.temperatureUnit.name
+        prefs[SettingsKeys.WEATHER_API_KEY] = settings.weatherApiKey
+        prefs[SettingsKeys.APP_LANGUAGE] = settings.appLanguage.name
+
+        prefs[SettingsKeys.ASSISTANT_ICON] = settings.assistantIcon.name
+        prefs[SettingsKeys.AUTO_SPLIT_ON_BOOT] = settings.autoSplitOnBoot
+        prefs[SettingsKeys.SCHEDULE_PROFILES] = serializeScheduleProfiles(settings.scheduleProfiles)
+
+        prefs[SettingsKeys.BRIDGE_ENABLED] = settings.navigationBridge.enabled
+        prefs[SettingsKeys.BRIDGE_LIGHT_THEME] = settings.navigationBridge.displayLightTheme
+        prefs[SettingsKeys.BRIDGE_BRIGHTNESS] = settings.navigationBridge.displayBrightness
+        prefs[SettingsKeys.BRIDGE_SPEED_WARNING_LIMIT] = settings.navigationBridge.speedWarningLimit
+
+        if (settings.navigationBridge.lastDeviceName != null) {
+            prefs[SettingsKeys.BRIDGE_LAST_DEVICE_NAME] = settings.navigationBridge.lastDeviceName
+        } else prefs.remove(SettingsKeys.BRIDGE_LAST_DEVICE_NAME)
+
+        if (settings.navigationBridge.lastDeviceAddress != null) {
+            prefs[SettingsKeys.BRIDGE_LAST_DEVICE_ADDRESS] = settings.navigationBridge.lastDeviceAddress
+        } else prefs.remove(SettingsKeys.BRIDGE_LAST_DEVICE_ADDRESS)
+    }
+
+    internal fun parseScheduleProfiles(jsonString: String): List<ScheduleProfile> {
         val list = mutableListOf<ScheduleProfile>()
         try {
             val array = org.json.JSONArray(jsonString)
@@ -152,75 +222,49 @@ class SettingsDataStore(private val context: Context) {
         return list
     }
 
-    suspend fun updateSettings(settings: LauncherSettings) {
-        context.dataStore.edit { prefs ->
-            if (settings.frame1App != null) prefs[Keys.FRAME1_APP] = settings.frame1App
-            else prefs.remove(Keys.FRAME1_APP)
-            if (settings.frame2App != null) prefs[Keys.FRAME2_APP] = settings.frame2App
-            else prefs.remove(Keys.FRAME2_APP)
-            if (settings.assistantApp != null) prefs[Keys.ASSISTANT_APP] = settings.assistantApp
-            else prefs.remove(Keys.ASSISTANT_APP)
-            if (settings.assistantLongPressApp != null) prefs[Keys.ASSISTANT_LONG_PRESS_APP] = settings.assistantLongPressApp
-            else prefs.remove(Keys.ASSISTANT_LONG_PRESS_APP)
-            if (settings.assistantDoubleTapApp != null) prefs[Keys.ASSISTANT_DOUBLE_TAP_APP] = settings.assistantDoubleTapApp
-            else prefs.remove(Keys.ASSISTANT_DOUBLE_TAP_APP)
-
-            prefs[Keys.AUTO_START_ON_BOOT] = settings.autoStartOnBoot
-            prefs[Keys.SHOW_STATUS_WIDGET] = settings.showStatusWidget
-            prefs[Keys.SHOW_ASSISTANT_WIDGET] = settings.showAssistantWidget
-
-            prefs[Keys.STATUS_WIDGET_SCALE] = settings.statusWidgetScale
-            prefs[Keys.ASSISTANT_BUTTON_SCALE] = settings.assistantButtonScale
-            prefs[Keys.WIDGET_OPACITY] = settings.widgetOpacity
-
-            prefs[Keys.STATUS_WIDGET_X] = settings.statusWidgetX
-            prefs[Keys.STATUS_WIDGET_Y] = settings.statusWidgetY
-            prefs[Keys.ASSISTANT_WIDGET_X] = settings.assistantWidgetX
-            prefs[Keys.ASSISTANT_WIDGET_Y] = settings.assistantWidgetY
-
-            prefs[Keys.ALLOW_OVERLAP_SYSTEM_BARS] = settings.allowOverlapSystemBars
-
-            prefs[Keys.CLOCK_FORMAT] = settings.clockFormat.name
-            prefs[Keys.SHOW_WIFI] = settings.showWifi
-            prefs[Keys.SHOW_BLUETOOTH] = settings.showBluetooth
-            prefs[Keys.SHOW_GPS] = settings.showGps
-
-            prefs[Keys.CLOCK_CLICK_THROUGH] = settings.clockClickThrough
-
-            prefs[Keys.SHOW_WEATHER] = settings.showWeather
-            prefs[Keys.WEATHER_LOCATION_MODE] = settings.weatherLocationMode.name
-            prefs[Keys.WEATHER_CITY] = settings.weatherCity
-            prefs[Keys.TEMPERATURE_UNIT] = settings.temperatureUnit.name
-            prefs[Keys.WEATHER_API_KEY] = settings.weatherApiKey
-            prefs[Keys.APP_LANGUAGE] = settings.appLanguage.name
-
-            prefs[Keys.ASSISTANT_ICON] = settings.assistantIcon.name
-            prefs[Keys.AUTO_SPLIT_ON_BOOT] = settings.autoSplitOnBoot
-
-            // Schedule
-            val jsonArray = org.json.JSONArray()
-            for (profile in settings.scheduleProfiles) {
-                val obj = org.json.JSONObject().apply {
-                    put("id", profile.id)
-                    put("name", profile.name)
-                    put("enabled", profile.enabled)
-                    put("startHour", profile.startHour)
-                    put("startMinute", profile.startMinute)
-                    put("endHour", profile.endHour)
-                    put("endMinute", profile.endMinute)
-                    put("lastTriggeredDayOfYear", profile.lastTriggeredDayOfYear)
-                    val daysArray = org.json.JSONArray()
-                    for (day in profile.days) daysArray.put(day)
-                    put("days", daysArray)
-                    put("autoNavigate", profile.autoNavigate)
-                    put("navAddress", profile.navAddress)
-                    put("autoMusic", profile.autoMusic)
-                    put("musicKeyword", profile.musicKeyword)
+    internal fun serializeScheduleProfiles(profiles: List<ScheduleProfile>): String {
+        fun escapeJson(value: String): String {
+            return buildString {
+                value.forEach { ch ->
+                    when (ch) {
+                        '\\' -> append("\\\\")
+                        '"' -> append("\\\"")
+                        '\n' -> append("\\n")
+                        '\r' -> append("\\r")
+                        '\t' -> append("\\t")
+                        else -> append(ch)
+                    }
                 }
-                jsonArray.put(obj)
             }
-            prefs[Keys.SCHEDULE_PROFILES] = jsonArray.toString()
         }
+
+        return profiles.joinToString(prefix = "[", postfix = "]") { profile ->
+            val days = profile.days.joinToString(prefix = "[", postfix = "]")
+            "{" +
+                "\"id\":\"${escapeJson(profile.id)}\"," +
+                "\"name\":\"${escapeJson(profile.name)}\"," +
+                "\"enabled\":${profile.enabled}," +
+                "\"startHour\":${profile.startHour}," +
+                "\"startMinute\":${profile.startMinute}," +
+                "\"endHour\":${profile.endHour}," +
+                "\"endMinute\":${profile.endMinute}," +
+                "\"lastTriggeredDayOfYear\":${profile.lastTriggeredDayOfYear}," +
+                "\"days\":$days," +
+                "\"autoNavigate\":${profile.autoNavigate}," +
+                "\"navAddress\":\"${escapeJson(profile.navAddress)}\"," +
+                "\"autoMusic\":${profile.autoMusic}," +
+                "\"musicKeyword\":\"${escapeJson(profile.musicKeyword)}\"" +
+                "}"
+        }
+    }
+}
+
+class SettingsDataStore(private val context: Context) {
+
+    val settingsFlow: Flow<LauncherSettings> = context.dataStore.data.map(SettingsPreferencesMapper::read)
+
+    suspend fun updateSettings(settings: LauncherSettings) {
+        context.dataStore.edit { prefs -> SettingsPreferencesMapper.write(prefs, settings) }
     }
 
     suspend fun resetToDefaults() {
