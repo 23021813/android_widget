@@ -11,12 +11,18 @@ internal open class NavigationNotification(
 ) {
     protected val notification: Notification = statusBarNotification.notification
     protected val context: Context = context
-    protected val appSourceContext: Context = runCatching {
+    protected val appSourceContext: Context = try {
         context.createPackageContext(
             statusBarNotification.packageName,
             Context.CONTEXT_IGNORE_SECURITY
         )
-    }.getOrElse { context }
+    } catch (e: Exception) {
+        android.util.Log.e(
+            "NavigationNotification",
+            "createPackageContext failed for ${statusBarNotification.packageName}: $e"
+        )
+        context
+    }
 
     protected var navigationData: NavigationData = NavigationData(postTime = statusBarNotification.postTime)
 }

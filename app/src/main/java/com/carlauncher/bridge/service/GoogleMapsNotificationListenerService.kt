@@ -20,7 +20,7 @@ class GoogleMapsNotificationListenerService : NotificationListenerService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var parsingJob: Job? = null
     private var bridgeEnabled = false
-    private var currentNotificationId: String? = null
+    private var lastSeenNotification: StatusBarNotification? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -33,7 +33,7 @@ class GoogleMapsNotificationListenerService : NotificationListenerService() {
                     if (enabled) {
                         checkActiveNotifications()
                     } else {
-                        currentNotificationId = null
+                        lastSeenNotification = null
                         NavigationBridgeRepository.clearNavigation()
                     }
                 }
@@ -56,7 +56,7 @@ class GoogleMapsNotificationListenerService : NotificationListenerService() {
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
         if (isGoogleMapsNotification(sbn)) {
             parsingJob?.cancel()
-            currentNotificationId = null
+            lastSeenNotification = null
             NavigationBridgeRepository.clearNavigation()
         }
     }
@@ -80,15 +80,15 @@ class GoogleMapsNotificationListenerService : NotificationListenerService() {
     }
 
     private fun handleGoogleNotification(statusBarNotification: StatusBarNotification) {
-        currentNotificationId = "${statusBarNotification.packageName}:${statusBarNotification.id}"
-        if (parsingJob?.isActive == true) return
+        lastSeenNotification = statusBarNotification // luôn cập nhật notification mới nhất
+        if (parsingJob?.isActive == true) return    // job đang chạy sẽ tự đọc lastSeenNotification
 
         parsingJob = serviceScope.launch {
-            val latestNotification = statusBarNotification
+            val notificationToProcess = lastSeenNotification ?: return@launch
             val parsed = withContext(Dispatchers.Default) {
                 GoogleMapsNavigationNotification(
                     this@GoogleMapsNotificationListenerService,
-                    latestNotification
+                    notificationToProcess
                 ).toNavigationData()
             }
             NavigationBridgeRepository.updateNavigationData(parsed)
