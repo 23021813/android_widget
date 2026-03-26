@@ -1,7 +1,7 @@
 {
-  "versionCode": 16,
-  "versionName": "1.4.2",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.2/CarFloat_1.4.2.apk",
+  "versionCode": 18,
+  "versionName": "1.4.3",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.3/CarFloat_1.4.3.apk",
   "changelog": "- Update panel quản trị devices dẫn đường",
   "forceUpdate": false
 }

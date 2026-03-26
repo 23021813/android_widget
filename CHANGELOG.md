@@ -2,7 +2,16 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
-## [1.3.9] - 2026-03-11
+## [1.4.3] - 2026-03-26
+### Changed
+- Comprehensive version upgrade and system stabilization.
+- Optimization of build system for multi-machine synchronization.
+
+## [1.4.23] - 2026-03-26
+### Added
+- Intermediate build for feature verification and key synchronization.
+
+<SAME%>
 ### Added
 - **TimeSyncMonitor**: Cơ chế mới chờ kết nối mạng và xác thực giờ chuẩn từ máy chủ Google trước khi xếp lịch (Sync Alarms). Đảm bảo trigger đúng giờ ngay cả khi Android Box bị mất giờ hệ thống (reset về 1970).
 - **Robustness Improvements**: Tự động thử lại (Retry) khi WiFi mới kết nối và chống xung đột logic khi OS cập nhật giờ.
