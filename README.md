@@ -1,4 +1,4 @@
-# CarFloat (Formerly Car Launcher Overlay) - v1.3.8
+# CarFloat (Formerly Car Launcher Overlay) - v1.4.3
 
 CarFloat là một ứng dụng tiện ích chuyên dụng dành cho màn hình xe hơi (Android Automotive / Android Box) với giao diện **Glassmorphism** hiện đại. Ứng dụng cung cấp các Widget nổi (Floating Widgets) thông minh, cho phép điều khiển và truy cập nhanh mà không cần thoát ứng dụng đang chạy.
 
@@ -74,5 +74,32 @@ CarFloat hỗ trợ cập nhật từ xa mà không cần CH Play. Để cài đ
 
 ---
 
-## 📝 Changelog
-Chi tiết các thay đổi qua từng phiên bản có thể xem tại [CHANGELOG.md](CHANGELOG.md).
+---
+ 
+ ## 📝 Changelog
+ Chi tiết các thay đổi qua từng phiên bản có thể xem tại [CHANGELOG.md](CHANGELOG.md).
+ 
+-## [1.1.0] - 2026-02-15
+-### Added
+-- Hỗ trợ đa ngôn ngữ cơ bản.
+-- Giao diện Glassmorphism ban đầu.
+-- Tính năng Split Screen Proxy.
++---
++
++## 🔐 Signing & Synchronization
++
++Dự án hỗ trợ build và sign tự động thông qua **GitHub Secrets**. Để đồng bộ key từ MacBook lên hệ thống, sử dụng GitHub CLI (`gh`):
++
++1. **Upload Keystore (Base64)**:
++   ```bash
++   gh secret set RELEASE_STORE_DATA --body "$(base64 -i ~/.android/debug.keystore)"
++   ```
++2. **Upload Credentials**:
++   ```bash
++   gh secret set RELEASE_STORE_PASSWORD --body "android"
++   gh secret set RELEASE_KEY_ALIAS --body "androiddebugkey"
++   gh secret set RELEASE_KEY_PASSWORD --body "android"
++   ```
++
++Các máy khác hoặc GitHub Actions có thể sử dụng các secret này để thực hiện build bản release chính thức.
+
