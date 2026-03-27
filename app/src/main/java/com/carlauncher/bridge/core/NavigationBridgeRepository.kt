@@ -3,7 +3,9 @@ package com.carlauncher.bridge.core
 import com.carlauncher.bridge.model.BleConnectionState
 import com.carlauncher.bridge.model.BridgePermissionState
 import com.carlauncher.bridge.model.BridgeUiState
+import com.carlauncher.bridge.model.DeviceState
 import com.carlauncher.bridge.model.NavigationData
+import com.carlauncher.bridge.model.WifiScanResult
 import com.carlauncher.data.models.NavigationBridgeSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,6 +66,43 @@ object NavigationBridgeRepository {
                 lastUpdateTimestamp = System.currentTimeMillis()
             )
         }
+    }
+
+    fun updateDeviceState(state: DeviceState) {
+        _uiState.update {
+            it.copy(
+                deviceState = state,
+                lastUpdateTimestamp = System.currentTimeMillis()
+            )
+        }
+    }
+
+    fun addWifiScanResult(result: WifiScanResult) {
+        _uiState.update {
+            val newList = it.wifiScanResults.toMutableList()
+            val existingIndex = newList.indexOfFirst { r -> r.ssid == result.ssid }
+            if (existingIndex >= 0) {
+                newList[existingIndex] = result
+            } else {
+                newList.add(result)
+            }
+            it.copy(
+                wifiScanResults = newList,
+                lastUpdateTimestamp = System.currentTimeMillis()
+            )
+        }
+    }
+
+    fun clearWifiScanResults() {
+        _uiState.update { it.copy(wifiScanResults = emptyList()) }
+    }
+
+    fun setWifiScanning(scanning: Boolean) {
+        _uiState.update { it.copy(isWifiScanning = scanning) }
+    }
+
+    fun setWifiConnecting(connecting: Boolean) {
+        _uiState.update { it.copy(isWifiConnecting = connecting) }
     }
 
     fun clearNavigation() {

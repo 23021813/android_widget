@@ -27,5 +27,9 @@ data class BridgeUiState(
     val navigationData: NavigationData? = null,
     val gpsSpeedKmh: Int = 0,
     val permissions: BridgePermissionState = BridgePermissionState(),
+    val deviceState: DeviceState = DeviceState(),
+    val wifiScanResults: List<WifiScanResult> = emptyList(),
+    val isWifiScanning: Boolean = false,
+    val isWifiConnecting: Boolean = false,
     val lastUpdateTimestamp: Long? = null
 )

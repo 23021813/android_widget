@@ -25,6 +25,30 @@ class BridgePayloadSerializerTest {
     }
 
     @Test
+    fun `build time sync command follows proto 1 format`() {
+        val payload = BridgePayloadSerializer.buildTimeSyncCommand(1679900000L, 420, "1001")
+        assertEquals(
+            "proto=1\ncmd=time.sync\nrequestId=1001\nepoch=1679900000\ntzOffsetMinutes=420",
+            payload
+        )
+    }
+
+    @Test
+    fun `build wifi connect command handles empty password`() {
+        val payloadWithPass = BridgePayloadSerializer.buildWifiConnectCommand("MyWiFi", "12345678", "1002")
+        assertEquals(
+            "proto=1\ncmd=wifi.connect\nrequestId=1002\nssid=MyWiFi\npassword=12345678",
+            payloadWithPass
+        )
+
+        val payloadNoPass = BridgePayloadSerializer.buildWifiConnectCommand("OpenNet", "", "1003")
+        assertEquals(
+            "proto=1\ncmd=wifi.connect\nrequestId=1003\nssid=OpenNet",
+            payloadNoPass
+        )
+    }
+
+    @Test
     fun `build navigation payload keeps expected key order and sanitizes text`() {
         val payload = BridgePayloadSerializer.buildNavigationPayload(
             data = NavigationData(

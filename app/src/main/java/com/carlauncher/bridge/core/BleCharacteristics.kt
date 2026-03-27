@@ -6,4 +6,6 @@ object BleCharacteristics {
     const val CHA_NAV = "0b11deef-1563-447f-aece-d3dfeb1c1f20"
     const val CHA_NAV_TBT_ICON = "d4d8fcca-16b2-4b8e-8ed5-90137c44a8ad"
     const val CHA_GPS_SPEED = "98b6073a-5cf3-4e73-b6d3-f8e05fa018a9"
+    const val CHA_DEVICE_CONTROL = "b3a1f4a2-6fd1-4a66-9c16-f6f5d3a8e101"
+    const val CHA_DEVICE_STATUS = "b3a1f4a2-6fd1-4a66-9c16-f6f5d3a8e102"
 }

@@ -37,6 +37,32 @@ object BridgeServiceController {
         })
     }
 
+    fun wifiScan(context: Context) {
+        context.startService(Intent(context, EspBleBridgeService::class.java).apply {
+            action = BridgeActions.WIFI_SCAN
+        })
+    }
+
+    fun wifiConnect(context: Context, ssid: String, pass: String) {
+        context.startService(Intent(context, EspBleBridgeService::class.java).apply {
+            action = BridgeActions.WIFI_CONNECT
+            putExtra("ssid", ssid)
+            putExtra("password", pass)
+        })
+    }
+
+    fun wifiForget(context: Context) {
+        context.startService(Intent(context, EspBleBridgeService::class.java).apply {
+            action = BridgeActions.WIFI_FORGET
+        })
+    }
+
+    fun requestStatusSnapshot(context: Context) {
+        context.startService(Intent(context, EspBleBridgeService::class.java).apply {
+            action = BridgeActions.STATUS_GET
+        })
+    }
+
     private fun startForegroundServiceCompat(context: Context, intent: Intent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent)

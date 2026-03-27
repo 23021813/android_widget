@@ -14,6 +14,84 @@ object BridgePayloadSerializer {
         )
     }
 
+    fun buildTimeSyncCommand(epoch: Long, tzOffsetMinutes: Int, requestId: String): String {
+        return keyValuePayload(
+            linkedMapOf(
+                "proto" to "1",
+                "cmd" to "time.sync",
+                "requestId" to requestId,
+                "epoch" to epoch.toString(),
+                "tzOffsetMinutes" to tzOffsetMinutes.toString()
+            )
+        )
+    }
+
+    fun buildStatusGetCommand(requestId: String): String {
+        return keyValuePayload(
+            linkedMapOf(
+                "proto" to "1",
+                "cmd" to "status.get",
+                "requestId" to requestId
+            )
+        )
+    }
+
+    fun buildSettingsSetCommand(settings: NavigationBridgeSettings, requestId: String): String {
+        return keyValuePayload(
+            linkedMapOf(
+                "proto" to "1",
+                "cmd" to "settings.set",
+                "requestId" to requestId,
+                "lightTheme" to settings.displayLightTheme.toString(),
+                "brightness" to settings.displayBrightness.toString(),
+                "speedLimit" to settings.speedWarningLimit.toString()
+            )
+        )
+    }
+
+    fun buildWifiScanCommand(requestId: String): String {
+        return keyValuePayload(
+            linkedMapOf(
+                "proto" to "1",
+                "cmd" to "wifi.scan",
+                "requestId" to requestId
+            )
+        )
+    }
+
+    fun buildWifiConnectCommand(ssid: String, password: String, requestId: String): String {
+        val map = linkedMapOf(
+            "proto" to "1",
+            "cmd" to "wifi.connect",
+            "requestId" to requestId,
+            "ssid" to ssid
+        )
+        if (password.isNotEmpty()) {
+            map["password"] = password
+        }
+        return keyValuePayload(map)
+    }
+
+    fun buildWifiForgetCommand(requestId: String): String {
+        return keyValuePayload(
+            linkedMapOf(
+                "proto" to "1",
+                "cmd" to "wifi.forget",
+                "requestId" to requestId
+            )
+        )
+    }
+
+    fun buildScreenGetCommand(requestId: String): String {
+        return keyValuePayload(
+            linkedMapOf(
+                "proto" to "1",
+                "cmd" to "screen.get",
+                "requestId" to requestId
+            )
+        )
+    }
+
     fun buildNavigationPayload(data: NavigationData?, iconHash: String): String {
         return keyValuePayload(
             linkedMapOf(

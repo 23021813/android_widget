@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
@@ -73,6 +74,7 @@ class EspBleBridgeService : Service(), LocationListener {
     private var reconnectTimer: Timer? = null
     private var firstPing = true
     private val sentIconRegistry = SentIconRegistry()
+    private val pendingDescriptors = mutableListOf<BluetoothGattDescriptor>()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -123,6 +125,14 @@ class EspBleBridgeService : Service(), LocationListener {
             }
             BridgeActions.DISCONNECT_DEVICE -> disconnect()
             BridgeActions.SEND_SETTINGS -> sendPreferencesToDevice()
+            BridgeActions.WIFI_SCAN -> sendWifiScan()
+            BridgeActions.WIFI_CONNECT -> {
+                val ssid = intent.getStringExtra("ssid").orEmpty()
+                val password = intent.getStringExtra("password").orEmpty()
+                if (ssid.isNotEmpty()) sendWifiConnect(ssid, password)
+            }
+            BridgeActions.WIFI_FORGET -> sendWifiForget()
+            BridgeActions.STATUS_GET -> sendStatusGet()
         }
         return START_STICKY
     }
@@ -190,8 +200,66 @@ class EspBleBridgeService : Service(), LocationListener {
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-            if (status != BluetoothGatt.GATT_SUCCESS) return
+            if (status != BluetoothGatt.GATT_SUCCESS || gatt == null) return
             connectionState = BluetoothProfile.STATE_CONNECTED
+            
+            pendingDescriptors.clear()
+            val service = gatt.getService(UUID.fromString(BleCharacteristics.SERVICE_UUID))
+            if (service != null) {
+                listOf(BleCharacteristics.CHA_DEVICE_STATUS, BleCharacteristics.CHA_SETTINGS).forEach { uuidStr ->
+                    service.getCharacteristic(UUID.fromString(uuidStr))?.let { char ->
+                        gatt.setCharacteristicNotification(char, true)
+                        char.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))?.let { desc ->
+                            @Suppress("DEPRECATION")
+                            desc.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                            pendingDescriptors.add(desc)
+                        }
+                    }
+                }
+            }
+            writeNextDescriptor(gatt)
+        }
+
+        override fun onDescriptorWrite(
+            gatt: BluetoothGatt?,
+            descriptor: BluetoothGattDescriptor?,
+            status: Int
+        ) {
+            gatt?.let { writeNextDescriptor(it) }
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray
+        ) {
+            handleBleNotification(characteristic.uuid.toString(), String(value, Charsets.UTF_8))
+        }
+
+        @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?
+        ) {
+            val value = characteristic?.value ?: return
+            handleBleNotification(characteristic.uuid.toString(), String(value, Charsets.UTF_8))
+        }
+
+        private fun writeNextDescriptor(gatt: BluetoothGatt) {
+            if (pendingDescriptors.isEmpty()) {
+                onSubscriptionsComplete()
+                return
+            }
+            val desc = pendingDescriptors.removeAt(0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                gatt.writeDescriptor(desc, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+            } else {
+                @Suppress("DEPRECATION")
+                gatt.writeDescriptor(desc)
+            }
+        }
+
+        private fun onSubscriptionsComplete() {
             isSending = false
             writeQueue.clear()
             sentIconRegistry.clear()
@@ -204,7 +272,7 @@ class EspBleBridgeService : Service(), LocationListener {
                 currentDevice?.address
             )
             persistLastDevice(currentDevice)
-            sendPreferencesToDevice()
+            sendTimeSync()
             sendToDevice(lastNavigationData)
         }
 
@@ -246,6 +314,66 @@ class EspBleBridgeService : Service(), LocationListener {
                 characteristic.value = item.data
                 @Suppress("DEPRECATION")
                 gatt.writeCharacteristic(characteristic)
+            }
+        }
+    }
+
+    private fun handleBleNotification(uuid: String, payload: String) {
+        val map = com.carlauncher.bridge.core.BlePayloadParser.parse(payload)
+        val type = map["type"] ?: return
+        when (type) {
+            "settings.updated" -> {
+                val state = NavigationBridgeRepository.uiState.value.deviceState
+                NavigationBridgeRepository.updateDeviceState(state.copy(
+                    lightTheme = map["lightTheme"]?.toBooleanStrictOrNull() ?: state.lightTheme,
+                    brightness = map["brightness"]?.toIntOrNull() ?: state.brightness,
+                    speedLimit = map["speedLimit"]?.toIntOrNull() ?: state.speedLimit
+                ))
+            }
+            "status.snapshot" -> {
+                val state = NavigationBridgeRepository.uiState.value.deviceState
+                NavigationBridgeRepository.updateDeviceState(state.copy(
+                    deviceName = map["deviceName"] ?: state.deviceName,
+                    bleConnected = map["bleConnected"]?.toBooleanStrictOrNull() ?: state.bleConnected,
+                    wifiConfigured = map["wifiConfigured"]?.toBooleanStrictOrNull() ?: state.wifiConfigured,
+                    wifiState = map["wifiState"] ?: state.wifiState,
+                    wifiSsid = map["wifiSsid"] ?: state.wifiSsid,
+                    wifiIp = map["wifiIp"] ?: state.wifiIp,
+                    wifiLastError = map["wifiLastError"] ?: state.wifiLastError,
+                    timeSource = map["timeSource"] ?: state.timeSource,
+                    timeSynced = map["timeSynced"]?.toBooleanStrictOrNull() ?: state.timeSynced,
+                    lastTimeSyncEpoch = map["lastTimeSyncEpoch"]?.toLongOrNull() ?: state.lastTimeSyncEpoch,
+                    tzOffsetMinutes = map["tzOffsetMinutes"]?.toIntOrNull() ?: state.tzOffsetMinutes,
+                    brightness = map["brightness"]?.toIntOrNull() ?: state.brightness,
+                    speedLimit = map["speedLimit"]?.toIntOrNull() ?: state.speedLimit,
+                    screen = map["screen"] ?: state.screen,
+                    screenLocked = map["screenLocked"]?.toBooleanStrictOrNull() ?: state.screenLocked,
+                    navReady = map["navReady"]?.toBooleanStrictOrNull() ?: state.navReady,
+                    firmwareVersion = map["firmwareVersion"] ?: state.firmwareVersion
+                ))
+            }
+            "wifi.scan.result" -> {
+                val ssid = map["ssid"] ?: return
+                NavigationBridgeRepository.addWifiScanResult(
+                    com.carlauncher.bridge.model.WifiScanResult(
+                        ssid = ssid,
+                        rssi = map["rssi"]?.toIntOrNull() ?: 0,
+                        auth = map["auth"] ?: "unknown",
+                        channel = map["channel"]?.toIntOrNull() ?: 0,
+                        hidden = map["hidden"]?.toBooleanStrictOrNull() ?: false
+                    )
+                )
+            }
+            "wifi.scan.done" -> {
+                NavigationBridgeRepository.setWifiScanning(false)
+            }
+            "wifi.connect.state" -> {
+                if (map["state"] == "connecting") {
+                    NavigationBridgeRepository.setWifiConnecting(true)
+                }
+            }
+            "wifi.connect.result" -> {
+                NavigationBridgeRepository.setWifiConnecting(false)
             }
         }
     }
@@ -315,8 +443,49 @@ class EspBleBridgeService : Service(), LocationListener {
 
     private fun sendPreferencesToDevice() {
         if (connectionState != BluetoothProfile.STATE_CONNECTED) return
-        val payload = BridgePayloadSerializer.buildSettingsPayload(currentSettings)
-        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_SETTINGS, payload.toByteArray()))
+        val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
+        val payload = BridgePayloadSerializer.buildSettingsSetCommand(currentSettings, reqId)
+        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
+    }
+
+    private fun sendTimeSync() {
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
+        val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
+        val epoch = System.currentTimeMillis() / 1000L
+        val tzOffset = java.util.TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 60000
+        val payload = BridgePayloadSerializer.buildTimeSyncCommand(epoch, tzOffset, reqId)
+        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
+    }
+    
+    private fun sendStatusGet() {
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
+        val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
+        val payload = BridgePayloadSerializer.buildStatusGetCommand(reqId)
+        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
+    }
+    
+    private fun sendWifiScan() {
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
+        NavigationBridgeRepository.clearWifiScanResults()
+        NavigationBridgeRepository.setWifiScanning(true)
+        val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
+        val payload = BridgePayloadSerializer.buildWifiScanCommand(reqId)
+        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
+    }
+    
+    private fun sendWifiConnect(ssid: String, pass: String) {
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
+        NavigationBridgeRepository.setWifiConnecting(true)
+        val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
+        val payload = BridgePayloadSerializer.buildWifiConnectCommand(ssid, pass, reqId)
+        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
+    }
+    
+    private fun sendWifiForget() {
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
+        val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
+        val payload = BridgePayloadSerializer.buildWifiForgetCommand(reqId)
+        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
     }
 
     private fun sendToDevice(data: NavigationData?) {

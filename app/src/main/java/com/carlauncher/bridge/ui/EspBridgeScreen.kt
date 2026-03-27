@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Stop
@@ -39,8 +40,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -109,6 +114,9 @@ fun EspBridgeScreen(
     var speedLimitInput by remember(bridgeSettings.speedWarningLimit) {
         mutableStateOf(bridgeSettings.speedWarningLimit.toString())
     }
+    var showWifiPasswordDialog by rememberSaveable { mutableStateOf(false) }
+    var selectedWifiSsid by rememberSaveable { mutableStateOf("") }
+    var wifiPasswordInput by rememberSaveable { mutableStateOf("") }
 
     fun refreshPermissions() {
         NavigationBridgeRepository.updatePermissions(
@@ -454,6 +462,82 @@ fun EspBridgeScreen(
                 }
             }
 
+            if (bridgeState.bleConnectionState == BleConnectionState.CONNECTED) {
+                item {
+                    SettingsSection(title = "Device Status & Wi-Fi") {
+                        val state = bridgeState.deviceState
+                        DiagnosticText(label = "Screen", value = "${state.screen} (Locked: ${state.screenLocked})")
+                        DiagnosticText(label = "Time Source", value = "${state.timeSource} (Synced: ${state.timeSynced})")
+                        DiagnosticText(label = "Firmware", value = state.firmwareVersion)
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        val wifiStatusStr = when (state.wifiState) {
+                            "connected" -> "Connected to ${state.wifiSsid} (${state.wifiIp})"
+                            "disconnected" -> "Disconnected (Saved: ${state.wifiSsid})"
+                            "unconfigured" -> "Unconfigured"
+                            else -> state.wifiState
+                        }
+                        DiagnosticText(label = "Wi-Fi Status", value = wifiStatusStr)
+                        if (state.wifiLastError.isNotEmpty()) {
+                            DiagnosticText(label = "Last Error", value = state.wifiLastError)
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { BridgeServiceController.wifiScan(context) },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(if (bridgeState.isWifiScanning) "Scanning..." else "Scan Wi-Fi")
+                            }
+                            OutlinedButton(
+                                onClick = { BridgeServiceController.wifiForget(context) },
+                                modifier = Modifier.weight(1f),
+                                enabled = state.wifiConfigured
+                            ) {
+                                Text("Forget Wi-Fi")
+                            }
+                        }
+                        
+                        if (bridgeState.wifiScanResults.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(text = "Scan Results:", color = TextSecondary, style = MaterialTheme.typography.labelLarge)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                bridgeState.wifiScanResults.sortedByDescending { it.rssi }.take(5).forEach { result ->
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant),
+                                        onClick = { 
+                                            selectedWifiSsid = result.ssid
+                                            wifiPasswordInput = ""
+                                            showWifiPasswordDialog = true
+                                        }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(12.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column {
+                                                Text(text = result.ssid, color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
+                                                Text(text = "Sec: ${result.auth} | RSSI: ${result.rssi}", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
+                                            }
+                                            Icon(Icons.Default.Wifi, contentDescription = null, tint = AccentCyan)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             item {
                 SettingsSection(title = androidx.compose.ui.res.stringResource(R.string.bridge_section_settings)) {
                     SettingsToggle(
@@ -637,6 +721,42 @@ fun EspBridgeScreen(
                 }
             }
         }
+    }
+
+    if (showWifiPasswordDialog) {
+        AlertDialog(
+            onDismissRequest = { showWifiPasswordDialog = false },
+            containerColor = DarkSurface,
+            title = { Text(text = "Connect to $selectedWifiSsid", color = TextPrimary) },
+            text = {
+                OutlinedTextField(
+                    value = wifiPasswordInput,
+                    onValueChange = { wifiPasswordInput = it },
+                    label = { Text("Password", color = TextSecondary) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary
+                    )
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        BridgeServiceController.wifiConnect(context, selectedWifiSsid, wifiPasswordInput)
+                        showWifiPasswordDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentCyan, contentColor = DarkBackground)
+                ) {
+                    Text("Connect")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWifiPasswordDialog = false }) {
+                    Text("Cancel", color = AccentCyan)
+                }
+            }
+        )
     }
 }
 
