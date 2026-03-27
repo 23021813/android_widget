@@ -19,6 +19,8 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
+import android.util.Log
+import com.carlauncher.utils.AppLogger
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Size
@@ -49,6 +51,7 @@ import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.ceil
 
 @SuppressLint("MissingPermission")
@@ -68,7 +71,7 @@ class EspBleBridgeService : Service(), LocationListener {
     private var currentDevice: BluetoothDevice? = null
     private var connectionState = BluetoothProfile.STATE_DISCONNECTED
     private var writeQueue = BleWriteQueue()
-    private var isSending = false
+    private val isSending = AtomicBoolean(false)
     private var lastNavigationData: NavigationData? = null
     private var pingTimer: Timer? = null
     private var reconnectTimer: Timer? = null
@@ -171,6 +174,7 @@ class EspBleBridgeService : Service(), LocationListener {
     private val gattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+                AppLogger.i("EspBleBridgeService", "GATT Connected. Status: $status")
                 connectionState = BluetoothProfile.STATE_CONNECTING
                 NavigationBridgeRepository.updateBleState(
                     BleConnectionState.CONNECTING,
@@ -179,6 +183,7 @@ class EspBleBridgeService : Service(), LocationListener {
                 )
                 gatt?.requestMtu(517)
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                AppLogger.w("EspBleBridgeService", "GATT Disconnected. Status: $status")
                 val lastName = currentDevice?.name
                 val lastAddress = currentDevice?.address
                 cleanupGattConnection()
@@ -260,7 +265,7 @@ class EspBleBridgeService : Service(), LocationListener {
         }
 
         private fun onSubscriptionsComplete() {
-            isSending = false
+            isSending.set(false)
             writeQueue.clear()
             sentIconRegistry.clear()
             stopReconnectTimer()
@@ -281,44 +286,68 @@ class EspBleBridgeService : Service(), LocationListener {
             characteristic: BluetoothGattCharacteristic?,
             status: Int
         ) {
-            isSending = false
+            AppLogger.d("EspBleBridgeService", "Write completed. Status: $status")
+            isSending.set(false)
+            processNextWrite()
+        }
+    }
+
+    private fun write(item: BleWriteQueue.QueueItem) {
+        val gatt = bluetoothGatt
+        if (gatt == null || connectionState != BluetoothProfile.STATE_CONNECTED) {
+            isSending.set(false)
+            return
+        }
+
+        synchronized(writeQueue) {
+            if (isSending.get()) {
+                writeQueue.add(item)
+                return
+            }
+            isSending.set(true)
+        }
+
+        AppLogger.d("EspBleBridgeService", "Sending to ${item.uuid}")
+        val characteristic = findCharacteristic(item.uuid) ?: run {
+            AppLogger.e("EspBleBridgeService", "Characteristic not found: ${item.uuid}")
+            isSending.set(false)
+            processNextWrite()
+            return
+        }
+
+        val success: Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            gatt.writeCharacteristic(
+                characteristic,
+                item.data,
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            ) == BluetoothGatt.GATT_SUCCESS
+        } else {
+            @Suppress("DEPRECATION")
+            characteristic.value = item.data
+            @Suppress("DEPRECATION")
+            characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            gatt.writeCharacteristic(characteristic)
+        }
+
+        if (!success) {
+            AppLogger.e("EspBleBridgeService", "Failed to initiate write for ${item.uuid}")
+            isSending.set(false)
+            processNextWrite()
+        } else {
+            AppLogger.d("EspBleBridgeService", "Write initiated for ${item.uuid}")
+        }
+    }
+
+    private fun processNextWrite() {
+        synchronized(writeQueue) {
             if (writeQueue.size > 0) {
                 write(writeQueue.pop())
             }
         }
     }
 
-    private fun write(item: BleWriteQueue.QueueItem) {
-        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
-
-        if (isSending) {
-            writeQueue.add(item)
-            return
-        }
-
-        val characteristic = findCharacteristic(item.uuid) ?: run {
-            isSending = false
-            return
-        }
-
-        isSending = true
-        bluetoothGatt?.let { gatt ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                gatt.writeCharacteristic(
-                    characteristic,
-                    item.data,
-                    BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                characteristic.value = item.data
-                @Suppress("DEPRECATION")
-                gatt.writeCharacteristic(characteristic)
-            }
-        }
-    }
-
     private fun handleBleNotification(uuid: String, payload: String) {
+        AppLogger.i("EspBleBridgeService", "Notification from $uuid: $payload")
         val map = com.carlauncher.bridge.core.BlePayloadParser.parse(payload)
         val type = map["type"] ?: return
         when (type) {
@@ -430,7 +459,7 @@ class EspBleBridgeService : Service(), LocationListener {
     }
 
     private fun cleanupGattConnection() {
-        isSending = false
+        isSending.set(false)
         writeQueue.clear()
         connectionState = BluetoothProfile.STATE_DISCONNECTED
         bluetoothGatt?.let { gatt ->
@@ -442,7 +471,11 @@ class EspBleBridgeService : Service(), LocationListener {
     }
 
     private fun sendPreferencesToDevice() {
-        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) {
+            AppLogger.w("EspBleBridgeService", "Cannot send settings: Not connected")
+            return
+        }
+        AppLogger.i("EspBleBridgeService", "Syncing settings to device: $currentSettings")
         val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
         val payload = BridgePayloadSerializer.buildSettingsSetCommand(currentSettings, reqId)
         write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
@@ -465,7 +498,11 @@ class EspBleBridgeService : Service(), LocationListener {
     }
     
     private fun sendWifiScan() {
-        if (connectionState != BluetoothProfile.STATE_CONNECTED) return
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) {
+            AppLogger.w("EspBleBridgeService", "Cannot scan WiFi: Not connected")
+            return
+        }
+        AppLogger.i("EspBleBridgeService", "Initiating WiFi scan")
         NavigationBridgeRepository.clearWifiScanResults()
         NavigationBridgeRepository.setWifiScanning(true)
         val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()

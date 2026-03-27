@@ -18,6 +18,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.util.Log
+import com.carlauncher.utils.AppLogger
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
