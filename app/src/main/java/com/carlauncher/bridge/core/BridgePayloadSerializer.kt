@@ -92,6 +92,23 @@ object BridgePayloadSerializer {
         )
     }
 
+    fun buildSpeedSignsUpdateCommand(
+        currentLimit: Int?,
+        upcomingLimit: Int?,
+        distanceMeters: Int?,
+        requestId: String
+    ): String {
+        val payload = linkedMapOf(
+            "proto" to "1",
+            "cmd" to "speed.signs.update",
+            "requestId" to requestId
+        )
+        currentLimit?.let { payload["currentLimit"] = it.toString() }
+        upcomingLimit?.let { payload["upcomingLimit"] = it.toString() }
+        distanceMeters?.let { payload["distanceMeters"] = it.toString() }
+        return keyValuePayload(payload)
+    }
+
     fun buildNavigationPayload(data: NavigationData?, iconHash: String): String {
         return keyValuePayload(
             linkedMapOf(

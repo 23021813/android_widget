@@ -56,6 +56,12 @@ internal object SettingsKeys {
     val BRIDGE_LIGHT_THEME = booleanPreferencesKey("bridge_light_theme")
     val BRIDGE_BRIGHTNESS = intPreferencesKey("bridge_brightness")
     val BRIDGE_SPEED_WARNING_LIMIT = intPreferencesKey("bridge_speed_warning_limit")
+    val BRIDGE_SPEED_SIGN_CAPTURE_ENABLED = booleanPreferencesKey("bridge_speed_sign_capture_enabled")
+    val BRIDGE_SPEED_SIGN_CAPTURE_INTERVAL_SEC = intPreferencesKey("bridge_speed_sign_capture_interval_sec")
+    val BRIDGE_SPEED_SIGN_ROI_X = intPreferencesKey("bridge_speed_sign_roi_x")
+    val BRIDGE_SPEED_SIGN_ROI_Y = intPreferencesKey("bridge_speed_sign_roi_y")
+    val BRIDGE_SPEED_SIGN_ROI_WIDTH = intPreferencesKey("bridge_speed_sign_roi_width")
+    val BRIDGE_SPEED_SIGN_ROI_HEIGHT = intPreferencesKey("bridge_speed_sign_roi_height")
 }
 
 internal object SettingsPreferencesMapper {
@@ -119,7 +125,16 @@ internal object SettingsPreferencesMapper {
                 lastDeviceAddress = prefs[SettingsKeys.BRIDGE_LAST_DEVICE_ADDRESS],
                 displayLightTheme = prefs[SettingsKeys.BRIDGE_LIGHT_THEME] ?: true,
                 displayBrightness = prefs[SettingsKeys.BRIDGE_BRIGHTNESS] ?: 50,
-                speedWarningLimit = prefs[SettingsKeys.BRIDGE_SPEED_WARNING_LIMIT] ?: 50
+                speedWarningLimit = prefs[SettingsKeys.BRIDGE_SPEED_WARNING_LIMIT] ?: 50,
+                speedSignCapture = SpeedSignCaptureSettings(
+                    enabled = prefs[SettingsKeys.BRIDGE_SPEED_SIGN_CAPTURE_ENABLED] ?: false,
+                    intervalSeconds = (prefs[SettingsKeys.BRIDGE_SPEED_SIGN_CAPTURE_INTERVAL_SEC] ?: 5)
+                        .coerceIn(2, 30),
+                    roiX = prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_X] ?: 120,
+                    roiY = prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_Y] ?: 120,
+                    roiWidth = prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_WIDTH] ?: 420,
+                    roiHeight = prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_HEIGHT] ?: 320
+                )
             )
         )
     }
@@ -175,6 +190,16 @@ internal object SettingsPreferencesMapper {
         prefs[SettingsKeys.BRIDGE_LIGHT_THEME] = settings.navigationBridge.displayLightTheme
         prefs[SettingsKeys.BRIDGE_BRIGHTNESS] = settings.navigationBridge.displayBrightness
         prefs[SettingsKeys.BRIDGE_SPEED_WARNING_LIMIT] = settings.navigationBridge.speedWarningLimit
+        prefs[SettingsKeys.BRIDGE_SPEED_SIGN_CAPTURE_ENABLED] =
+            settings.navigationBridge.speedSignCapture.enabled
+        prefs[SettingsKeys.BRIDGE_SPEED_SIGN_CAPTURE_INTERVAL_SEC] =
+            settings.navigationBridge.speedSignCapture.intervalSeconds.coerceIn(2, 30)
+        prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_X] = settings.navigationBridge.speedSignCapture.roiX
+        prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_Y] = settings.navigationBridge.speedSignCapture.roiY
+        prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_WIDTH] =
+            settings.navigationBridge.speedSignCapture.roiWidth.coerceAtLeast(80)
+        prefs[SettingsKeys.BRIDGE_SPEED_SIGN_ROI_HEIGHT] =
+            settings.navigationBridge.speedSignCapture.roiHeight.coerceAtLeast(80)
 
         if (settings.navigationBridge.lastDeviceName != null) {
             prefs[SettingsKeys.BRIDGE_LAST_DEVICE_NAME] = settings.navigationBridge.lastDeviceName

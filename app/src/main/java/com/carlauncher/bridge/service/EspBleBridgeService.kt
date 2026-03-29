@@ -136,6 +136,15 @@ class EspBleBridgeService : Service(), LocationListener {
             }
             BridgeActions.WIFI_FORGET -> sendWifiForget()
             BridgeActions.STATUS_GET -> sendStatusGet()
+            BridgeActions.SEND_SPEED_SIGNS -> {
+                val currentLimit = intent.getIntExtra("currentLimit", Int.MIN_VALUE)
+                    .takeIf { it != Int.MIN_VALUE }
+                val upcomingLimit = intent.getIntExtra("upcomingLimit", Int.MIN_VALUE)
+                    .takeIf { it != Int.MIN_VALUE }
+                val distanceMeters = intent.getIntExtra("distanceMeters", Int.MIN_VALUE)
+                    .takeIf { it != Int.MIN_VALUE }
+                sendSpeedSignsUpdate(currentLimit, upcomingLimit, distanceMeters)
+            }
         }
         return START_STICKY
     }
@@ -522,6 +531,31 @@ class EspBleBridgeService : Service(), LocationListener {
         if (connectionState != BluetoothProfile.STATE_CONNECTED) return
         val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
         val payload = BridgePayloadSerializer.buildWifiForgetCommand(reqId)
+        write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
+    }
+
+    private fun sendSpeedSignsUpdate(
+        currentLimit: Int?,
+        upcomingLimit: Int?,
+        distanceMeters: Int?
+    ) {
+        if (connectionState != BluetoothProfile.STATE_CONNECTED) {
+            AppLogger.w("EspBleBridgeService", "Cannot send speed signs: Not connected")
+            return
+        }
+        AppLogger.i(
+            "EspBleBridgeService",
+            "Sending speed signs current=${currentLimit ?: "-"}, " +
+                "upcoming=${upcomingLimit ?: "-"}, " +
+                "distance=${distanceMeters ?: "-"}"
+        )
+        val reqId = com.carlauncher.bridge.core.RequestIdGenerator.next()
+        val payload = BridgePayloadSerializer.buildSpeedSignsUpdateCommand(
+            currentLimit = currentLimit,
+            upcomingLimit = upcomingLimit,
+            distanceMeters = distanceMeters,
+            requestId = reqId
+        )
         write(BleWriteQueue.QueueItem(BleCharacteristics.CHA_DEVICE_CONTROL, payload.toByteArray()))
     }
 

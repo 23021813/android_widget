@@ -1,4 +1,4 @@
-# CarFloat (Formerly Car Launcher Overlay) - v1.4.3
+# CarFloat (Formerly Car Launcher Overlay) - v1.4.5
 
 CarFloat là một ứng dụng tiện ích chuyên dụng dành cho màn hình xe hơi (Android Automotive / Android Box) với giao diện **Glassmorphism** hiện đại. Ứng dụng cung cấp các Widget nổi (Floating Widgets) thông minh, cho phép điều khiển và truy cập nhanh mà không cần thoát ứng dụng đang chạy.
 

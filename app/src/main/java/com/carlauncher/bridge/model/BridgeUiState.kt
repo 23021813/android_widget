@@ -21,6 +21,9 @@ data class BridgePermissionState(
 data class BridgeUiState(
     val bridgeSettings: NavigationBridgeSettings = NavigationBridgeSettings(),
     val serviceRunning: Boolean = false,
+    val speedSignCaptureRunning: Boolean = false,
+    val speedSignCaptureStatus: String = "idle",
+    val speedSignDetection: SpeedSignDetectionResult? = null,
     val bleConnectionState: BleConnectionState = BleConnectionState.DISCONNECTED,
     val selectedDeviceName: String? = null,
     val selectedDeviceAddress: String? = null,

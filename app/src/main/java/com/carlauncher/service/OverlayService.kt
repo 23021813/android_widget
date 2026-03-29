@@ -18,7 +18,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.util.Log
-import com.carlauncher.utils.AppLogger
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -51,6 +50,7 @@ import androidx.lifecycle.*
 import androidx.savedstate.*
 import com.carlauncher.LauncherActivity
 import com.carlauncher.SplitScreenProxyActivity
+import com.carlauncher.bridge.core.NavigationBridgeRepository
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.data.models.AssistantIcon
 import com.carlauncher.data.models.LauncherSettings
@@ -69,6 +69,8 @@ class OverlayService : Service() {
         const val CHANNEL_ID = "car_launcher_overlay"
         const val NOTIFICATION_ID = 1001
         const val ACTION_TOGGLE_CLICK_THROUGH = "com.carlauncher.TOGGLE_CLICK_THROUGH"
+        const val ACTION_SHOW_SPEED_SIGN_ROI = "com.carlauncher.SHOW_SPEED_SIGN_ROI"
+        const val ACTION_HIDE_SPEED_SIGN_ROI = "com.carlauncher.HIDE_SPEED_SIGN_ROI"
 
         // In-memory flag: reset on every process start (boot)
         var bootSplitDone = false
@@ -85,20 +87,47 @@ class OverlayService : Service() {
         fun stop(context: Context) {
             context.stopService(Intent(context, OverlayService::class.java))
         }
+
+        fun showSpeedSignRoiCalibration(context: Context) {
+            val intent = Intent(context, OverlayService::class.java).apply {
+                action = ACTION_SHOW_SPEED_SIGN_ROI
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+
+        fun hideSpeedSignRoiCalibration(context: Context) {
+            context.startService(Intent(context, OverlayService::class.java).apply {
+                action = ACTION_HIDE_SPEED_SIGN_ROI
+            })
+        }
     }
 
     private var windowManager: WindowManager? = null
     private var statusView: View? = null
     private var assistantView: View? = null
     private var dragHandleView: View? = null
+    private var speedSignRoiView: View? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var settingsDataStore: SettingsDataStore
     private val weatherRepository = WeatherRepository()
     private val defaultWeatherCity = LauncherSettings().weatherCity
     // Position save debounce
     private var positionSaveJob: Job? = null
+    private var roiSaveJob: Job? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_SHOW_SPEED_SIGN_ROI -> showSpeedSignRoiOverlay()
+            ACTION_HIDE_SPEED_SIGN_ROI -> removeSpeedSignRoiOverlay()
+        }
+        return START_STICKY
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -398,6 +427,27 @@ class OverlayService : Service() {
                 current.copy(assistantWidgetX = x, assistantWidgetY = y)
             }
             settingsDataStore.updateSettings(updated)
+        }
+    }
+
+    private fun saveSpeedSignRoiBounds(x: Int, y: Int, width: Int, height: Int) {
+        roiSaveJob?.cancel()
+        roiSaveJob = serviceScope.launch {
+            delay(300L)
+            val current = settingsDataStore.settingsFlow.first()
+            val currentBridge = current.navigationBridge
+            settingsDataStore.updateSettings(
+                current.copy(
+                    navigationBridge = currentBridge.copy(
+                        speedSignCapture = currentBridge.speedSignCapture.copy(
+                            roiX = x,
+                            roiY = y,
+                            roiWidth = width,
+                            roiHeight = height
+                        )
+                    )
+                )
+            )
         }
     }
 
@@ -857,6 +907,193 @@ class OverlayService : Service() {
         assistantView = null
     }
 
+    private fun showSpeedSignRoiOverlay() {
+        val existingView = speedSignRoiView
+        if (existingView != null) {
+            serviceScope.launch {
+                val persisted = settingsDataStore.settingsFlow.first().navigationBridge.speedSignCapture
+                val existingParams = (existingView.layoutParams as? WindowManager.LayoutParams)
+                    ?: WindowManager.LayoutParams().also {
+                        it.width = persisted.roiWidth.coerceAtLeast(120)
+                        it.height = persisted.roiHeight.coerceAtLeast(120)
+                    }
+
+                existingParams.x = persisted.roiX
+                existingParams.y = persisted.roiY
+                existingParams.width = persisted.roiWidth.coerceAtLeast(120)
+                existingParams.height = persisted.roiHeight.coerceAtLeast(120)
+
+                runCatching { windowManager?.updateViewLayout(existingView, existingParams) }
+                saveSpeedSignRoiBounds(
+                    existingParams.x,
+                    existingParams.y,
+                    existingParams.width,
+                    existingParams.height
+                )
+            }
+            return
+        }
+
+        val defaultSettings = LauncherSettings().navigationBridge.speedSignCapture
+        val params = WindowManager.LayoutParams(
+            defaultSettings.roiWidth.coerceAtLeast(120),
+            defaultSettings.roiHeight.coerceAtLeast(120),
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = defaultSettings.roiX
+            y = defaultSettings.roiY
+        }
+
+        serviceScope.launch {
+            val persisted = settingsDataStore.settingsFlow.first().navigationBridge.speedSignCapture
+            params.x = persisted.roiX
+            params.y = persisted.roiY
+            params.width = persisted.roiWidth.coerceAtLeast(120)
+            params.height = persisted.roiHeight.coerceAtLeast(120)
+            speedSignRoiView?.let {
+                runCatching { windowManager?.updateViewLayout(it, params) }
+            }
+        }
+
+        val composeView = ComposeView(this).apply {
+            setViewTreeLifecycleOwner(OverlayLifecycleOwner())
+            setViewTreeSavedStateRegistryOwner(OverlayLifecycleOwner())
+            setContent {
+                val bridgeState by NavigationBridgeRepository.uiState.collectAsState()
+                val detection = bridgeState.speedSignDetection
+                var roiX by remember { mutableIntStateOf(params.x) }
+                var roiY by remember { mutableIntStateOf(params.y) }
+                var roiWidth by remember { mutableIntStateOf(params.width) }
+                var roiHeight by remember { mutableIntStateOf(params.height) }
+                val candidateText = detection?.candidates
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.joinToString(",")
+                    ?: "--"
+                val rawPreview = detection?.rawText
+                    ?.replace('\n', ' ')
+                    ?.replace(Regex("\\s+"), " ")
+                    ?.trim()
+                    ?.take(64)
+                    .orEmpty()
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(2.dp, Color(0xFF00E5FF), RoundedCornerShape(12.dp))
+                        .background(Color(0x2200E5FF))
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, dragAmount ->
+                                change.consume()
+                                params.x += dragAmount.x.toInt()
+                                params.y += dragAmount.y.toInt()
+                                roiX = params.x
+                                roiY = params.y
+                                runCatching { windowManager?.updateViewLayout(this@apply, params) }
+                                saveSpeedSignRoiBounds(params.x, params.y, params.width, params.height)
+                            }
+                        }
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xB0000000))
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "ROI",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "x=$roiX y=$roiY",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "w=$roiWidth h=$roiHeight",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "status=${bridgeState.speedSignCaptureStatus}",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "src=${detection?.captureSource ?: "--"}",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "layout=${detection?.layoutType ?: "--"}",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "cur=${detection?.currentLimit ?: "--"} next=${detection?.upcomingLimit ?: "--"}",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "dist=${detection?.upcomingDistanceMeters?.let { "${it}m" } ?: "--"}",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "cand=$candidateText",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                        if (rawPreview.isNotBlank()) {
+                            Text(
+                                text = "raw=$rawPreview",
+                                color = Color.White,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(28.dp)
+                            .clip(RoundedCornerShape(topStart = 8.dp))
+                            .background(Color(0xCC00E5FF))
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, dragAmount ->
+                                    change.consume()
+                                    params.width = (params.width + dragAmount.x.toInt()).coerceAtLeast(120)
+                                    params.height = (params.height + dragAmount.y.toInt()).coerceAtLeast(120)
+                                    roiWidth = params.width
+                                    roiHeight = params.height
+                                    runCatching { windowManager?.updateViewLayout(this@apply, params) }
+                                    saveSpeedSignRoiBounds(params.x, params.y, params.width, params.height)
+                                }
+                            }
+                    )
+                }
+            }
+        }
+
+        speedSignRoiView = composeView
+        runCatching { windowManager?.addView(composeView, params) }
+    }
+
+    private fun removeSpeedSignRoiOverlay() {
+        speedSignRoiView?.let {
+            runCatching { windowManager?.removeView(it) }
+        }
+        speedSignRoiView = null
+    }
+
     // ═══════════════════════════════════════
     // Notification (with click-through toggle action)
     // ═══════════════════════════════════════
@@ -895,6 +1132,7 @@ class OverlayService : Service() {
     override fun onDestroy() {
         removeStatusOverlay()
         removeAssistantOverlay()
+        removeSpeedSignRoiOverlay()
         TimeSyncMonitor.stopMonitoring(this)
         serviceScope.cancel()
         super.onDestroy()

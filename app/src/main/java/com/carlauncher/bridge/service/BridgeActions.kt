@@ -10,4 +10,5 @@ object BridgeActions {
     const val WIFI_CONNECT = "com.carlauncher.bridge.WIFI_CONNECT"
     const val WIFI_FORGET = "com.carlauncher.bridge.WIFI_FORGET"
     const val STATUS_GET = "com.carlauncher.bridge.STATUS_GET"
+    const val SEND_SPEED_SIGNS = "com.carlauncher.bridge.SEND_SPEED_SIGNS"
 }

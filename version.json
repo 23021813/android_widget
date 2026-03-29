@@ -1,7 +1,7 @@
 {
-  "versionCode": 19,
-  "versionName": "1.4.4",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.4/CarFloat_1.4.4.apk",
-  "changelog": "- Update panel quản trị devices dẫn đường",
+  "versionCode": 20,
+  "versionName": "1.4.5",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.5/CarFloat_1.4.5.apk",
+  "changelog": "- Ổn định ROI OCR khi chuyển app và khi ẩn/hiện ROI.\n- Tự phục hồi pipeline capture khi gặp frame null hoặc stale.\n- Tăng độ ổn định dịch vụ nhận diện biển báo tốc độ.",
   "forceUpdate": false
 }

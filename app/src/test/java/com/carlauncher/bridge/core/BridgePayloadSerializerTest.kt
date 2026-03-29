@@ -49,6 +49,21 @@ class BridgePayloadSerializerTest {
     }
 
     @Test
+    fun `build speed signs update command omits null fields`() {
+        val payload = BridgePayloadSerializer.buildSpeedSignsUpdateCommand(
+            currentLimit = 60,
+            upcomingLimit = 80,
+            distanceMeters = null,
+            requestId = "2001"
+        )
+
+        assertEquals(
+            "proto=1\ncmd=speed.signs.update\nrequestId=2001\ncurrentLimit=60\nupcomingLimit=80",
+            payload
+        )
+    }
+
+    @Test
     fun `build navigation payload keeps expected key order and sanitizes text`() {
         val payload = BridgePayloadSerializer.buildNavigationPayload(
             data = NavigationData(

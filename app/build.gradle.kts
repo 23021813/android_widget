@@ -36,8 +36,8 @@ android {
         applicationId = "com.carlauncher"
         minSdk = 28
         targetSdk = 34
-        versionCode = 19
-        versionName = "1.4.4"
+        versionCode = 20
+        versionName = "1.4.5"
     }
 
     signingConfigs {
@@ -131,6 +131,10 @@ dependencies {
 
     // Coroutines
     implementation(libs.coroutines.android)
+    implementation(libs.coroutines.play.services)
+
+    // ML Kit OCR
+    implementation(libs.mlkit.text.recognition)
 
     // Core
     implementation(libs.core.ktx)

@@ -75,6 +75,7 @@ import com.carlauncher.bridge.model.BleConnectionState
 import com.carlauncher.bridge.permission.NavigationBridgePermissionHelper
 import com.carlauncher.bridge.service.BridgeServiceController
 import com.carlauncher.data.models.NavigationBridgeSettings
+import com.carlauncher.service.OverlayService
 import com.carlauncher.ui.screens.SettingsSection
 import com.carlauncher.ui.screens.SettingsSlider
 import com.carlauncher.ui.screens.SettingsTextField
@@ -117,6 +118,10 @@ fun EspBridgeScreen(
     var showWifiPasswordDialog by rememberSaveable { mutableStateOf(false) }
     var selectedWifiSsid by rememberSaveable { mutableStateOf("") }
     var wifiPasswordInput by rememberSaveable { mutableStateOf("") }
+    var captureIntervalInput by remember(bridgeSettings.speedSignCapture.intervalSeconds) {
+        mutableStateOf(bridgeSettings.speedSignCapture.intervalSeconds.toString())
+    }
+    var roiCalibrationVisible by rememberSaveable { mutableStateOf(false) }
 
     fun refreshPermissions() {
         NavigationBridgeRepository.updatePermissions(
@@ -287,7 +292,10 @@ fun EspBridgeScreen(
     }
 
     DisposableEffect(Unit) {
-        onDispose { stopScan() }
+        onDispose {
+            stopScan()
+            OverlayService.hideSpeedSignRoiCalibration(context)
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -568,6 +576,60 @@ fun EspBridgeScreen(
                             }
                         }
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SettingsToggle(
+                        label = "Enable speed sign capture",
+                        checked = bridgeSettings.speedSignCapture.enabled,
+                        onCheckedChange = { enabled ->
+                            if (!enabled && roiCalibrationVisible) {
+                                roiCalibrationVisible = false
+                                OverlayService.hideSpeedSignRoiCalibration(context)
+                            }
+                            onSettingsUpdate(
+                                bridgeSettings.copy(
+                                    speedSignCapture = bridgeSettings.speedSignCapture.copy(enabled = enabled)
+                                )
+                            )
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SettingsTextField(
+                        label = "Capture interval (seconds)",
+                        value = captureIntervalInput,
+                        onValueChange = { newValue ->
+                            captureIntervalInput = newValue.filter(Char::isDigit).take(2)
+                            captureIntervalInput.toIntOrNull()?.let { seconds ->
+                                onSettingsUpdate(
+                                    bridgeSettings.copy(
+                                        speedSignCapture = bridgeSettings.speedSignCapture.copy(
+                                            intervalSeconds = seconds.coerceIn(2, 30)
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "ROI: x=${bridgeSettings.speedSignCapture.roiX}, y=${bridgeSettings.speedSignCapture.roiY}, w=${bridgeSettings.speedSignCapture.roiWidth}, h=${bridgeSettings.speedSignCapture.roiHeight}",
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = {
+                            roiCalibrationVisible = !roiCalibrationVisible
+                            if (roiCalibrationVisible) {
+                                OverlayService.showSpeedSignRoiCalibration(context)
+                            } else {
+                                OverlayService.hideSpeedSignRoiCalibration(context)
+                            }
+                        },
+                        enabled = bridgeSettings.speedSignCapture.enabled,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(if (roiCalibrationVisible) "Hide ROI calibrator" else "Show ROI calibrator")
+                    }
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedButton(
                         onClick = { BridgeServiceController.sendSettings(context) },
@@ -582,6 +644,44 @@ fun EspBridgeScreen(
 
             item {
                 SettingsSection(title = androidx.compose.ui.res.stringResource(R.string.bridge_section_diagnostics)) {
+                    val speedSign = bridgeState.speedSignDetection
+                    DiagnosticText(
+                        label = "Capture Pipeline",
+                        value = if (bridgeState.speedSignCaptureRunning) {
+                            "Running (${bridgeState.speedSignCaptureStatus})"
+                        } else {
+                            "Stopped (${bridgeState.speedSignCaptureStatus})"
+                        }
+                    )
+                    DiagnosticText(
+                        label = "Current / Upcoming",
+                        value = "${speedSign?.currentLimit ?: "--"} / ${speedSign?.upcomingLimit ?: "--"}"
+                    )
+                    DiagnosticText(
+                        label = "Layout / Source",
+                        value = "${speedSign?.layoutType ?: "--"} / ${speedSign?.captureSource ?: "--"}"
+                    )
+                    DiagnosticText(
+                        label = "Candidates",
+                        value = speedSign?.candidates?.takeIf { it.isNotEmpty() }?.joinToString(",") ?: "--"
+                    )
+                    DiagnosticText(
+                        label = "Upcoming Distance",
+                        value = speedSign?.upcomingDistanceMeters?.let { "$it m" } ?: "--"
+                    )
+                    if (!speedSign?.debugSummary.isNullOrBlank()) {
+                        DiagnosticText(
+                            label = "OCR Debug",
+                            value = speedSign?.debugSummary.orEmpty().take(160)
+                        )
+                    }
+                    if (!speedSign?.rawText.isNullOrBlank()) {
+                        DiagnosticText(
+                            label = "OCR Raw",
+                            value = speedSign?.rawText.orEmpty().take(120)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                     DiagnosticsCard(
                         title = androidx.compose.ui.res.stringResource(R.string.bridge_diag_speed),
                         icon = Icons.Default.Speed,

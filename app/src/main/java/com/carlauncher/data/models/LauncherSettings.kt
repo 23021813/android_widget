@@ -57,13 +57,23 @@ data class ScheduleProfile(
     val musicKeyword: String = ""
 )
 
+data class SpeedSignCaptureSettings(
+    val enabled: Boolean = false,
+    val intervalSeconds: Int = 5,
+    val roiX: Int = 120,
+    val roiY: Int = 120,
+    val roiWidth: Int = 420,
+    val roiHeight: Int = 320
+)
+
 data class NavigationBridgeSettings(
     val enabled: Boolean = false,
     val lastDeviceName: String? = null,
     val lastDeviceAddress: String? = null,
     val displayLightTheme: Boolean = true,
     val displayBrightness: Int = 50,
-    val speedWarningLimit: Int = 50
+    val speedWarningLimit: Int = 50,
+    val speedSignCapture: SpeedSignCaptureSettings = SpeedSignCaptureSettings()
 )
 
 data class LauncherSettings(

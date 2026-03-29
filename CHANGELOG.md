@@ -2,6 +2,15 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
+## [1.4.5] - 2026-03-29
+### Fixed
+- Ổn định ROI OCR khi chuyển đổi ứng dụng và khi bật/tắt hiển thị ROI.
+- Bổ sung cơ chế tự phục hồi pipeline capture khi gặp khung hình null hoặc stale liên tiếp.
+- Giảm tình trạng nhận diện bị dừng tạm thời sau khi MediaProjection bị gián đoạn.
+
+### Changed
+- Đồng bộ metadata OTA cho bản phát hành 1.4.5 (`versionCode` 20, `versionName` 1.4.5).
+
 ## [1.4.3] - 2026-03-26
 ### Changed
 - Comprehensive version upgrade and system stabilization.

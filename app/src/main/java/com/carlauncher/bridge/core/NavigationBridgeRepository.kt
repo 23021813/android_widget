@@ -5,6 +5,7 @@ import com.carlauncher.bridge.model.BridgePermissionState
 import com.carlauncher.bridge.model.BridgeUiState
 import com.carlauncher.bridge.model.DeviceState
 import com.carlauncher.bridge.model.NavigationData
+import com.carlauncher.bridge.model.SpeedSignDetectionResult
 import com.carlauncher.bridge.model.WifiScanResult
 import com.carlauncher.data.models.NavigationBridgeSettings
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,25 @@ object NavigationBridgeRepository {
         _uiState.update {
             it.copy(
                 serviceRunning = running,
+                lastUpdateTimestamp = System.currentTimeMillis()
+            )
+        }
+    }
+
+    fun updateSpeedSignCaptureState(running: Boolean, status: String) {
+        _uiState.update {
+            it.copy(
+                speedSignCaptureRunning = running,
+                speedSignCaptureStatus = status,
+                lastUpdateTimestamp = System.currentTimeMillis()
+            )
+        }
+    }
+
+    fun updateSpeedSignDetection(result: SpeedSignDetectionResult?) {
+        _uiState.update {
+            it.copy(
+                speedSignDetection = result,
                 lastUpdateTimestamp = System.currentTimeMillis()
             )
         }

@@ -63,6 +63,20 @@ object BridgeServiceController {
         })
     }
 
+    fun sendSpeedSigns(
+        context: Context,
+        currentLimit: Int?,
+        upcomingLimit: Int?,
+        distanceMeters: Int?
+    ) {
+        context.startService(Intent(context, EspBleBridgeService::class.java).apply {
+            action = BridgeActions.SEND_SPEED_SIGNS
+            putExtra("currentLimit", currentLimit ?: Int.MIN_VALUE)
+            putExtra("upcomingLimit", upcomingLimit ?: Int.MIN_VALUE)
+            putExtra("distanceMeters", distanceMeters ?: Int.MIN_VALUE)
+        })
+    }
+
     private fun startForegroundServiceCompat(context: Context, intent: Intent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent)

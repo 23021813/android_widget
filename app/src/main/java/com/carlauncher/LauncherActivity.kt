@@ -4,9 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,9 +21,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.carlauncher.bridge.core.NavigationBridgeRepository
 import com.carlauncher.bridge.permission.NavigationBridgePermissionHelper
 import com.carlauncher.bridge.service.BridgeServiceController
+import com.carlauncher.bridge.service.SpeedSignCaptureController
+import com.carlauncher.bridge.service.SpeedSignProjectionStore
 import com.carlauncher.data.SettingsDataStore
 import com.carlauncher.data.models.AppLanguage
 import com.carlauncher.data.models.LauncherSettings
@@ -42,11 +47,44 @@ import kotlinx.coroutines.runBlocking
 class LauncherActivity : ComponentActivity() {
 
     private lateinit var settingsDataStore: SettingsDataStore
+    private lateinit var mediaProjectionManager: MediaProjectionManager
 
     private val permissionState = mutableStateOf(false)
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { }
+    private val screenCapturePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val data = result.data
+        if (result.resultCode == RESULT_OK && data != null) {
+            SpeedSignProjectionStore.update(result.resultCode, data)
+            lifecycleScope.launch {
+                val settings = settingsDataStore.settingsFlow.first()
+                if (settings.navigationBridge.enabled && settings.navigationBridge.speedSignCapture.enabled) {
+                    SpeedSignCaptureController.start(this@LauncherActivity)
+                }
+            }
+            Toast.makeText(this, "Đã cấp quyền chụp màn hình", Toast.LENGTH_SHORT).show()
+        } else {
+            SpeedSignProjectionStore.clear()
+            lifecycleScope.launch {
+                val settings = settingsDataStore.settingsFlow.first()
+                if (settings.navigationBridge.speedSignCapture.enabled) {
+                    settingsDataStore.updateSettings(
+                        settings.copy(
+                            navigationBridge = settings.navigationBridge.copy(
+                                speedSignCapture = settings.navigationBridge.speedSignCapture.copy(
+                                    enabled = false
+                                )
+                            )
+                        )
+                    )
+                }
+            }
+            Toast.makeText(this, "Bạn chưa cấp quyền chụp màn hình", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // Read locale synchronously before UI is set up
     override fun attachBaseContext(newBase: Context) {
@@ -60,6 +98,8 @@ class LauncherActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         settingsDataStore = SettingsDataStore(this)
+        mediaProjectionManager =
+            getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
         permissionState.value = Settings.canDrawOverlays(this)
         checkOverlayPermissionAndStartService()
@@ -70,6 +110,7 @@ class LauncherActivity : ComponentActivity() {
             )
             val scope = rememberCoroutineScope()
             val hasPermission by permissionState
+            var hasRequestedScreenCapturePermission by remember { mutableStateOf(false) }
 
             // OTA update check
             var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
@@ -105,6 +146,25 @@ class LauncherActivity : ComponentActivity() {
                     BridgeServiceController.enable(this@LauncherActivity)
                 } else {
                     BridgeServiceController.disable(this@LauncherActivity)
+                }
+            }
+
+            val speedSignCaptureEnabled =
+                settings.navigationBridge.enabled && settings.navigationBridge.speedSignCapture.enabled
+            LaunchedEffect(speedSignCaptureEnabled) {
+                if (speedSignCaptureEnabled) {
+                    if (SpeedSignProjectionStore.hasProjection()) {
+                        SpeedSignCaptureController.start(this@LauncherActivity)
+                    } else if (!hasRequestedScreenCapturePermission) {
+                        hasRequestedScreenCapturePermission = true
+                        screenCapturePermissionLauncher.launch(
+                            mediaProjectionManager.createScreenCaptureIntent()
+                        )
+                    }
+                } else {
+                    hasRequestedScreenCapturePermission = false
+                    SpeedSignCaptureController.stop(this@LauncherActivity)
+                    OverlayService.hideSpeedSignRoiCalibration(this@LauncherActivity)
                 }
             }
 
