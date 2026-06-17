@@ -1,7 +1,7 @@
 {
-  "versionCode": 18,
-  "versionName": "1.4.3",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.3/CarFloat_1.4.3.apk",
-  "changelog": "- Update panel quản trị devices dẫn đường",
+  "versionCode": 21,
+  "versionName": "1.4.6",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.6/CarFloat_1.4.6.apk",
+  "changelog": "- Remove CarBridge\n- Add Pre-Split Config",
   "forceUpdate": false
 }
