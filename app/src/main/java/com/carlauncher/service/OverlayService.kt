@@ -151,6 +151,8 @@ class OverlayService : Service() {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     putExtra("pkg1", settings.frame1App)
                     putExtra("pkg2", settings.frame2App)
+                    putExtra("pre_split_pkg", settings.preSplitApp)
+                    putExtra("pre_split_delay_ms", settings.preSplitDelayMs)
                     if (profileForFirstOpen != null) {
                         if (profileForFirstOpen.autoNavigate && profileForFirstOpen.navAddress.isNotBlank()) {
                             putExtra("nav_address", profileForFirstOpen.navAddress)

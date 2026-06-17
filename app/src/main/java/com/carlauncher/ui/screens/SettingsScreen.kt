@@ -98,6 +98,23 @@ fun SettingsScreen(
                     Text(stringResource(R.string.split_screen_hint), color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(12.dp))
                     SettingsAppSelector(
+                        label = stringResource(R.string.app_pre_split),
+                        currentApp = settings.preSplitApp?.let { pkg -> installedApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.not_selected),
+                        onClick = { appPickerTarget = "preSplit"; showAppPicker = true },
+                        onClear = { onSettingsUpdate(settings.copy(preSplitApp = null)) }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if (settings.preSplitApp != null) {
+                        SettingsSlider(
+                            label = stringResource(R.string.pre_split_delay),
+                            value = settings.preSplitDelayMs / 1000f,
+                            valueRange = 0.5f..5.0f,
+                            displayValue = String.format("%.1fs", settings.preSplitDelayMs / 1000f),
+                            onValueChange = { onSettingsUpdate(settings.copy(preSplitDelayMs = (it * 1000).toInt())) }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                    SettingsAppSelector(
                         label = stringResource(R.string.app_left_top),
                         currentApp = settings.frame1App?.let { pkg -> installedApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.not_selected),
                         onClick = { appPickerTarget = "frame1"; showAppPicker = true },
@@ -504,6 +521,7 @@ fun SettingsScreen(
                 when (appPickerTarget) {
                     "frame1" -> onSettingsUpdate(settings.copy(frame1App = app.packageName))
                     "frame2" -> onSettingsUpdate(settings.copy(frame2App = app.packageName))
+                    "preSplit" -> onSettingsUpdate(settings.copy(preSplitApp = app.packageName))
                     "assistant" -> onSettingsUpdate(settings.copy(assistantApp = app.packageName))
                     "assistantLongPress" -> onSettingsUpdate(settings.copy(assistantLongPressApp = app.packageName))
                     "assistantDoubleTap" -> onSettingsUpdate(settings.copy(assistantDoubleTapApp = app.packageName))

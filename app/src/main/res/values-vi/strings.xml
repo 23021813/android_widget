@@ -11,6 +11,8 @@
     <string name="split_screen_hint">Thiết lập 2 ứng dụng để khởi chạy chế độ chia màn hình:</string>
     <string name="app_left_top">App Trái / Trên</string>
     <string name="app_right_bottom">App Phải / Dưới</string>
+    <string name="app_pre_split">App mở trước chia đôi</string>
+    <string name="pre_split_delay">Độ trễ chia đôi</string>
     <string name="not_selected">Chưa chọn</string>
     <string name="tap_to_select">Nhấn để chọn</string>
     <string name="launch_split_view">Khởi chạy Split View</string>

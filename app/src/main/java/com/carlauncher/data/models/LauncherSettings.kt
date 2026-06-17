@@ -117,6 +117,8 @@ data class LauncherSettings(
 
     // Boot Split-View
     val autoSplitOnBoot: Boolean = true,
+    val preSplitApp: String? = null,
+    val preSplitDelayMs: Int = 1500,
 
     // Schedule Automation Profiles
     val scheduleProfiles: List<ScheduleProfile> = emptyList(),

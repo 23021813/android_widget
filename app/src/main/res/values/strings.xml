@@ -11,6 +11,8 @@
     <string name="split_screen_hint">Choose 2 apps to launch in split-screen mode:</string>
     <string name="app_left_top">Left / Top App</string>
     <string name="app_right_bottom">Right / Bottom App</string>
+    <string name="app_pre_split">Pre-Split App (Launch first)</string>
+    <string name="pre_split_delay">Pre-Split Delay</string>
     <string name="not_selected">Not Selected</string>
     <string name="tap_to_select">Tap to select</string>
     <string name="launch_split_view">Launch Split View</string>

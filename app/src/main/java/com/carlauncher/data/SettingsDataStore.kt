@@ -48,6 +48,8 @@ internal object SettingsKeys {
     val ASSISTANT_DOUBLE_TAP_APP = stringPreferencesKey("assistant_double_tap_app")
 
     val AUTO_SPLIT_ON_BOOT = booleanPreferencesKey("auto_split_on_boot")
+    val PRE_SPLIT_APP = stringPreferencesKey("pre_split_app")
+    val PRE_SPLIT_DELAY_MS = intPreferencesKey("pre_split_delay_ms")
     val SCHEDULE_PROFILES = stringPreferencesKey("schedule_profiles")
 
     val BRIDGE_ENABLED = booleanPreferencesKey("bridge_enabled")
@@ -108,6 +110,8 @@ internal object SettingsPreferencesMapper {
             assistantDoubleTapApp = prefs[SettingsKeys.ASSISTANT_DOUBLE_TAP_APP],
 
             autoSplitOnBoot = prefs[SettingsKeys.AUTO_SPLIT_ON_BOOT] ?: true,
+            preSplitApp = prefs[SettingsKeys.PRE_SPLIT_APP],
+            preSplitDelayMs = prefs[SettingsKeys.PRE_SPLIT_DELAY_MS] ?: 1500,
 
             scheduleProfiles = prefs[SettingsKeys.SCHEDULE_PROFILES]?.let {
                 parseScheduleProfiles(it)
@@ -169,6 +173,9 @@ internal object SettingsPreferencesMapper {
 
         prefs[SettingsKeys.ASSISTANT_ICON] = settings.assistantIcon.name
         prefs[SettingsKeys.AUTO_SPLIT_ON_BOOT] = settings.autoSplitOnBoot
+        if (settings.preSplitApp != null) prefs[SettingsKeys.PRE_SPLIT_APP] = settings.preSplitApp
+        else prefs.remove(SettingsKeys.PRE_SPLIT_APP)
+        prefs[SettingsKeys.PRE_SPLIT_DELAY_MS] = settings.preSplitDelayMs
         prefs[SettingsKeys.SCHEDULE_PROFILES] = serializeScheduleProfiles(settings.scheduleProfiles)
 
         prefs[SettingsKeys.BRIDGE_ENABLED] = settings.navigationBridge.enabled

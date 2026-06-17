@@ -14,6 +14,8 @@ class SplitScreenProxyActivity : Activity() {
         val pkg2 = intent.getStringExtra("pkg2")
         val navAddress = intent.getStringExtra("nav_address")
         val musicKeyword = intent.getStringExtra("music_keyword")
+        val preSplitPkg = intent.getStringExtra("pre_split_pkg")
+        val preSplitDelayMs = intent.getIntExtra("pre_split_delay_ms", 1500)
 
         Log.d(
             "SplitScreenProxy",
@@ -29,18 +31,28 @@ class SplitScreenProxyActivity : Activity() {
                 "Resolved actions: action1=${actionIntent1?.data} action2=${actionIntent2?.data}"
             )
 
-            SplitScreenLauncher.launchSplitScreen(
-                this, pkg1, pkg2,
-                actionIntent1 = actionIntent1,
-                actionIntent2 = actionIntent2
-            )
+            if (preSplitPkg != null) {
+                SplitScreenLauncher.launchApp(this, preSplitPkg)
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                    SplitScreenLauncher.launchSplitScreen(
+                        this, pkg1, pkg2,
+                        actionIntent1 = actionIntent1,
+                        actionIntent2 = actionIntent2
+                    )
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ finish() }, 1500)
+                }, preSplitDelayMs.toLong())
+            } else {
+                SplitScreenLauncher.launchSplitScreen(
+                    this, pkg1, pkg2,
+                    actionIntent1 = actionIntent1,
+                    actionIntent2 = actionIntent2
+                )
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ finish() }, 1500)
+            }
         } else {
             Log.w("SplitScreenProxy", "Missing pkg1/pkg2 in intent, aborting split")
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ finish() }, 1500)
         }
-
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            finish()
-        }, 1500)
     }
 
     private fun resolveActionIntent(pkg: String, navAddress: String?, musicKeyword: String?): Intent? {
