@@ -52,12 +52,7 @@ internal object SettingsKeys {
     val PRE_SPLIT_DELAY_MS = intPreferencesKey("pre_split_delay_ms")
     val SCHEDULE_PROFILES = stringPreferencesKey("schedule_profiles")
 
-    val BRIDGE_ENABLED = booleanPreferencesKey("bridge_enabled")
-    val BRIDGE_LAST_DEVICE_NAME = stringPreferencesKey("bridge_last_device_name")
-    val BRIDGE_LAST_DEVICE_ADDRESS = stringPreferencesKey("bridge_last_device_address")
-    val BRIDGE_LIGHT_THEME = booleanPreferencesKey("bridge_light_theme")
-    val BRIDGE_BRIGHTNESS = intPreferencesKey("bridge_brightness")
-    val BRIDGE_SPEED_WARNING_LIMIT = intPreferencesKey("bridge_speed_warning_limit")
+
 }
 
 internal object SettingsPreferencesMapper {
@@ -117,14 +112,6 @@ internal object SettingsPreferencesMapper {
                 parseScheduleProfiles(it)
             } ?: emptyList(),
 
-            navigationBridge = NavigationBridgeSettings(
-                enabled = prefs[SettingsKeys.BRIDGE_ENABLED] ?: false,
-                lastDeviceName = prefs[SettingsKeys.BRIDGE_LAST_DEVICE_NAME],
-                lastDeviceAddress = prefs[SettingsKeys.BRIDGE_LAST_DEVICE_ADDRESS],
-                displayLightTheme = prefs[SettingsKeys.BRIDGE_LIGHT_THEME] ?: true,
-                displayBrightness = prefs[SettingsKeys.BRIDGE_BRIGHTNESS] ?: 50,
-                speedWarningLimit = prefs[SettingsKeys.BRIDGE_SPEED_WARNING_LIMIT] ?: 50
-            )
         )
     }
 
@@ -178,18 +165,6 @@ internal object SettingsPreferencesMapper {
         prefs[SettingsKeys.PRE_SPLIT_DELAY_MS] = settings.preSplitDelayMs
         prefs[SettingsKeys.SCHEDULE_PROFILES] = serializeScheduleProfiles(settings.scheduleProfiles)
 
-        prefs[SettingsKeys.BRIDGE_ENABLED] = settings.navigationBridge.enabled
-        prefs[SettingsKeys.BRIDGE_LIGHT_THEME] = settings.navigationBridge.displayLightTheme
-        prefs[SettingsKeys.BRIDGE_BRIGHTNESS] = settings.navigationBridge.displayBrightness
-        prefs[SettingsKeys.BRIDGE_SPEED_WARNING_LIMIT] = settings.navigationBridge.speedWarningLimit
-
-        if (settings.navigationBridge.lastDeviceName != null) {
-            prefs[SettingsKeys.BRIDGE_LAST_DEVICE_NAME] = settings.navigationBridge.lastDeviceName
-        } else prefs.remove(SettingsKeys.BRIDGE_LAST_DEVICE_NAME)
-
-        if (settings.navigationBridge.lastDeviceAddress != null) {
-            prefs[SettingsKeys.BRIDGE_LAST_DEVICE_ADDRESS] = settings.navigationBridge.lastDeviceAddress
-        } else prefs.remove(SettingsKeys.BRIDGE_LAST_DEVICE_ADDRESS)
     }
 
     internal fun parseScheduleProfiles(jsonString: String): List<ScheduleProfile> {

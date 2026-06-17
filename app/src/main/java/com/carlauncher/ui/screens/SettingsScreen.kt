@@ -42,8 +42,7 @@ fun SettingsScreen(
     onSettingsUpdate: (LauncherSettings) -> Unit,
     onLaunchSplitView: () -> Unit,
     onResetDefaults: () -> Unit,
-    onCheckUpdate: () -> Unit,
-    onOpenEspBridge: () -> Unit
+    onCheckUpdate: () -> Unit
 ) {
     var showAppPicker by remember { mutableStateOf(false) }
     var appPickerTarget by remember { mutableStateOf("") }
@@ -216,55 +215,6 @@ fun SettingsScreen(
                     SettingsToggle(label = stringResource(R.string.allow_overlap_system_bars), checked = settings.allowOverlapSystemBars, onCheckedChange = { onSettingsUpdate(settings.copy(allowOverlapSystemBars = it)) })
                     Spacer(modifier = Modifier.height(8.dp))
                     SettingsToggle(label = stringResource(R.string.clock_click_through), checked = settings.clockClickThrough, onCheckedChange = { onSettingsUpdate(settings.copy(clockClickThrough = it)) })
-                }
-            }
-
-            item {
-                SettingsSection(title = stringResource(R.string.section_esp_bridge)) {
-                    Text(
-                        text = stringResource(R.string.bridge_settings_hint),
-                        color = TextSecondary,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = if (settings.navigationBridge.enabled) {
-                                    stringResource(R.string.bridge_status_enabled)
-                                } else {
-                                    stringResource(R.string.bridge_status_disabled)
-                                },
-                                color = if (settings.navigationBridge.enabled) AccentGreen else TextSecondary,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            val savedDevice = settings.navigationBridge.lastDeviceName
-                                ?: settings.navigationBridge.lastDeviceAddress
-                                ?: stringResource(R.string.bridge_no_device_saved)
-                            Text(
-                                text = savedDevice,
-                                color = TextSecondary,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                        Button(
-                            onClick = onOpenEspBridge,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = AccentCyan,
-                                contentColor = DarkBackground
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Default.DeveloperBoard, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.open_bridge_screen))
-                        }
-                    }
                 }
             }
 

@@ -29,12 +29,6 @@
     <string name="auto_start_on_boot">Khởi động cùng xe (Tự động chạy Overlay khi bật máy)</string>
     <string name="show_status_widget">Hiển thị Widget Trạng thái (Đồng hồ, Icon, Thời tiết)</string>
     <string name="show_assistant_widget">Hiển thị Nút Trợ lý ảo (Microphone)</string>
-    <string name="section_esp_bridge">📟 Cầu nối ESP32</string>
-    <string name="bridge_settings_hint">Đọc điều hướng từ Google Maps và gửi sang màn hình ESP32 qua BLE.</string>
-    <string name="bridge_status_enabled">Bridge đang bật</string>
-    <string name="bridge_status_disabled">Bridge đang tắt</string>
-    <string name="bridge_no_device_saved">Chưa lưu thiết bị BLE</string>
-    <string name="open_bridge_screen">Mở Bridge</string>
 
     <!-- Widget Appearance -->
     <string name="section_widget_appearance">🎨 Giao diện Widget Nổi</string>
@@ -162,48 +156,5 @@
     <string name="new_version">Phiên bản mới</string>
     <string name="update_now">Cập nhật ngay</string>
     <string name="update_later">Để sau</string>
-    <string name="bridge_screen_title">ESP32 Bridge</string>
-    <string name="bridge_section_runtime">Trạng thái Bridge</string>
-    <string name="bridge_section_permissions">Quyền truy cập</string>
-    <string name="bridge_section_device">Thiết bị BLE</string>
-    <string name="bridge_section_settings">Cấu hình hiển thị</string>
-    <string name="bridge_section_diagnostics">Chẩn đoán thời gian thực</string>
-    <string name="bridge_toggle_label">Chạy dịch vụ ESP32 bridge</string>
-    <string name="bridge_permission_notification_listener">Quyền đọc notification</string>
-    <string name="bridge_permission_notifications">Quyền thông báo</string>
-    <string name="bridge_permission_location">Quyền vị trí</string>
-    <string name="bridge_permission_bluetooth">Quyền Bluetooth</string>
-    <string name="bridge_action_open_settings">Mở</string>
-    <string name="bridge_action_grant">Cấp quyền</string>
-    <string name="bridge_permission_granted">Đã cấp</string>
-    <string name="bridge_permission_missing">Chưa cấp</string>
-    <string name="bridge_scan_hint">Quét thiết bị BLE xung quanh và cả thiết bị đã ghép đôi để chọn màn hình ESP32 muốn kết nối.</string>
-    <string name="bridge_action_scan">Quét thiết bị</string>
-    <string name="bridge_action_disconnect">Ngắt kết nối</string>
-    <string name="bridge_scanning">Đang quét...</string>
-    <string name="bridge_enable_service_first">Hãy bật bridge service trước khi quét thiết bị BLE.</string>
-    <string name="bridge_light_theme">Giao diện sáng trên màn hình</string>
-    <string name="bridge_brightness">Độ sáng màn hình</string>
-    <string name="bridge_speed_limit">Ngưỡng cảnh báo tốc độ (km/h)</string>
-    <string name="bridge_send_settings_now">Gửi cấu hình ngay</string>
-    <string name="bridge_diag_speed">Tốc độ GPS</string>
-    <string name="bridge_no_navigation">Chưa có dữ liệu điều hướng từ Google Maps.</string>
-    <string name="bridge_diag_next_road">Đường kế tiếp</string>
-    <string name="bridge_diag_road_desc">Mô tả đường</string>
-    <string name="bridge_diag_distance">Khoảng cách tới lần rẽ</string>
-    <string name="bridge_diag_ete">Thời gian còn lại</string>
-    <string name="bridge_diag_eta">Giờ đến dự kiến</string>
-    <string name="bridge_diag_total_distance">Tổng quãng đường</string>
-    <string name="bridge_picker_title">Chọn thiết bị BLE</string>
-    <string name="bridge_picker_scanning_hint">Đang quét thiết bị BLE xung quanh tối đa 12 giây...</string>
-    <string name="bridge_picker_empty">Không tìm thấy thiết bị BLE hoặc thiết bị đã ghép đôi trong lần quét này.</string>
-    <string name="bridge_device_unnamed">Thiết bị BLE không tên</string>
-    <string name="bridge_permissions_required">Cần cấp đủ quyền cho bridge trước khi bật dịch vụ.</string>
-    <string name="bridge_scanner_unavailable">Bluetooth scanner hiện chưa sẵn sàng trên thiết bị này.</string>
-    <string name="bridge_scanner_paired_only">Không mở được BLE scanner. Chỉ hiển thị thiết bị đã ghép đôi.</string>
-    <string name="bridge_scan_failed">Quét BLE thất bại (mã lỗi: %1$d).</string>
-    <string name="bridge_location_service_required">Hãy bật Vị trí trên thiết bị trước khi quét BLE.</string>
-    <string name="bridge_notification_title">ESP32 Bridge</string>
-    <string name="bridge_notification_channel_name">Cầu nối điều hướng ESP32</string>
-    <string name="action_back">Quay lại</string>
 </resources>
+

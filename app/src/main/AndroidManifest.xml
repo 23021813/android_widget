@@ -12,8 +12,6 @@
     <!-- Foreground service for overlay -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Network & connectivity status -->
@@ -28,14 +26,11 @@
 
     <!-- Bluetooth status -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
     <!-- Location for weather -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <!-- Boot completed for auto-start -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -89,21 +84,6 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Car launcher status overlay that persists across split-screen apps" />
         </service>
-
-        <service
-            android:name=".bridge.service.GoogleMapsNotificationListenerService"
-            android:exported="false"
-            android:label="GoogleMapsNotificationListenerService"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service>
-
-        <service
-            android:name=".bridge.service.EspBleBridgeService"
-            android:exported="false"
-            android:foregroundServiceType="location|connectedDevice" />
 
         <!-- Boot Receiver -->
         <receiver

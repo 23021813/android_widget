@@ -57,15 +57,6 @@ data class ScheduleProfile(
     val musicKeyword: String = ""
 )
 
-data class NavigationBridgeSettings(
-    val enabled: Boolean = false,
-    val lastDeviceName: String? = null,
-    val lastDeviceAddress: String? = null,
-    val displayLightTheme: Boolean = true,
-    val displayBrightness: Int = 50,
-    val speedWarningLimit: Int = 50
-)
-
 data class LauncherSettings(
     // App Frames
     val frame1App: String? = null,
@@ -121,8 +112,5 @@ data class LauncherSettings(
     val preSplitDelayMs: Int = 1500,
 
     // Schedule Automation Profiles
-    val scheduleProfiles: List<ScheduleProfile> = emptyList(),
-
-    // ESP32 Navigation Bridge
-    val navigationBridge: NavigationBridgeSettings = NavigationBridgeSettings()
+    val scheduleProfiles: List<ScheduleProfile> = emptyList()
 )
