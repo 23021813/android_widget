@@ -1,7 +1,7 @@
 {
   "versionCode": 22,
   "versionName": "1.5.0",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.5.0/CarFloat_1.5.0.apk",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.0/app-release.apk",
   "changelog": "- Add Parking Alert (Telegram + Email SMTP) with encrypted secrets",
   "forceUpdate": false
 }
