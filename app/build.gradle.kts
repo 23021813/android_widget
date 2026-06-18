@@ -36,8 +36,8 @@ android {
         applicationId = "com.carlauncher"
         minSdk = 28
         targetSdk = 34
-        versionCode = 21
-        versionName = "1.4.6"
+        versionCode = 22
+        versionName = "1.5.0"
     }
 
     signingConfigs {
@@ -89,6 +89,11 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/NOTICE.md"
+            excludes += "/META-INF/NOTICE.txt"
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/LICENSE.txt"
+            excludes += "/META-INF/DEPENDENCIES"
         }
     }
 }
@@ -131,6 +136,13 @@ dependencies {
 
     // Coroutines
     implementation(libs.coroutines.android)
+
+    // EncryptedSharedPreferences for SMTP password / Telegram token
+    implementation(libs.security.crypto)
+
+    // JavaMail Android (SMTP for email alerts)
+    implementation(libs.mail.android)
+    implementation(libs.mail.activation)
 
     // Core
     implementation(libs.core.ktx)

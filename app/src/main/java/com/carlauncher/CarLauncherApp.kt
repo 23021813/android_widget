@@ -1,6 +1,7 @@
 package com.carlauncher
 
 import android.app.Application
+import com.carlauncher.service.AppContextHolder
 
 class CarLauncherApp : Application() {
 
@@ -8,6 +9,7 @@ class CarLauncherApp : Application() {
         super.onCreate()
         // Initialize any global resources here
         instance = this
+        AppContextHolder.appContext = applicationContext
     }
 
     companion object {

@@ -1,7 +1,7 @@
 {
-  "versionCode": 21,
-  "versionName": "1.4.6",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.4.6/CarFloat_1.4.6.apk",
-  "changelog": "- Remove CarBridge\n- Add Pre-Split Config",
+  "versionCode": 22,
+  "versionName": "1.5.0",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/1.5.0/CarFloat_1.5.0.apk",
+  "changelog": "- Add Parking Alert (Telegram + Email SMTP) with encrypted secrets",
   "forceUpdate": false
 }
