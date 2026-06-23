@@ -1,7 +1,7 @@
 {
-  "versionCode": 22,
-  "versionName": "1.5.0",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.0/app-release.apk",
-  "changelog": "- Remove CarBridge\n- Add Pre-Split Config\n- Fix pre-split timing (UsageStatsManager polling)",
+  "versionCode": 23,
+  "versionName": "1.5.1",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.1/app-release.apk",
+  "changelog": "Remove Parking Alert (Telegram/Email) - fix pre-split timing with UsageStatsManager polling - extend delay max to 5 minutes",
   "forceUpdate": false
 }
