@@ -104,11 +104,17 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     if (settings.preSplitApp != null) {
+                        val delaySec = settings.preSplitDelayMs / 1000f
+                        val displayTime = when {
+                            delaySec >= 60 -> "${(delaySec / 60).toInt()}m ${(delaySec % 60).toInt()}s"
+                            delaySec >= 5 -> "${delaySec.toInt()}s"
+                            else -> String.format("%.1fs", delaySec)
+                        }
                         SettingsSlider(
                             label = stringResource(R.string.pre_split_delay),
-                            value = settings.preSplitDelayMs / 1000f,
-                            valueRange = 0.5f..5.0f,
-                            displayValue = String.format("%.1fs", settings.preSplitDelayMs / 1000f),
+                            value = delaySec,
+                            valueRange = 0.5f..300f,
+                            displayValue = displayTime,
                             onValueChange = { onSettingsUpdate(settings.copy(preSplitDelayMs = (it * 1000).toInt())) }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
