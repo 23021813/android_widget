@@ -52,23 +52,6 @@ internal object SettingsKeys {
     val PRE_SPLIT_DELAY_MS = intPreferencesKey("pre_split_delay_ms")
     val SCHEDULE_PROFILES = stringPreferencesKey("schedule_profiles")
 
-    // Parking Alert
-    val PARKING_ENABLED = booleanPreferencesKey("parking_enabled")
-    val PARKING_IDLE_MIN = intPreferencesKey("parking_idle_min")
-    val PARKING_DISTANCE_M = intPreferencesKey("parking_distance_m")
-    val PARKING_COOLDOWN_MIN = intPreferencesKey("parking_cooldown_min")
-    val PARKING_SEND_TELEGRAM = booleanPreferencesKey("parking_send_telegram")
-    val PARKING_SEND_EMAIL = booleanPreferencesKey("parking_send_email")
-    val PARKING_TG_CHAT_ID = stringPreferencesKey("parking_tg_chat_id")
-    val PARKING_SMTP_HOST = stringPreferencesKey("parking_smtp_host")
-    val PARKING_SMTP_PORT = intPreferencesKey("parking_smtp_port")
-    val PARKING_SMTP_USER = stringPreferencesKey("parking_smtp_user")
-    val PARKING_SMTP_RECIPIENT = stringPreferencesKey("parking_smtp_recipient")
-    val PARKING_LAST_MOVEMENT_TS = longPreferencesKey("parking_last_movement_ts")
-    val PARKING_LAST_ALERT_TS = longPreferencesKey("parking_last_alert_ts")
-    val PARKING_HAS_TG_TOKEN = booleanPreferencesKey("parking_has_tg_token")
-    val PARKING_HAS_SMTP_PASS = booleanPreferencesKey("parking_has_smtp_pass")
-
 
 }
 
@@ -129,24 +112,6 @@ internal object SettingsPreferencesMapper {
                 parseScheduleProfiles(it)
             } ?: emptyList(),
 
-            parkingAlert = ParkingAlertConfig(
-                enabled = prefs[SettingsKeys.PARKING_ENABLED] ?: false,
-                idleMinutes = prefs[SettingsKeys.PARKING_IDLE_MIN] ?: 15,
-                distanceMeters = prefs[SettingsKeys.PARKING_DISTANCE_M] ?: 50,
-                cooldownMinutes = prefs[SettingsKeys.PARKING_COOLDOWN_MIN] ?: 30,
-                sendTelegram = prefs[SettingsKeys.PARKING_SEND_TELEGRAM] ?: true,
-                sendEmail = prefs[SettingsKeys.PARKING_SEND_EMAIL] ?: false,
-                telegramChatId = prefs[SettingsKeys.PARKING_TG_CHAT_ID] ?: "",
-                smtpHost = prefs[SettingsKeys.PARKING_SMTP_HOST] ?: "smtp.gmail.com",
-                smtpPort = prefs[SettingsKeys.PARKING_SMTP_PORT] ?: 587,
-                smtpUser = prefs[SettingsKeys.PARKING_SMTP_USER] ?: "",
-                smtpRecipient = prefs[SettingsKeys.PARKING_SMTP_RECIPIENT] ?: "",
-                lastMovementTimestamp = prefs[SettingsKeys.PARKING_LAST_MOVEMENT_TS] ?: 0L,
-                lastAlertTimestamp = prefs[SettingsKeys.PARKING_LAST_ALERT_TS] ?: 0L,
-                hasTelegramToken = prefs[SettingsKeys.PARKING_HAS_TG_TOKEN] ?: false,
-                hasSmtpPassword = prefs[SettingsKeys.PARKING_HAS_SMTP_PASS] ?: false
-            ),
-
         )
     }
 
@@ -199,26 +164,6 @@ internal object SettingsPreferencesMapper {
         else prefs.remove(SettingsKeys.PRE_SPLIT_APP)
         prefs[SettingsKeys.PRE_SPLIT_DELAY_MS] = settings.preSplitDelayMs
         prefs[SettingsKeys.SCHEDULE_PROFILES] = serializeScheduleProfiles(settings.scheduleProfiles)
-
-        val p = settings.parkingAlert
-        prefs[SettingsKeys.PARKING_ENABLED] = p.enabled
-        prefs[SettingsKeys.PARKING_IDLE_MIN] = p.idleMinutes
-        prefs[SettingsKeys.PARKING_DISTANCE_M] = p.distanceMeters
-        prefs[SettingsKeys.PARKING_COOLDOWN_MIN] = p.cooldownMinutes
-        prefs[SettingsKeys.PARKING_SEND_TELEGRAM] = p.sendTelegram
-        prefs[SettingsKeys.PARKING_SEND_EMAIL] = p.sendEmail
-        if (p.telegramChatId.isNotEmpty()) prefs[SettingsKeys.PARKING_TG_CHAT_ID] = p.telegramChatId
-        else prefs.remove(SettingsKeys.PARKING_TG_CHAT_ID)
-        prefs[SettingsKeys.PARKING_SMTP_HOST] = p.smtpHost
-        prefs[SettingsKeys.PARKING_SMTP_PORT] = p.smtpPort
-        if (p.smtpUser.isNotEmpty()) prefs[SettingsKeys.PARKING_SMTP_USER] = p.smtpUser
-        else prefs.remove(SettingsKeys.PARKING_SMTP_USER)
-        if (p.smtpRecipient.isNotEmpty()) prefs[SettingsKeys.PARKING_SMTP_RECIPIENT] = p.smtpRecipient
-        else prefs.remove(SettingsKeys.PARKING_SMTP_RECIPIENT)
-        prefs[SettingsKeys.PARKING_LAST_MOVEMENT_TS] = p.lastMovementTimestamp
-        prefs[SettingsKeys.PARKING_LAST_ALERT_TS] = p.lastAlertTimestamp
-        prefs[SettingsKeys.PARKING_HAS_TG_TOKEN] = p.hasTelegramToken
-        prefs[SettingsKeys.PARKING_HAS_SMTP_PASS] = p.hasSmtpPassword
 
     }
 
@@ -306,6 +251,5 @@ class SettingsDataStore(private val context: Context) {
 
     suspend fun resetToDefaults() {
         context.dataStore.edit { it.clear() }
-        com.carlauncher.data.secrets.SecretsStore(context).clear()
     }
 }

@@ -162,28 +162,4 @@
     <string name="new_version">New version</string>
     <string name="update_now">Update Now</string>
     <string name="update_later">Later</string>
-
-    <!-- Parking Alert -->
-    <string name="section_parking">🅿️ Parking Alert</string>
-    <string name="parking_enabled">Enable parking idle alert</string>
-    <string name="parking_idle_label">Trigger after (minutes idle)</string>
-    <string name="parking_distance_label">Movement threshold (meters)</string>
-    <string name="parking_cooldown_label">Resend cooldown (minutes)</string>
-    <string name="parking_send_telegram">Send via Telegram</string>
-    <string name="parking_send_email">Send via Email (SMTP)</string>
-    <string name="parking_tg_chat_id">Telegram Chat ID</string>
-    <string name="parking_tg_token">Telegram Bot Token</string>
-    <string name="parking_tg_token_hint">Created via @BotFather. Stored encrypted on device.</string>
-    <string name="parking_smtp_host">SMTP Host</string>
-    <string name="parking_smtp_port">SMTP Port</string>
-    <string name="parking_smtp_user">SMTP User (email)</string>
-    <string name="parking_smtp_password">SMTP Password / App Password</string>
-    <string name="parking_smtp_recipient">Recipient (leave blank = same as sender)</string>
-    <string name="parking_test">Send test alert</string>
-    <string name="parking_test_ok">Test alert sent — check your Telegram / Inbox</string>
-    <string name="parking_test_fail">Test alert failed — verify credentials &amp; internet</string>
-    <string name="parking_secret_saved">Encrypted on device</string>
-    <string name="parking_secret_set">✓ Set</string>
-    <string name="parking_secret_not_set">Not set</string>
-    <string name="parking_security_note">Bot token and SMTP password are encrypted via AndroidKeyStore. Other config (chat id, host, port) is stored in standard DataStore.</string>
 </resources>

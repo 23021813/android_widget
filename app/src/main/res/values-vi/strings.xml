@@ -156,29 +156,5 @@
     <string name="new_version">Phiên bản mới</string>
     <string name="update_now">Cập nhật ngay</string>
     <string name="update_later">Để sau</string>
-
-    <!-- Parking Alert -->
-    <string name="section_parking">🅿️ Cảnh báo đỗ xe</string>
-    <string name="parking_enabled">Bật cảnh báo khi xe đứng yên quá lâu</string>
-    <string name="parking_idle_label">Kích hoạt sau (phút đứng yên)</string>
-    <string name="parking_distance_label">Ngưỡng coi là \"có di chuyển\" (mét)</string>
-    <string name="parking_cooldown_label">Thời gian nghỉ giữa 2 lần gửi (phút)</string>
-    <string name="parking_send_telegram">Gửi qua Telegram</string>
-    <string name="parking_send_email">Gửi qua Email (SMTP)</string>
-    <string name="parking_tg_chat_id">Telegram Chat ID</string>
-    <string name="parking_tg_token">Telegram Bot Token</string>
-    <string name="parking_tg_token_hint">Tạo qua @BotFather. Được mã hoá lưu trên thiết bị.</string>
-    <string name="parking_smtp_host">SMTP Host</string>
-    <string name="parking_smtp_port">SMTP Port</string>
-    <string name="parking_smtp_user">SMTP User (email gửi)</string>
-    <string name="parking_smtp_password">Mật khẩu SMTP / App Password</string>
-    <string name="parking_smtp_recipient">Email nhận (để trống = gửi cho chính mình)</string>
-    <string name="parking_test">Gửi thử ngay</string>
-    <string name="parking_test_ok">Đã gửi thử — kiểm tra Telegram / Hộp thư</string>
-    <string name="parking_test_fail">Gửi thử thất bại — kiểm tra thông tin &amp; mạng</string>
-    <string name="parking_secret_saved">Đã mã hoá trên thiết bị</string>
-    <string name="parking_secret_set">✓ Đã thiết lập</string>
-    <string name="parking_secret_not_set">Chưa thiết lập</string>
-    <string name="parking_security_note">Bot token và mật khẩu SMTP được mã hoá bằng AndroidKeyStore. Các thông tin khác (chat id, host, port…) lưu trong DataStore thường.</string>
 </resources>
 

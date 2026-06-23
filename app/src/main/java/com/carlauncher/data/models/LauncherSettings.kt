@@ -57,24 +57,6 @@ data class ScheduleProfile(
     val musicKeyword: String = ""
 )
 
-data class ParkingAlertConfig(
-    val enabled: Boolean = false,
-    val idleMinutes: Int = 15,
-    val distanceMeters: Int = 50,
-    val cooldownMinutes: Int = 30,
-    val sendTelegram: Boolean = true,
-    val sendEmail: Boolean = false,
-    val telegramChatId: String = "",
-    val smtpHost: String = "smtp.gmail.com",
-    val smtpPort: Int = 587,
-    val smtpUser: String = "",
-    val smtpRecipient: String = "",
-    val lastMovementTimestamp: Long = 0L,
-    val lastAlertTimestamp: Long = 0L,
-    val hasTelegramToken: Boolean = false,
-    val hasSmtpPassword: Boolean = false
-)
-
 data class LauncherSettings(
     // App Frames
     val frame1App: String? = null,
@@ -130,8 +112,5 @@ data class LauncherSettings(
     val preSplitDelayMs: Int = 1500,
 
     // Schedule Automation Profiles
-    val scheduleProfiles: List<ScheduleProfile> = emptyList(),
-
-    // Parking Alert (encrypted secrets stored separately in SecretsStore)
-    val parkingAlert: ParkingAlertConfig = ParkingAlertConfig()
+    val scheduleProfiles: List<ScheduleProfile> = emptyList()
 )

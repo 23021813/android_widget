@@ -2,20 +2,17 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
-## [1.5.0] - 2026-06-18
+## [1.5.0] - 2026-06-23
 ### Added
-- **Parking Alert**: Tính năng cảnh báo khi xe đứng yên quá lâu. Theo dõi vị trí GPS mỗi 60s; nếu khoảng cách di chuyển < ngưỡng (mặc định 50m) trong suốt khoảng thời gian cấu hình (mặc định 15 phút), hệ thống sẽ gửi cảnh báo qua **Telegram** và/hoặc **Email (SMTP)**.
-- **Encrypted secrets**: Bot token Telegram và mật khẩu SMTP được mã hoá bằng `EncryptedSharedPreferences` (AndroidKeyStore AES-256-GCM). Không lưu plaintext.
-- **Cooldown + persistent state**: Thời gian nghỉ giữa 2 lần gửi cảnh báo có thể cấu hình (mặc định 30 phút). Trạng thái `lastMovementTimestamp` / `lastAlertTimestamp` được lưu vào DataStore nên vẫn còn hiệu lực qua app restart.
-- **Test Alert button**: Nút "Gửi thử ngay" trong Settings giúp xác nhận cấu hình Telegram/Email đúng trước khi tin tưởng.
-- **Settings UI**: Thêm section "🅿️ Cảnh báo đỗ xe" với các tuỳ chọn: idle threshold, distance threshold, cooldown, channel toggles, SMTP/Telegram fields.
+- **Pre-split app timing fix**: Khi auto-split-on-boot, app pre-split giờ được detect khi đã vào màn hình chính (qua UsageStatsManager polling) thay vì delay cố định, giúp split-screen không chạy trước khi app sẵn sàng.
+- **Pre-split delay max 5 phút**: Slider cấu hình delay được mở rộng từ 5 giây lên 5 phút, phù hợp với app khởi động chậm.
+
+### Removed
+- **Parking Alert**: Gỡ bỏ toàn bộ tính năng cảnh báo xe đứng yên (Telegram/Email). Code + dependencies liên quan (security-crypto, android-mail) đã xoá.
 
 ### Changed
 - `versionCode` 21 → 22, `versionName` 1.4.6 → 1.5.0.
-
-### Dependencies
-- `androidx.security:security-crypto-ktx:1.1.0-alpha06` (mã hoá secrets)
-- `com.sun.mail:android-mail:1.6.7` + `com.sun.mail:android-activation:1.6.7` (SMTP)
+- **Pre-Split Config**: Thêm cấu hình chọn app khởi động trước khi chia màn hình.
 
 ## [1.4.3] - 2026-03-26
 ### Changed

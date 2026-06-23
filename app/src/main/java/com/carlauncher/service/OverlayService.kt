@@ -56,7 +56,6 @@ import com.carlauncher.data.models.LauncherSettings
 import com.carlauncher.data.models.VirtualActions
 import com.carlauncher.data.models.WeatherInfo
 import com.carlauncher.data.WeatherRepository
-import com.carlauncher.data.secrets.SecretsStore
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -93,8 +92,6 @@ class OverlayService : Service() {
     private var dragHandleView: View? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var settingsDataStore: SettingsDataStore
-    private lateinit var secretsStore: SecretsStore
-    private var parkingMonitor: ParkingMonitor? = null
     private val weatherRepository = WeatherRepository()
     private val defaultWeatherCity = LauncherSettings().weatherCity
     // Position save debounce
@@ -105,18 +102,9 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         settingsDataStore = SettingsDataStore(this)
-        secretsStore = SecretsStore(this)
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification())
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-
-        parkingMonitor = ParkingMonitor(
-            context = this,
-            settingsDataStore = settingsDataStore,
-            secretsStore = secretsStore,
-            scope = serviceScope,
-            locationProvider = { getBestLastKnownLocation() }
-        ).also { it.start() }
 
         // Auto split-view on first boot, gửi action nếu đang trong bất kỳ khoảng lịch nào khớp
         serviceScope.launch {
@@ -909,8 +897,6 @@ class OverlayService : Service() {
         removeStatusOverlay()
         removeAssistantOverlay()
         TimeSyncMonitor.stopMonitoring(this)
-        parkingMonitor?.stop()
-        parkingMonitor = null
         serviceScope.cancel()
         super.onDestroy()
     }

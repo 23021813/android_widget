@@ -2,6 +2,6 @@
   "versionCode": 22,
   "versionName": "1.5.0",
   "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.0/app-release.apk",
-  "changelog": "- Add Parking Alert (Telegram + Email SMTP) with encrypted secrets",
+  "changelog": "- Remove CarBridge\n- Add Pre-Split Config\n- Fix pre-split timing (UsageStatsManager polling)",
   "forceUpdate": false
 }

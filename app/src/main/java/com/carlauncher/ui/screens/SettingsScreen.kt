@@ -383,16 +383,6 @@ fun SettingsScreen(
                 }
             }
 
-            // ═══ PARKING ALERT ═══
-            item {
-                SettingsSection(title = stringResource(R.string.section_parking)) {
-                    ParkingAlertSection(
-                        settings = settings,
-                        onSettingsUpdate = onSettingsUpdate
-                    )
-                }
-            }
-
             // ═══ HELP & GESTURE GUIDE ═══
             item {
                 SettingsSection(title = stringResource(R.string.section_help)) {
