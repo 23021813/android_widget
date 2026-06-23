@@ -110,6 +110,7 @@ data class LauncherSettings(
     val autoSplitOnBoot: Boolean = true,
     val preSplitApp: String? = null,
     val preSplitDelayMs: Int = 1500,
+    val preSplitNavigateToDest: Boolean = false,
 
     // Schedule Automation Profiles
     val scheduleProfiles: List<ScheduleProfile> = emptyList()

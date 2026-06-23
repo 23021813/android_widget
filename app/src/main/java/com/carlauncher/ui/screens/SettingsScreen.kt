@@ -96,6 +96,14 @@ fun SettingsScreen(
                 SettingsSection(title = stringResource(R.string.section_split_screen)) {
                     Text(stringResource(R.string.split_screen_hint), color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(12.dp))
+                    if (settings.preSplitApp == "vn.vietmap.live") {
+                        SettingsToggle(
+                            label = stringResource(R.string.pre_split_navigate_dest),
+                            checked = settings.preSplitNavigateToDest,
+                            onCheckedChange = { onSettingsUpdate(settings.copy(preSplitNavigateToDest = it)) }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                     SettingsAppSelector(
                         label = stringResource(R.string.app_pre_split),
                         currentApp = settings.preSplitApp?.let { pkg -> installedApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.not_selected),

@@ -50,6 +50,7 @@ internal object SettingsKeys {
     val AUTO_SPLIT_ON_BOOT = booleanPreferencesKey("auto_split_on_boot")
     val PRE_SPLIT_APP = stringPreferencesKey("pre_split_app")
     val PRE_SPLIT_DELAY_MS = intPreferencesKey("pre_split_delay_ms")
+    val PRE_SPLIT_NAVIGATE_DEST = booleanPreferencesKey("pre_split_navigate_dest")
     val SCHEDULE_PROFILES = stringPreferencesKey("schedule_profiles")
 
 
@@ -107,6 +108,7 @@ internal object SettingsPreferencesMapper {
             autoSplitOnBoot = prefs[SettingsKeys.AUTO_SPLIT_ON_BOOT] ?: true,
             preSplitApp = prefs[SettingsKeys.PRE_SPLIT_APP],
             preSplitDelayMs = prefs[SettingsKeys.PRE_SPLIT_DELAY_MS] ?: 1500,
+            preSplitNavigateToDest = prefs[SettingsKeys.PRE_SPLIT_NAVIGATE_DEST] ?: false,
 
             scheduleProfiles = prefs[SettingsKeys.SCHEDULE_PROFILES]?.let {
                 parseScheduleProfiles(it)
@@ -163,6 +165,7 @@ internal object SettingsPreferencesMapper {
         if (settings.preSplitApp != null) prefs[SettingsKeys.PRE_SPLIT_APP] = settings.preSplitApp
         else prefs.remove(SettingsKeys.PRE_SPLIT_APP)
         prefs[SettingsKeys.PRE_SPLIT_DELAY_MS] = settings.preSplitDelayMs
+        prefs[SettingsKeys.PRE_SPLIT_NAVIGATE_DEST] = settings.preSplitNavigateToDest
         prefs[SettingsKeys.SCHEDULE_PROFILES] = serializeScheduleProfiles(settings.scheduleProfiles)
 
     }

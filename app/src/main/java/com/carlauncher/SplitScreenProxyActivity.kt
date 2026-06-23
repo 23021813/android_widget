@@ -50,6 +50,14 @@ class SplitScreenProxyActivity : Activity() {
             SplitScreenLauncher.launchApp(this, preSplitPkg)
             scope.launch {
                 waitForPreSplitApp(preSplitPkg, preSplitDelayMs.toLong())
+
+                val preSplitNavIntent = buildPreSplitNavIntent(preSplitPkg, navAddress)
+                if (preSplitNavIntent != null) {
+                    Log.d(TAG, "Sending pre-split navigation intent to $preSplitPkg")
+                    startActivity(preSplitNavIntent)
+                    delay(1000)
+                }
+
                 launchSplit(pkg1, pkg2, actionIntent1, actionIntent2)
             }
         } else {
@@ -130,6 +138,18 @@ class SplitScreenProxyActivity : Activity() {
             return SplitScreenLauncher.buildMusicSearchIntent(musicKeyword)
         }
         return null
+    }
+
+    /**
+     * Build a navigation intent for the pre-split app.
+     * If pre-split is Vietmap Live and navigateToDest is enabled,
+     * returns a Vietmap navigation intent using the schedule's navAddress.
+     */
+    private fun buildPreSplitNavIntent(preSplitPkg: String, navAddress: String?): Intent? {
+        if (preSplitPkg != "vn.vietmap.live") return null
+        val navigateToDest = intent.getBooleanExtra("pre_split_navigate_dest", false)
+        if (!navigateToDest) return null
+        return SplitScreenLauncher.buildVietmapNavigationIntent(navAddress ?: "")
     }
 
     override fun onDestroy() {

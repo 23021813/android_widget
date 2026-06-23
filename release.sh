@@ -167,8 +167,7 @@ ok "APK built: $APK_SIZE"
 # ── 5. Verify signature ───────────────────────────────────────────────────
 step "5/8  Verifying APK signature (v2 scheme)"
 
-VERIFY_OUT=$("$APKSIGNER" verify --print-certs "$APK_PATH" 2>&1)
-if echo "$VERIFY_OUT" | grep -q "Verifies"; then
+if VERIFY_OUT=$("$APKSIGNER" verify --print-certs "$APK_PATH" 2>&1); then
     ok "Signature OK"
 else
     die "Signature verification failed:\n$VERIFY_OUT"

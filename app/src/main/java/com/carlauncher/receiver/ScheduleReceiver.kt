@@ -92,6 +92,9 @@ class ScheduleReceiver : BroadcastReceiver() {
                     putExtra("pkg2", frame2)
                     if (navAddress.isNotBlank()) putExtra("nav_address", navAddress)
                     if (musicKeyword.isNotBlank()) putExtra("music_keyword", musicKeyword)
+                    putExtra("pre_split_pkg", settings.preSplitApp)
+                    putExtra("pre_split_delay_ms", settings.preSplitDelayMs)
+                    putExtra("pre_split_navigate_dest", settings.preSplitNavigateToDest)
                 }
                 context.startActivity(splitIntent)
                 delay(4000L)
@@ -107,6 +110,9 @@ class ScheduleReceiver : BroadcastReceiver() {
                     putExtra("pkg2", frame2)
                     if (navAddress.isNotBlank()) putExtra("nav_address", navAddress)
                     if (musicKeyword.isNotBlank()) putExtra("music_keyword", musicKeyword)
+                    putExtra("pre_split_pkg", settings.preSplitApp)
+                    putExtra("pre_split_delay_ms", settings.preSplitDelayMs)
+                    putExtra("pre_split_navigate_dest", settings.preSplitNavigateToDest)
                 }
                 context.startActivity(actionIntent)
                 delay(4000L)

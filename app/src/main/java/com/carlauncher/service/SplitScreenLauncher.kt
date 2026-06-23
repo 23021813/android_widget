@@ -132,6 +132,20 @@ object SplitScreenLauncher {
     }
 
     /**
+     * Build an action intent for Vietmap Live navigation.
+     * Uses https://www.google.com/maps?q=<address> which Vietmap Live
+     * registers to handle (shares intent filter with Google Maps URLs).
+     * Returns null if address is blank.
+     */
+    fun buildVietmapNavigationIntent(address: String): Intent? {
+        if (address.isBlank()) return null
+        val uri = Uri.parse("https://www.google.com/maps?q=${Uri.encode(address)}")
+        return Intent(Intent.ACTION_VIEW, uri).apply {
+            setPackage("vn.vietmap.live")
+        }
+    }
+
+    /**
      * Build an action intent for YouTube Music search.
      * Returns null if keyword is blank.
      */

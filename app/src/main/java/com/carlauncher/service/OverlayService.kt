@@ -153,6 +153,7 @@ class OverlayService : Service() {
                     putExtra("pkg2", settings.frame2App)
                     putExtra("pre_split_pkg", settings.preSplitApp)
                     putExtra("pre_split_delay_ms", settings.preSplitDelayMs)
+                    putExtra("pre_split_navigate_dest", settings.preSplitNavigateToDest)
                     if (profileForFirstOpen != null) {
                         if (profileForFirstOpen.autoNavigate && profileForFirstOpen.navAddress.isNotBlank()) {
                             putExtra("nav_address", profileForFirstOpen.navAddress)
