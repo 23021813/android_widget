@@ -53,6 +53,9 @@ data class ScheduleProfile(
     val days: Set<Int> = emptySet(), // Calendar.MONDAY(2) .. MONDAY(6) etc.
     val autoNavigate: Boolean = false,
     val navAddress: String = "",
+    val navLat: Double? = null,
+    val navLng: Double? = null,
+    val navPoiName: String = "",
     val autoMusic: Boolean = false,
     val musicKeyword: String = ""
 )

@@ -45,8 +45,8 @@ object ScheduleManager {
         for ((i, p) in settings.scheduleProfiles.withIndex()) {
             Log.d(TAG, "  [$i] id=${p.id.take(8)} name='${p.name}' enabled=${p.enabled} " +
                 "days=${p.days} ${p.startHour}:${String.format("%02d", p.startMinute)}-${p.endHour}:${String.format("%02d", p.endMinute)} " +
-                "nav=${p.autoNavigate}/'${p.navAddress}' music=${p.autoMusic}/'${p.musicKeyword}' " +
-                "lastTriggered=${p.lastTriggeredDayOfYear}")
+                "nav=${p.autoNavigate}/'${p.navAddress}' lat=${p.navLat} lng=${p.navLng} poi='${p.navPoiName}' " +
+                "music=${p.autoMusic}/'${p.musicKeyword}' lastTriggered=${p.lastTriggeredDayOfYear}")
         }
         
         for (profile in settings.scheduleProfiles) {
@@ -105,7 +105,7 @@ object ScheduleManager {
             val cal = Calendar.getInstance().apply { timeInMillis = triggerTime }
             Log.d(TAG, "  ✓ ALARM SET profile '${profile.name}' id=${profile.id.take(8)} " +
                 "requestCode=${profile.id.hashCode()} at ${cal.time} " +
-                "nav='${profile.navAddress}' music='${profile.musicKeyword}'")
+                "nav='${profile.navAddress}' lat=${profile.navLat} lng=${profile.navLng} poi='${profile.navPoiName}' music='${profile.musicKeyword}'")
         }
         Log.d(TAG, "═══ syncAlarms END ═══")
     }

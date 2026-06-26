@@ -196,6 +196,9 @@ internal object SettingsPreferencesMapper {
                         days = daysSet,
                         autoNavigate = obj.optBoolean("autoNavigate", false),
                         navAddress = obj.optString("navAddress", ""),
+                        navLat = if (obj.has("navLat")) obj.optDouble("navLat", Double.NaN).let { if (it.isNaN()) null else it } else null,
+                        navLng = if (obj.has("navLng")) obj.optDouble("navLng", Double.NaN).let { if (it.isNaN()) null else it } else null,
+                        navPoiName = obj.optString("navPoiName", ""),
                         autoMusic = obj.optBoolean("autoMusic", false),
                         musicKeyword = obj.optString("musicKeyword", "")
                     )
@@ -237,6 +240,9 @@ internal object SettingsPreferencesMapper {
                 "\"days\":$days," +
                 "\"autoNavigate\":${profile.autoNavigate}," +
                 "\"navAddress\":\"${escapeJson(profile.navAddress)}\"," +
+                "\"navLat\":${profile.navLat}," +
+                "\"navLng\":${profile.navLng}," +
+                "\"navPoiName\":\"${escapeJson(profile.navPoiName)}\"," +
                 "\"autoMusic\":${profile.autoMusic}," +
                 "\"musicKeyword\":\"${escapeJson(profile.musicKeyword)}\"" +
                 "}"

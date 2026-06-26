@@ -139,6 +139,7 @@ class OverlayService : Service() {
                         "name=${profile.name}, enabled=${profile.enabled}, days=${profile.days}, " +
                             "start=${profile.startHour}:${profile.startMinute}, end=${profile.endHour}:${profile.endMinute}, " +
                             "autoNav=${profile.autoNavigate}, nav='${profile.navAddress}', " +
+                            "lat=${profile.navLat}, lng=${profile.navLng}, poi='${profile.navPoiName}', " +
                             "autoMusic=${profile.autoMusic}, music='${profile.musicKeyword}'"
                     }
                 )
@@ -157,6 +158,11 @@ class OverlayService : Service() {
                     if (profileForFirstOpen != null) {
                         if (profileForFirstOpen.autoNavigate && profileForFirstOpen.navAddress.isNotBlank()) {
                             putExtra("nav_address", profileForFirstOpen.navAddress)
+                        }
+                        if (profileForFirstOpen.autoNavigate && profileForFirstOpen.navLat != null && profileForFirstOpen.navLng != null) {
+                            putExtra("nav_lat", profileForFirstOpen.navLat)
+                            putExtra("nav_lng", profileForFirstOpen.navLng)
+                            if (profileForFirstOpen.navPoiName.isNotBlank()) putExtra("nav_poi_name", profileForFirstOpen.navPoiName)
                         }
                         if (profileForFirstOpen.autoMusic && profileForFirstOpen.musicKeyword.isNotBlank()) {
                             putExtra("music_keyword", profileForFirstOpen.musicKeyword)
@@ -422,7 +428,7 @@ class OverlayService : Service() {
             val inRange = currentTotalMinutes in startMin..endMin
             Log.d("OverlayService", "  '${profile.name}' enabled=${profile.enabled} dayMatch=${currentDay in profile.days} " +
                 "range=${profile.startHour}:${String.format("%02d", profile.startMinute)}-${profile.endHour}:${String.format("%02d", profile.endMinute)} " +
-                "inRange=$inRange nav='${profile.navAddress}'")
+                "inRange=$inRange nav='${profile.navAddress}' lat=${profile.navLat} lng=${profile.navLng} poi='${profile.navPoiName}'")
         }
 
         val candidates = settings.scheduleProfiles.filter { profile ->
@@ -441,7 +447,7 @@ class OverlayService : Service() {
             val midpoint = (it.startHour * 60 + it.startMinute + it.endHour * 60 + it.endMinute) / 2
             kotlin.math.abs(currentTotalMinutes - midpoint)
         }
-        Log.d("OverlayService", "  → candidates=${candidates.map { "'${it.name}'/nav='${it.navAddress}'" }} chosen='${chosen?.name}' nav='${chosen?.navAddress}'")
+        Log.d("OverlayService", "  → candidates=${candidates.map { "'${it.name}'/nav='${it.navAddress}'/lat=${it.navLat}/lng=${it.navLng}'" }} chosen='${chosen?.name}' nav='${chosen?.navAddress}' lat=${chosen?.navLat} lng=${chosen?.navLng}")
         return chosen
     }
 

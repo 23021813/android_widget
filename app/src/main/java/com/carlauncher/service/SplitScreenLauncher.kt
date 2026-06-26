@@ -132,16 +132,37 @@ object SplitScreenLauncher {
     }
 
     /**
-     * Build an action intent for Vietmap Live navigation.
-     * Uses https://www.google.com/maps?q=<address> which Vietmap Live
-     * registers to handle (shares intent filter with Google Maps URLs).
-     * Returns null if address is blank.
+     * Build an intent for Vietmap Live navigation using lat/lng/poiName.
+     * Uses Vietmap's native deep link: vietmaplive://companion/navigation
+     * This is the same approach Kiki Auto uses and Vietmap handles it by
+     * forwarding the URI to Flutter via "firstIntentDeeplinkData" on the
+     * vml_main_channel method channel. On a real device this triggers auto-navigation.
+     */
+    fun buildVietmapNavigationIntent(lat: Double, lng: Double, poiName: String): Intent {
+        val uri = Uri.parse("vietmaplive://companion/navigation?lat=$lat&lng=$lng&poiName=${Uri.encode(poiName)}")
+        Log.d("VietmapNav", "buildVietmapNavigationIntent: lat=$lat lng=$lng poiName='$poiName' -> uri=$uri")
+        return Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+    }
+
+    /**
+     * Legacy overload: tries to parse an address string as "lat,lng" coordinates
+     * and sends as deep link; otherwise sends as deep link with poiName=address.
      */
     fun buildVietmapNavigationIntent(address: String): Intent? {
         if (address.isBlank()) return null
-        val uri = Uri.parse("https://www.google.com/maps?q=${Uri.encode(address)}")
-        return Intent(Intent.ACTION_VIEW, uri).apply {
-            setPackage("vn.vietmap.live")
+        val parts = address.split(",")
+        return if (parts.size == 2) {
+            val lat = parts[0].trim().toDoubleOrNull()
+            val lng = parts[1].trim().toDoubleOrNull()
+            if (lat != null && lng != null) {
+                buildVietmapNavigationIntent(lat, lng, "")
+            } else {
+                buildVietmapNavigationIntent(0.0, 0.0, address)
+            }
+        } else {
+            buildVietmapNavigationIntent(0.0, 0.0, address)
         }
     }
 

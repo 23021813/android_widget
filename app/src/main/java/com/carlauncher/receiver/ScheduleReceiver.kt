@@ -64,7 +64,7 @@ class ScheduleReceiver : BroadcastReceiver() {
             return
         }
 
-        Log.d(TAG, "  Found profile: name='${profile.name}' nav=${profile.autoNavigate}/'${profile.navAddress}' music=${profile.autoMusic}/'${profile.musicKeyword}'")
+        Log.d(TAG, "  Found profile: name='${profile.name}' nav=${profile.autoNavigate}/'${profile.navAddress}' lat=${profile.navLat} lng=${profile.navLng} poi='${profile.navPoiName}' music=${profile.autoMusic}/'${profile.musicKeyword}'")
 
         if (!profile.enabled) {
             Log.d(TAG, "  Profile '${profile.name}' disabled, skipping")
@@ -78,8 +78,11 @@ class ScheduleReceiver : BroadcastReceiver() {
         }
 
         val navAddress = if (profile.autoNavigate) profile.navAddress else ""
+        val navLat = if (profile.autoNavigate) profile.navLat else null
+        val navLng = if (profile.autoNavigate) profile.navLng else null
+        val navPoiName = if (profile.autoNavigate) profile.navPoiName else ""
         val musicKeyword = if (profile.autoMusic) profile.musicKeyword else ""
-        Log.d(TAG, "  Resolved action params: navAddress='$navAddress' musicKeyword='$musicKeyword'")
+        Log.d(TAG, "  Resolved action params: navAddress='$navAddress' lat=$navLat lng=$navLng poi='$navPoiName' music='$musicKeyword'")
 
         if (!skipSplitScreen) {
             val frame1 = settings.frame1App
@@ -91,6 +94,9 @@ class ScheduleReceiver : BroadcastReceiver() {
                     putExtra("pkg1", frame1)
                     putExtra("pkg2", frame2)
                     if (navAddress.isNotBlank()) putExtra("nav_address", navAddress)
+                    if (navLat != null) putExtra("nav_lat", navLat)
+                    if (navLng != null) putExtra("nav_lng", navLng)
+                    if (navPoiName.isNotBlank()) putExtra("nav_poi_name", navPoiName)
                     if (musicKeyword.isNotBlank()) putExtra("music_keyword", musicKeyword)
                     putExtra("pre_split_pkg", settings.preSplitApp)
                     putExtra("pre_split_delay_ms", settings.preSplitDelayMs)
@@ -109,6 +115,9 @@ class ScheduleReceiver : BroadcastReceiver() {
                     putExtra("pkg1", frame1)
                     putExtra("pkg2", frame2)
                     if (navAddress.isNotBlank()) putExtra("nav_address", navAddress)
+                    if (navLat != null) putExtra("nav_lat", navLat)
+                    if (navLng != null) putExtra("nav_lng", navLng)
+                    if (navPoiName.isNotBlank()) putExtra("nav_poi_name", navPoiName)
                     if (musicKeyword.isNotBlank()) putExtra("music_keyword", musicKeyword)
                     putExtra("pre_split_pkg", settings.preSplitApp)
                     putExtra("pre_split_delay_ms", settings.preSplitDelayMs)

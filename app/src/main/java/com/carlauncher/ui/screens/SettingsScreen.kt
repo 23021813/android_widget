@@ -281,7 +281,9 @@ fun SettingsScreen(
                                 endMinute = endTotal % 60,
                                 days = setOf(1, 2, 3, 4, 5, 6, 7), // All days
                                 autoNavigate = true,
-                                navAddress = "Hanoi",
+                                navLat = 18.67337,
+                                navLng = 105.69232,
+                                navPoiName = "Vinh Nghe An",
                                 autoMusic = true,
                                 musicKeyword = "Nhạc trẻ"
                             )
@@ -705,7 +707,11 @@ fun ScheduleProfileCard(
             Text(text = nameStr, style = MaterialTheme.typography.titleMedium, color = TextPrimary, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "⏰ $timeStr | 📅 $displayDays", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
-            if (profile.autoNavigate) Text(text = "📍 " + stringResource(R.string.schedule_to_destination, profile.navAddress), style = MaterialTheme.typography.bodySmall, color = AccentCyan)
+            if (profile.autoNavigate) {
+                val destText = if (profile.navPoiName.isNotBlank()) profile.navPoiName
+                    else profile.navAddress.ifBlank { "${profile.navLat ?: "?"},${profile.navLng ?: "?"}" }
+                Text(text = "📍 " + stringResource(R.string.schedule_to_destination, destText), style = MaterialTheme.typography.bodySmall, color = AccentCyan)
+            }
             if (profile.autoMusic) Text(text = "🎵 " + stringResource(R.string.schedule_play_music, profile.musicKeyword), style = MaterialTheme.typography.bodySmall, color = AccentGreen)
         }
         
@@ -845,6 +851,32 @@ fun ScheduleProfileEditorDialog(
                         onCheckedChange = { editedProfile = editedProfile.copy(autoNavigate = it) }
                     )
                     if (editedProfile.autoNavigate) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        SettingsTextField(
+                            label = "Latitude",
+                            value = editedProfile.navLat?.toString() ?: "",
+                            onValueChange = {
+                                editedProfile = editedProfile.copy(
+                                    navLat = it.toDoubleOrNull()
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        SettingsTextField(
+                            label = "Longitude",
+                            value = editedProfile.navLng?.toString() ?: "",
+                            onValueChange = {
+                                editedProfile = editedProfile.copy(
+                                    navLng = it.toDoubleOrNull()
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        SettingsTextField(
+                            label = "POI Name",
+                            value = editedProfile.navPoiName,
+                            onValueChange = { editedProfile = editedProfile.copy(navPoiName = it) }
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
                         SettingsTextField(
                             label = stringResource(R.string.schedule_nav_address),

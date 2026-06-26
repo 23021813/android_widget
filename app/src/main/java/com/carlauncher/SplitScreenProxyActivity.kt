@@ -29,11 +29,14 @@ class SplitScreenProxyActivity : Activity() {
         val pkg1 = intent.getStringExtra("pkg1")
         val pkg2 = intent.getStringExtra("pkg2")
         val navAddress = intent.getStringExtra("nav_address")
+        val navLat = if (intent.hasExtra("nav_lat")) intent.getDoubleExtra("nav_lat", Double.NaN).let { if (it.isNaN()) null else it } else null
+        val navLng = if (intent.hasExtra("nav_lng")) intent.getDoubleExtra("nav_lng", Double.NaN).let { if (it.isNaN()) null else it } else null
+        val navPoiName = intent.getStringExtra("nav_poi_name") ?: ""
         val musicKeyword = intent.getStringExtra("music_keyword")
         val preSplitPkg = intent.getStringExtra("pre_split_pkg")
         val preSplitDelayMs = intent.getIntExtra("pre_split_delay_ms", 1500)
 
-        Log.d(TAG, "onCreate: pkg1=$pkg1 pkg2=$pkg2 navAddress=$navAddress musicKeyword=$musicKeyword")
+        Log.d(TAG, "onCreate: pkg1=$pkg1 pkg2=$pkg2 navAddress=$navAddress lat=$navLat lng=$navLng poi=$navPoiName music=$musicKeyword")
 
         if (pkg1 == null || pkg2 == null) {
             Log.w(TAG, "Missing pkg1/pkg2 in intent, aborting split")
@@ -47,18 +50,20 @@ class SplitScreenProxyActivity : Activity() {
         Log.d(TAG, "Resolved actions: action1=${actionIntent1?.data} action2=${actionIntent2?.data}")
 
         if (preSplitPkg != null) {
-            SplitScreenLauncher.launchApp(this, preSplitPkg)
-            scope.launch {
-                waitForPreSplitApp(preSplitPkg, preSplitDelayMs.toLong())
-
-                val preSplitNavIntent = buildPreSplitNavIntent(preSplitPkg, navAddress)
-                if (preSplitNavIntent != null) {
-                    Log.d(TAG, "Sending pre-split navigation intent to $preSplitPkg")
-                    startActivity(preSplitNavIntent)
-                    delay(1000)
+            val preSplitNavIntent = buildPreSplitNavIntent(preSplitPkg, navAddress, navLat, navLng, navPoiName)
+            if (preSplitNavIntent != null) {
+                Log.d(TAG, "Sending pre-split navigation intent to $preSplitPkg with deep link URI")
+                startActivity(preSplitNavIntent)
+                scope.launch {
+                    waitForPreSplitApp(preSplitPkg, preSplitDelayMs.toLong())
+                    launchSplit(pkg1, pkg2, actionIntent1, actionIntent2)
                 }
-
-                launchSplit(pkg1, pkg2, actionIntent1, actionIntent2)
+            } else {
+                SplitScreenLauncher.launchApp(this, preSplitPkg)
+                scope.launch {
+                    waitForPreSplitApp(preSplitPkg, preSplitDelayMs.toLong())
+                    launchSplit(pkg1, pkg2, actionIntent1, actionIntent2)
+                }
             }
         } else {
             launchSplit(pkg1, pkg2, actionIntent1, actionIntent2)
@@ -142,13 +147,23 @@ class SplitScreenProxyActivity : Activity() {
 
     /**
      * Build a navigation intent for the pre-split app.
-     * If pre-split is Vietmap Live and navigateToDest is enabled,
-     * returns a Vietmap navigation intent using the schedule's navAddress.
+     * Prefers navLat/navLng/navPoiName from schedule profile;
+     * falls back to legacy navAddress string.
      */
-    private fun buildPreSplitNavIntent(preSplitPkg: String, navAddress: String?): Intent? {
+    private fun buildPreSplitNavIntent(
+        preSplitPkg: String,
+        navAddress: String?,
+        navLat: Double?,
+        navLng: Double?,
+        navPoiName: String
+    ): Intent? {
         if (preSplitPkg != "vn.vietmap.live") return null
         val navigateToDest = intent.getBooleanExtra("pre_split_navigate_dest", false)
         if (!navigateToDest) return null
+        if (navLat != null && navLng != null) {
+            val poi = navPoiName.ifBlank { navAddress ?: "" }
+            return SplitScreenLauncher.buildVietmapNavigationIntent(navLat, navLng, poi)
+        }
         return SplitScreenLauncher.buildVietmapNavigationIntent(navAddress ?: "")
     }
 

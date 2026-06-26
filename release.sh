@@ -218,7 +218,8 @@ gh release create "$TAG" \
     "$VERSION_JSON" \
     --title "CarFloat $NEW_VERSION_NAME" \
     --notes "$NOTES" \
-    --clobber
+    --latest \
+    --verify-tag
 ok "GitHub release created: https://github.com/$REPO_OWNER/$REPO_NAME/releases/tag/$TAG"
 
 # ── 8. Fix downloadUrl in version.json (real URL) + commit + upload ───────

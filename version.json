@@ -1,7 +1,7 @@
 {
-  "versionCode": 24,
-  "versionName": "1.5.2",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.2/app-release.apk",
-  "changelog": "Th\u00eam d\u1eabn \u0111\u01b0\u1eddng Vietmap Live, s\u1eeda toggle kh\u00f4ng l\u01b0u \u0111\u01b0\u1ee3c",
+  "versionCode": 25,
+  "versionName": "1.5.3",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.3/app-release.apk",
+  "changelog": "Fix auto-navigation Vietmap Live: d\u00f9ng deep link vietmaplive://companion/navigation (gi\u1ed1ng Kiki Auto)",
   "forceUpdate": false
 }
