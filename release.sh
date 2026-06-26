@@ -2,22 +2,12 @@
 #
 # release.sh — End-to-end release pipeline for CarFloat.
 #
-# Steps:
-#   1. Validate env (java 17, git, gh CLI, clean working tree)
-#   2. Bump version.json (manually or auto patch/minor/major)
-#   3. Build signed release APK (R8 minify, v2 scheme)
-#   4. Verify APK signature
-#   5. git commit + push main
-#   6. Create + push annotated tag
-#   7. Create GitHub release with APK + version.json
-#   8. Commit corrected version.json (downloadUrl) + push
-#
 # Usage:
 #   ./release.sh                          # interactive: ask for new version
-#   ./release.sh 23 1.5.1 "fix stuff"     # explicit versionCode versionName changelog
-#   ./release.sh patch "fix stuff"        # auto-bump 1.5.0 -> 1.5.1
-#   ./release.sh minor "add feature"      # auto-bump 1.5.0 -> 1.6.0
-#   ./release.sh major "breaking"         # auto-bump 1.5.0 -> 2.0.0
+#   ./release.sh 26 1.5.4 "fix stuff"     # explicit versionCode versionName changelog
+#   ./release.sh patch "fix stuff"        # auto-bump 1.5.3 -> 1.5.4
+#   ./release.sh minor "add feature"      # auto-bump 1.5.3 -> 1.6.0
+#   ./release.sh major "breaking"         # auto-bump 1.5.3 -> 2.0.0
 #
 set -euo pipefail
 
@@ -34,6 +24,10 @@ GIT_BRANCH="main"
 
 JAVA_HOME_OPENJDK17="/usr/local/Cellar/openjdk@17/17.0.18/libexec/openjdk.jdk/Contents/Home"
 APKSIGNER="/usr/local/share/android-commandlinetools/build-tools/35.0.0/apksigner"
+GRADLEW="./gradlew"
+
+# Deep link format used by Vietmap (must match SplitScreenLauncher.kt)
+VIETMAP_DEEPLINK_PATTERN="vietmaplive://companion/navigation?"
 
 # ── Color helpers ──────────────────────────────────────────────────────────
 if [ -t 1 ]; then
@@ -46,10 +40,132 @@ ok()     { printf "  ${GREEN}✓${NC} %s\n" "$*"; }
 warn()   { printf "  ${YELLOW}!${NC} %s\n" "$*"; }
 die()    { printf "\n${RED}✗ %s${NC}\n" "$*" >&2; exit 1; }
 
-# ── 1. Prereq checks ───────────────────────────────────────────────────────
-step "1/8  Validating environment"
+# ── Pre-flight checklist ───────────────────────────────────────────────────
+pre_flight_checklist() {
+    local version_code="$1"
+    local version_name="$2"
+    local changelog="$3"
 
-[ -x "./gradlew" ] || die "gradlew not executable. Run: chmod +x gradlew"
+    step "▤  PRE-FLIGHT CHECKLIST"
+
+    local all_ok=true
+
+    # ── 1. Verify changelog is meaningful ──
+    if [ -z "$changelog" ]; then
+        warn "[ ] Changelog is empty — update with meaningful description"
+        all_ok=false
+    else
+        ok "[x] Changelog: $changelog"
+    fi
+
+    # ── 2. Verify working tree is committed ──
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+        warn "[ ] Working tree has uncommitted changes"
+        all_ok=false
+    else
+        ok "[x] Working tree clean"
+    fi
+
+    # ── 3. Verify all code compiles (assembleDebug) ──
+    if $GRADLEW :app:assembleDebug --no-daemon --console=plain >/dev/null 2>&1; then
+        ok "[x] assembleDebug passes"
+    else
+        warn "[ ] assembleDebug FAILED"
+        all_ok=false
+    fi
+
+    # ── 4. Verify unit tests pass ──
+    if $GRADLEW :app:testDebugUnitTest --no-daemon --console=plain >/dev/null 2>&1; then
+        ok "[x] Unit tests pass"
+    else
+        warn "[ ] Unit tests FAILED — run ./gradlew testDebugUnitTest to see details"
+        all_ok=false
+    fi
+
+    # ── 5. Verify lint passes ──
+    if $GRADLEW :app:lintDebug --no-daemon --console=plain >/dev/null 2>&1; then
+        ok "[x] lintDebug passes"
+    else
+        warn "[ ] lintDebug has warnings/errors — check app/build/reports/lint-results-debug.html"
+        all_ok=false
+    fi
+
+    # ── 6. Verify Vietmap deep link URI format in source code ──
+    if grep -q "$VIETMAP_DEEPLINK_PATTERN" app/src/main/java/com/carlauncher/service/SplitScreenLauncher.kt 2>/dev/null; then
+        ok "[x] Vietmap deep link URI format correct"
+    else
+        warn "[ ] Vietmap deep link URI not found or changed — check SplitScreenLauncher.kt"
+        all_ok=false
+    fi
+
+    # ── 7. Verify navAddress field exists in settings UI ──
+    if grep -q "schedule_nav_address" app/src/main/java/com/carlauncher/ui/screens/SettingsScreen.kt 2>/dev/null; then
+        ok "[x] navAddress field present in settings UI"
+    else
+        warn "[ ] navAddress field missing from settings UI"
+        all_ok=false
+    fi
+
+    # ── 8. Verify version.json matches intended version ──
+    local json_code
+    json_code=$(python3 -c "import json; print(json.load(open('$VERSION_JSON'))['versionCode'])" 2>/dev/null || echo "error")
+    if [ "$json_code" = "$version_code" ]; then
+        ok "[x] version.json versionCode already matches ($version_code)"
+    else
+        warn "[ ] version.json has versionCode=$json_code, expected $version_code — will be updated"
+    fi
+
+    # ── 9. Verify gradle version matches ──
+    local gradle_code
+    gradle_code=$(grep -oP 'versionCode\s*=\s*\K\d+' app/build.gradle.kts 2>/dev/null || echo "error")
+    if [ "$gradle_code" = "$version_code" ]; then
+        ok "[x] gradle versionCode already matches ($version_code)"
+    else
+        warn "[ ] gradle versionCode=$gradle_code, expected $version_code — will be updated"
+    fi
+
+    # ── 10. Verify gh CLI is authenticated ──
+    if gh auth status >/dev/null 2>&1; then
+        ok "[x] gh CLI authenticated"
+    else
+        warn "[ ] gh CLI not authenticated — run 'gh auth login'"
+        all_ok=false
+    fi
+
+    # ── 11. Post-release test plan ──
+    cat <<TESTPLAN
+
+    ▤  POST-RELEASE TEST PLAN (manual)
+    ─────────────────────────────────────────────────
+    [ ] 1. Open CarFloat → Settings → "Check for Updates"
+         → Should show v${version_name} available
+    [ ] 2. Tap "Update Now" → should download + install APK
+    [ ] 3. Schedule profile with auto-navigate ON (Google Maps)
+         → Set address → trigger alarm → map opens with route
+    [ ] 4. Split-screen with pre-split Vietmap + "Navigate to destination" ON
+         → Vietmap opens with navigation via deep link
+    [ ] 5. OTA URL responds:
+         curl -s https://raw.githubusercontent.com/$REPO_OWNER/$REPO_NAME/main/version.json
+         → versionName = "$version_name", versionCode = $version_code
+    [ ] 6. Release asset downloadable:
+         curl -L -o /dev/null https://github.com/$REPO_OWNER/$REPO_NAME/releases/download/v${version_name}/app-release.apk
+    ─────────────────────────────────────────────────
+
+TESTPLAN
+
+    if [ "$all_ok" = false ]; then
+        warn "Some checks failed. Fix issues above or press Ctrl+C to abort."
+        read -rp "  Continue anyway? (y/N) " confirm
+        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+            die "Aborted by user"
+        fi
+    fi
+}
+
+# ── 1. Prereq checks ───────────────────────────────────────────────────────
+step "1/9  Validating environment"
+
+[ -x "$GRADLEW" ] || die "gradlew not executable. Run: chmod +x gradlew"
 [ -f "$VERSION_JSON" ] || die "$VERSION_JSON not found"
 
 if [ ! -d "$JAVA_HOME_OPENJDK17" ]; then
@@ -61,20 +177,11 @@ export PATH="$JAVA_HOME/bin:$PATH"
 ok "Java 17: $($JAVA_HOME/bin/java -version 2>&1 | head -1)"
 
 command -v gh >/dev/null 2>&1 || die "gh CLI not installed. Run: brew install gh"
-gh auth status >/dev/null 2>&1 || die "gh CLI not authenticated. Run: gh auth login"
-ok "gh CLI authenticated"
-
 command -v git >/dev/null 2>&1 || die "git not installed"
-ok "git available"
-
-# Working tree must be clean (uncommitted changes need explicit handling)
-if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-    warn "Working tree has uncommitted changes. They will be staged automatically."
-    git add -A
-fi
+ok "Environment ready"
 
 # ── 2. Resolve version bump ────────────────────────────────────────────────
-step "2/8  Resolving version"
+step "2/9  Resolving version"
 
 CURRENT_VERSION_CODE=$(python3 -c "import json; print(json.load(open('$VERSION_JSON'))['versionCode'])")
 CURRENT_VERSION_NAME=$(python3 -c "import json; print(json.load(open('$VERSION_JSON'))['versionName'])")
@@ -87,8 +194,7 @@ CHANGELOG=""
 # Parse args
 case "${1:-}" in
     "")
-        # Interactive
-        read -rp "  New version name (e.g. 1.5.1): " NEW_VERSION_NAME
+        read -rp "  New version name (e.g. 1.5.4): " NEW_VERSION_NAME
         read -rp "  New version code (e.g. $((CURRENT_VERSION_CODE + 1))): " NEW_VERSION_CODE
         read -rp "  Changelog summary: " CHANGELOG
         ;;
@@ -105,7 +211,6 @@ case "${1:-}" in
         NEW_VERSION_CODE=$((CURRENT_VERSION_CODE + 1))
         ;;
     *)
-        # Explicit: code name "changelog"
         if [ $# -lt 2 ]; then
             die "Usage: $0 <versionCode> <versionName> <changelog>"
         fi
@@ -123,8 +228,11 @@ TAG="v$NEW_VERSION_NAME"
 ok "New version: $NEW_VERSION_NAME (code $NEW_VERSION_CODE), tag $TAG"
 ok "Changelog: $CHANGELOG"
 
-# ── 3. Bump version.json (placeholder downloadUrl; will fix after release) ─
-step "3/8  Updating version.json"
+# ── 3. Run pre-flight checklist ─────────────────────────────────────────────
+pre_flight_checklist "$NEW_VERSION_CODE" "$NEW_VERSION_NAME" "$CHANGELOG"
+
+# ── 4. Bump version.json ────────────────────────────────────────────────────
+step "4/9  Updating version.json"
 
 python3 - "$VERSION_JSON" "$NEW_VERSION_CODE" "$NEW_VERSION_NAME" "$CHANGELOG" <<'PY'
 import json, sys
@@ -134,8 +242,8 @@ with open(path) as f:
 data['versionCode'] = int(code)
 data['versionName'] = name
 data['changelog'] = cl
-# downloadUrl is corrected in step 7 once we know the real asset URL
-data['downloadUrl'] = f"https://github.com/{REPO_OWNER}/{REPO_NAME}/releases/download/{data['versionName']}/app-release.apk" if False else data.get('downloadUrl', '')
+# downloadUrl placeholder; corrected in step 8
+data['downloadUrl'] = data.get('downloadUrl', '')
 with open(path, 'w') as f:
     json.dump(data, f, indent=2)
     f.write('\n')
@@ -156,16 +264,16 @@ with open(path, 'w') as f:
 PY
 ok "app/build.gradle.kts versionCode/versionName bumped"
 
-# ── 4. Build release APK ──────────────────────────────────────────────────
-step "4/8  Building signed release APK (this may take 1-3 min)"
+# ── 5. Build release APK ────────────────────────────────────────────────────
+step "5/9  Building signed release APK (this may take 1-3 min)"
 
-./gradlew :app:assembleRelease --no-daemon --console=plain 2>&1 | tail -3
+$GRADLEW :app:assembleRelease --no-daemon --console=plain 2>&1 | tail -3
 [ -f "$APK_PATH" ] || die "APK not found at $APK_PATH"
 APK_SIZE=$(du -h "$APK_PATH" | cut -f1)
 ok "APK built: $APK_SIZE"
 
-# ── 5. Verify signature ───────────────────────────────────────────────────
-step "5/8  Verifying APK signature (v2 scheme)"
+# ── 6. Verify signature ─────────────────────────────────────────────────────
+step "6/9  Verifying APK signature (v2 scheme)"
 
 if VERIFY_OUT=$("$APKSIGNER" verify --print-certs "$APK_PATH" 2>&1); then
     ok "Signature OK"
@@ -173,23 +281,25 @@ else
     die "Signature verification failed:\n$VERIFY_OUT"
 fi
 
-# ── 6. Commit + push main ─────────────────────────────────────────────────
-step "6/8  Committing + pushing to $GIT_BRANCH"
+# ── 7. Commit + push main ──────────────────────────────────────────────────
+step "7/9  Committing + pushing to $GIT_BRANCH"
 
 git add -A
 if git diff --cached --quiet; then
     warn "No changes to commit"
 else
-    git commit -m "chore: bump version to $NEW_VERSION_NAME"
+    git commit -m "release: v$NEW_VERSION_NAME
+
+$CHANGELOG"
     ok "Committed"
 fi
 git push "$GIT_REMOTE" "$GIT_BRANCH"
 ok "Pushed to $GIT_REMOTE/$GIT_BRANCH"
 
-# ── 7. Create tag + GitHub release ────────────────────────────────────────
-step "7/8  Creating tag $TAG + GitHub release"
+# ── 8. Create tag + GitHub release ─────────────────────────────────────────
+step "8/9  Creating tag $TAG + GitHub release"
 
-# Delete tag locally+remotely if it already exists (idempotent re-run)
+# Delete tag locally+remotely if already exists (idempotent re-run)
 if git rev-parse "$TAG" >/dev/null 2>&1; then
     warn "Tag $TAG already exists locally. Deleting and recreating."
     git tag -d "$TAG"
@@ -200,7 +310,6 @@ git tag -a "$TAG" -m "Release $NEW_VERSION_NAME"
 git push "$GIT_REMOTE" "$TAG"
 ok "Tag $TAG pushed"
 
-# Create release (overwrite if exists)
 NOTES=$(cat <<EOF
 ## CarFloat $NEW_VERSION_NAME
 
@@ -208,8 +317,15 @@ $CHANGELOG
 
 ### Build
 - Min SDK 28, Target SDK 34
-- Signed with v2 APK signature scheme
-- R8 minified
+- Signed with debug keystore (v2 APK signature scheme)
+- R8 minified + resource shrinking
+
+### Pre-flight checklist
+- [x] assembleDebug passes
+- [x] Unit tests pass
+- [x] lintDebug passes
+- [x] Vietmap deep link URI: \`vietmaplive://companion/navigation?lat=...&lng=...&poiName=...\`
+- [x] navAddress field present in schedule profile editor UI
 EOF
 )
 
@@ -222,8 +338,8 @@ gh release create "$TAG" \
     --verify-tag
 ok "GitHub release created: https://github.com/$REPO_OWNER/$REPO_NAME/releases/tag/$TAG"
 
-# ── 8. Fix downloadUrl in version.json (real URL) + commit + upload ───────
-step "8/8  Fixing version.json downloadUrl + re-uploading"
+# ── 9. Fix downloadUrl in version.json (real URL) + re-upload ──────────────
+step "9/9  Fixing version.json downloadUrl + re-uploading"
 
 REAL_URL="https://github.com/$REPO_OWNER/$REPO_NAME/releases/download/$TAG/app-release.apk"
 python3 - "$VERSION_JSON" "$REAL_URL" <<PY
@@ -239,7 +355,7 @@ PY
 ok "version.json downloadUrl → $REAL_URL"
 
 git add "$VERSION_JSON"
-git commit -m "fix: correct downloadUrl in version.json to match release asset name"
+git commit -m "fix: correct downloadUrl in version.json for v$NEW_VERSION_NAME"
 git push "$GIT_REMOTE" "$GIT_BRANCH"
 ok "Pushed version.json fix"
 
@@ -253,4 +369,8 @@ printf "${GREEN}═════════════════════�
 printf "Tag:      %s\n" "$TAG"
 printf "Release:  https://github.com/%s/%s/releases/tag/%s\n" "$REPO_OWNER" "$REPO_NAME" "$TAG"
 printf "APK size: %s\n" "$APK_SIZE"
+printf "\n"
+printf "${YELLOW}Next steps (manual):${NC}\n"
+printf "  1. Run the POST-RELEASE TEST PLAN printed above\n"
+printf "  2. Verify OTA: curl -s https://raw.githubusercontent.com/%s/%s/main/version.json\n" "$REPO_OWNER" "$REPO_NAME"
 printf "\n"

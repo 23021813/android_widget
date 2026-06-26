@@ -1,7 +1,7 @@
 {
-  "versionCode": 25,
-  "versionName": "1.5.3",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.3/app-release.apk",
-  "changelog": "Fix auto-navigation Vietmap Live: d\u00f9ng deep link vietmaplive://companion/navigation (gi\u1ed1ng Kiki Auto)",
+  "versionCode": 26,
+  "versionName": "1.5.4",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.4/app-release.apk",
+  "changelog": "Th\u00eam l\u1ea1i navAddress field trong schedule profile editor",
   "forceUpdate": false
 }
