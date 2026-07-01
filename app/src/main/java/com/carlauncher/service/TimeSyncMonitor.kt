@@ -116,9 +116,7 @@ object TimeSyncMonitor {
                 stopMonitoring(context)
                 
                 withContext(Dispatchers.Main) {
-                    Log.d(TAG, "Syncing and triggering missed schedules...")
-                    ScheduleManager.syncAlarms(context)
-                    ScheduleManager.checkAndTriggerMissedSchedules(context, skipSplitScreen = false)
+                    Log.d(TAG, "Time synced — overlay coroutine will handle schedule trigger")
                 }
                 return@performTimeCheckSequence
             }

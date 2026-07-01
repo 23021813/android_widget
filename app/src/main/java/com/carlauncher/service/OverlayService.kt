@@ -72,6 +72,11 @@ class OverlayService : Service() {
         // In-memory flag: reset on every process start (boot)
         var bootSplitDone = false
 
+        // Prevent duplicate SplitScreenProxyActivity launches from
+        // concurrent paths (OverlayService coroutine + ScheduleReceiver)
+        @Volatile
+        var splitInProgress = false
+
         fun start(context: Context) {
             val intent = Intent(context, OverlayService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -132,6 +137,12 @@ class OverlayService : Service() {
                 }
                 
                 bootSplitDone = true
+
+                // Init schedule alarms + trigger missed schedules
+                // (moved here from TimeSyncMonitor so it runs AFTER bootSplitDone,
+                //  ensuring proper ordering: sync → bootDone → schedules → proxy launch)
+                ScheduleManager.syncAlarms(this@OverlayService)
+                ScheduleManager.checkAndTriggerMissedSchedules(this@OverlayService, skipSplitScreen = false)
 
                 Log.d(
                     "OverlayService",

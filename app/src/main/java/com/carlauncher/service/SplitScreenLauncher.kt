@@ -142,7 +142,7 @@ object SplitScreenLauncher {
         val uri = Uri.parse("vietmaplive://companion/navigation?lat=$lat&lng=$lng&poiName=${Uri.encode(poiName)}")
         Log.d("VietmapNav", "buildVietmapNavigationIntent: lat=$lat lng=$lng poiName='$poiName' -> uri=$uri")
         return Intent(Intent.ACTION_VIEW, uri).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     }
 

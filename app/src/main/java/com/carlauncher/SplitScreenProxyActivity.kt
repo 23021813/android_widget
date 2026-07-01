@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import com.carlauncher.service.OverlayService
 import com.carlauncher.service.SplitScreenLauncher
 import com.carlauncher.split.PreSplitDetector
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +26,15 @@ class SplitScreenProxyActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Split lock: tránh duplicate ProxyActivity khi cả OverlayService
+        // và ScheduleReceiver đều launch cùng lúc
+        if (OverlayService.splitInProgress) {
+            Log.d(TAG, "Split already in progress, skipping duplicate")
+            finish()
+            return
+        }
+        OverlayService.splitInProgress = true
 
         val pkg1 = intent.getStringExtra("pkg1")
         val pkg2 = intent.getStringExtra("pkg2")
@@ -169,6 +179,7 @@ class SplitScreenProxyActivity : Activity() {
 
     override fun onDestroy() {
         scope.cancel()
+        OverlayService.splitInProgress = false
         super.onDestroy()
     }
 
