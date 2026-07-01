@@ -1,7 +1,7 @@
 {
   "versionCode": 27,
   "versionName": "1.5.5",
-  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.4/app-release.apk",
+  "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.5/app-release.apk",
   "changelog": "Fix duplicate ProxyActivity race condition on boot",
   "forceUpdate": false
 }
