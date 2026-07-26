@@ -117,9 +117,10 @@
     <string name="update_available">Có bản cập nhật</string>
 
     <!-- Virtual Actions -->
-    <string name="action_home_label">Trở về màn hình chính</string>
+    <string name="action_home_label">Về màn hình chính</string>
     <string name="action_split_view_label">🚗 CarFloat (Chia màn hình)</string>
-    <string name="help_drag_handle_double_tap">Chạm đúp nút chấm trắng: Kích hoạt chia đôi màn hình</string>
+    <string name="action_wifi_popup_label">📶 Bảng Wi-Fi</string>
+    <string name="help_drag_handle_double_tap">Chạm 2 lần vào chấm trắng: Bật chia đôi màn hình</string>
 
     <!-- Schedule Automation -->
     <string name="section_schedule">📅 Lịch trình tự động</string>

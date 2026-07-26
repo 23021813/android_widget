@@ -122,6 +122,7 @@
     <!-- Virtual Actions (App Picker) -->
     <string name="action_home_label">Go to Home Screen</string>
     <string name="action_split_view_label">🚗 CarFloat (Split View)</string>
+    <string name="action_wifi_popup_label">📶 Wi-Fi Settings</string>
     <string name="help_drag_handle_double_tap">Double tap the white dot: Activate split view</string>
 
     <!-- Schedule Automation -->

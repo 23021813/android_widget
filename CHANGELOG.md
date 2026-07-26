@@ -2,6 +2,13 @@
 
 Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ được ghi lại trong tệp này.
 
+## [1.5.6] - 2026-07-26
+### Changed
+- **Wi-Fi Popup Action**: Thay đổi cơ chế "Ép kết nối Wi-Fi" ngầm (background) vốn không tương thích trên một số hệ điều hành (như Tbox S2P Android 13) bằng một Activity trong suốt (Trampoline Activity) có tên **Bảng Wi-Fi**. Khi gán tính năng này vào phím tắt Assistant, popup cài đặt mạng của hệ thống sẽ nổi lên để người dùng thao tác trực tiếp, vượt qua hạn chế khởi chạy Panel từ Background của Android 12+.
+- `versionCode` 27 → 28, `versionName` 1.5.5 → 1.5.6.
+
+## [1.5.5] - 2026-06-25
+
 ## [1.5.1] - 2026-06-23
 ### Added
 - **Pre-split app timing fix**: Khi auto-split-on-boot, app pre-split được detect khi đã vào màn hình chính (qua UsageStatsManager polling) thay vì delay cố định, khắc phục split-screen chạy trước khi app sẵn sàng.

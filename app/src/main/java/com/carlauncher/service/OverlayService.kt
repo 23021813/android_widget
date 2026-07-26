@@ -857,6 +857,12 @@ class OverlayService : Service() {
                         }
                     }
                 }
+                "__ACTION_WIFI_POPUP__" -> {
+                    val intent = Intent(this, com.carlauncher.ui.screens.WifiPopupActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                    startActivity(intent)
+                }
                 null -> {
                     // No app assigned — do nothing
                 }

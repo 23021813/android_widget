@@ -75,7 +75,16 @@ fun SettingsScreen(
             icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_sort_by_size)
         )
     }
-    val assistantApps = remember(installedApps) { listOf(homeApp, splitViewApp) + installedApps }
+    
+    val wifiPopupApp = remember {
+        AppInfo(
+            packageName = "__ACTION_WIFI_POPUP__",
+            label = context.getString(R.string.action_wifi_popup_label),
+            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_preferences)
+        )
+    }
+    
+    val assistantApps = remember(installedApps) { listOf(homeApp, splitViewApp, wifiPopupApp) + installedApps }
 
     Scaffold(
         topBar = {
