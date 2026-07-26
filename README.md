@@ -1,12 +1,16 @@
-# CarFloat (Formerly Car Launcher Overlay) - v1.4.3
+# CarFloat (Formerly Car Launcher Overlay) - v1.5.6
 
 CarFloat là một ứng dụng tiện ích chuyên dụng dành cho màn hình xe hơi (Android Automotive / Android Box) với giao diện **Glassmorphism** hiện đại. Ứng dụng cung cấp các Widget nổi (Floating Widgets) thông minh, cho phép điều khiển và truy cập nhanh mà không cần thoát ứng dụng đang chạy.
 
 ---
 
-## 🌟 Có gì mới trong bản v1.3.8?
+## 🌟 Có gì mới trong bản v1.5.6?
 
-Bản cập nhật v1.3.8 tập trung vào độ chính xác của tự động hóa và khắc phục các lỗi về thông báo:
+Bản cập nhật v1.5.6 mang tới cải tiến quan trọng về tính năng kết nối mạng:
+
+### 📶 Bảng Wi-Fi Popup (Trampoline Activity)
+- **Hỗ trợ Android 12+ / 13+**: Thay thế hoàn toàn cơ chế tự ép kết nối Wi-Fi ngầm cũ (vốn bị giới hạn quyền hệ thống trên Tbox S2P / Android 13) bằng nút bấm **Bảng Wi-Fi**.
+- **Mở nhanh từ Assistant**: Cho phép gán hành động mở bảng cài đặt Wi-Fi chính thức của Android vào phím Assistant (Tap/Double Tap/Long Press) để người dùng thao tác bật/chọn mạng cực kỳ nhanh chóng.
 
 ### 🕒 Tự động hóa Lịch trình Thông minh
 - **Logic "Closest-to-current"**: Sửa lỗi app luôn chọn nhầm lịch trình buổi sáng khi khởi động vào buổi chiều. Hệ thống giờ đây sẽ phân tích và chọn lịch trình khớp nhất với khung giờ hiện tại.
