@@ -84,6 +84,13 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true"
             android:taskAffinity="" />
+            
+        <activity
+            android:name=".ui.screens.QuickMenuActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:taskAffinity="" />
 
         <!-- Floating overlay service -->
         <service

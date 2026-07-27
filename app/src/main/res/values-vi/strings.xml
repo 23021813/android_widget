@@ -95,6 +95,8 @@
     <!-- v1.3 -->
     <string name="assistant_long_press_app">App khi giữ lâu</string>
     <string name="assistant_double_tap_app">App khi bấm đúp</string>
+    <string name="enable_assistant_sound">Bật âm thanh khi bấm</string>
+
     <string name="assistant_icon_label">Biểu tượng nút</string>
     <string name="allow_overlap_system_bars">Cho phép đè lên thanh trạng thái</string>
     <string name="clock_click_through">Chế độ xuyên qua (chạm truyền xuống app)</string>

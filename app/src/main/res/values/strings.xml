@@ -95,6 +95,8 @@
     <!-- Assistant multi-gesture -->
     <string name="assistant_long_press_app">Long Press App</string>
     <string name="assistant_double_tap_app">Double Tap App</string>
+    <string name="enable_assistant_sound">Enable Click Sound</string>
+
     <string name="assistant_icon_label">Button Icon</string>
 
     <!-- System toggles -->
@@ -123,6 +125,8 @@
     <string name="action_home_label">Go to Home Screen</string>
     <string name="action_split_view_label">🚗 CarFloat (Split View)</string>
     <string name="action_wifi_popup_label">📶 Wi-Fi Settings</string>
+    <string name="action_quick_menu_label">⚡ Quick Menu</string>
+
     <string name="help_drag_handle_double_tap">Double tap the white dot: Activate split view</string>
 
     <!-- Schedule Automation -->

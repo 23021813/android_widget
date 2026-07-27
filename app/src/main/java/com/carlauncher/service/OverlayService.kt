@@ -863,6 +863,12 @@ class OverlayService : Service() {
                     }
                     startActivity(intent)
                 }
+                VirtualActions.ACTION_QUICK_MENU -> {
+                    val intent = Intent(this, com.carlauncher.ui.screens.QuickMenuActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                    startActivity(intent)
+                }
                 null -> {
                     // No app assigned — do nothing
                 }
@@ -1106,18 +1112,57 @@ fun AssistantFloatingButton(
     val alpha = settings.widgetOpacity.coerceIn(0f, 1f)
     val scale = settings.assistantButtonScale
     val iconVector = resolveAssistantIcon(settings.assistantIcon)
+    val view = androidx.compose.ui.platform.LocalView.current
+    
+    var isPressed by remember { mutableStateOf(false) }
+    val animatedScale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = 1.0f * scale,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = 500f),
+        label = "scale"
+    )
+    val glowAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isPressed) 0.8f else 0f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
+        label = "glowAlpha"
+    )
+    val glowSize by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isPressed) 1.5f * scale else 1.0f * scale,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.7f, stiffness = 400f),
+        label = "glowSize"
+    )
 
-    Box(modifier = Modifier.padding(16.dp * scale)) {
+    // Fixed size box to prevent window resizing during animation
+    Box(
+        modifier = Modifier.size(96.dp * scale),
+        contentAlignment = Alignment.Center
+    ) {
+        // Pulse Glow Layer (Gradient)
+        if (glowAlpha > 0f) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp * glowSize)
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF00E5FF).copy(alpha = glowAlpha),
+                                Color(0xFF00E5FF).copy(alpha = 0f)
+                            )
+                        )
+                    )
+            )
+        }
+
+        // Main Button
         Box(
             modifier = Modifier
-                .size(64.dp * scale)
+                .size(64.dp * animatedScale)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
                         onDrag(dragAmount.x, dragAmount.y)
                     }
                 }
-                .border(1.dp * scale, Color.White.copy(alpha = 0.15f), CircleShape)
+                .border(1.dp * animatedScale, Color.White.copy(alpha = 0.15f), CircleShape)
                 .clip(CircleShape)
                 .background(
                     Brush.radialGradient(
@@ -1129,6 +1174,17 @@ fun AssistantFloatingButton(
                 )
                 .pointerInput(Unit) {
                     detectTapGestures(
+                        onPress = {
+                            isPressed = true
+                            if (settings.enableAssistantSound) {
+                                view.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+                            }
+                            try {
+                                awaitRelease()
+                            } finally {
+                                isPressed = false
+                            }
+                        },
                         onTap = { onClick() },
                         onLongPress = { onLongPress() },
                         onDoubleTap = { onDoubleTap() }
@@ -1140,8 +1196,9 @@ fun AssistantFloatingButton(
                 imageVector = iconVector,
                 contentDescription = stringResource(R.string.assistant),
                 tint = Color.White,
-                modifier = Modifier.size(32.dp * scale)
+                modifier = Modifier.size(32.dp * animatedScale)
             )
         }
     }
 }
+

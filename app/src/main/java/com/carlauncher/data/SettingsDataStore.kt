@@ -46,6 +46,7 @@ internal object SettingsKeys {
     val ASSISTANT_ICON = stringPreferencesKey("assistant_icon")
     val ASSISTANT_LONG_PRESS_APP = stringPreferencesKey("assistant_long_press_app")
     val ASSISTANT_DOUBLE_TAP_APP = stringPreferencesKey("assistant_double_tap_app")
+    val ENABLE_ASSISTANT_SOUND = booleanPreferencesKey("enable_assistant_sound")
 
     val AUTO_SPLIT_ON_BOOT = booleanPreferencesKey("auto_split_on_boot")
     val PRE_SPLIT_APP = stringPreferencesKey("pre_split_app")
@@ -104,6 +105,7 @@ internal object SettingsPreferencesMapper {
             } ?: AssistantIcon.MIC,
             assistantLongPressApp = prefs[SettingsKeys.ASSISTANT_LONG_PRESS_APP],
             assistantDoubleTapApp = prefs[SettingsKeys.ASSISTANT_DOUBLE_TAP_APP],
+            enableAssistantSound = prefs[SettingsKeys.ENABLE_ASSISTANT_SOUND] ?: true,
 
             autoSplitOnBoot = prefs[SettingsKeys.AUTO_SPLIT_ON_BOOT] ?: true,
             preSplitApp = prefs[SettingsKeys.PRE_SPLIT_APP],
@@ -130,6 +132,7 @@ internal object SettingsPreferencesMapper {
         if (settings.assistantDoubleTapApp != null) {
             prefs[SettingsKeys.ASSISTANT_DOUBLE_TAP_APP] = settings.assistantDoubleTapApp
         } else prefs.remove(SettingsKeys.ASSISTANT_DOUBLE_TAP_APP)
+        prefs[SettingsKeys.ENABLE_ASSISTANT_SOUND] = settings.enableAssistantSound
 
         prefs[SettingsKeys.AUTO_START_ON_BOOT] = settings.autoStartOnBoot
         prefs[SettingsKeys.SHOW_STATUS_WIDGET] = settings.showStatusWidget

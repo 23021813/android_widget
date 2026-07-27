@@ -39,6 +39,7 @@ enum class AssistantIcon(val displayName: String) {
 object VirtualActions {
     const val ACTION_HOME = "com.carlauncher.ACTION_HOME"
     const val ACTION_SPLIT_VIEW = "com.carlauncher.ACTION_SPLIT_VIEW"
+    const val ACTION_QUICK_MENU = "com.carlauncher.ACTION_QUICK_MENU"
 }
 
 data class ScheduleProfile(
@@ -108,6 +109,7 @@ data class LauncherSettings(
     val assistantIcon: AssistantIcon = AssistantIcon.MIC,
     val assistantLongPressApp: String? = null,
     val assistantDoubleTapApp: String? = null,
+    val enableAssistantSound: Boolean = true,
 
     // Boot Split-View
     val autoSplitOnBoot: Boolean = true,

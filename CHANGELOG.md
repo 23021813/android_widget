@@ -5,6 +5,8 @@ Tất cả các thay đổi đáng chú ý đối với dự án CarFloat sẽ �
 ## [1.5.6] - 2026-07-26
 ### Changed
 - **Wi-Fi Popup Action**: Thay thế cơ chế "Ép kết nối Wi-Fi" ngầm (background) không tương thích trên Android 13+ / Tbox S2P bằng một Activity trong suốt (Trampoline Activity) có tên **Bảng Wi-Fi**. Khi gán tính năng này vào nút Assistant, bảng kết nối Wi-Fi chính thức của Android sẽ mở ra trực tiếp cho người dùng thao tác.
+- **Quick Menu (Trợ lý ảo)**: Thêm hành động mở **Quick Menu** cho nút Trợ lý ảo. Menu hiển thị danh sách dạng lưới trong suốt (App Launcher thu nhỏ) chứa các ứng dụng và hành động ảo.
+- **Assistant Button Feedback**: Thêm hiệu ứng phát sáng mờ dần (Pulse Glow) và âm thanh phản hồi khi bấm nút (có thể bật/tắt trong Cài đặt).
 - `versionCode` 27 → 28, `versionName` 1.5.5 → 1.5.6.
 
 ## [1.5.1] - 2026-06-23

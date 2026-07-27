@@ -15,7 +15,7 @@ sleep 2
 # 2. Start emulator
 echo "📱 Starting emulator: $AVD_NAME..."
 # Using -no-snapshot-save to ensure a fresh state if needed, but keeping standard boot
-emulator -avd "$AVD_NAME" -no-audio -no-snapshot-save > /dev/null 2>&1 &
+emulator -avd "$AVD_NAME" -no-snapshot-save > /dev/null 2>&1 &
 
 # 3. Wait for device to be ready
 echo "⏳ Waiting for device to boot..."

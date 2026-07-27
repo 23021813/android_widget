@@ -84,7 +84,15 @@ fun SettingsScreen(
         )
     }
     
-    val assistantApps = remember(installedApps) { listOf(homeApp, splitViewApp, wifiPopupApp) + installedApps }
+    val quickMenuApp = remember {
+        AppInfo(
+            packageName = VirtualActions.ACTION_QUICK_MENU,
+            label = context.getString(R.string.action_quick_menu_label),
+            icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_sort_by_size) // can use any appropriate icon
+        )
+    }
+    
+    val assistantApps = remember(installedApps) { listOf(homeApp, splitViewApp, wifiPopupApp, quickMenuApp) + installedApps }
 
     Scaffold(
         topBar = {
@@ -193,6 +201,12 @@ fun SettingsScreen(
                         currentApp = settings.assistantDoubleTapApp?.let { pkg -> assistantApps.find { it.packageName == pkg }?.label ?: pkg } ?: stringResource(R.string.tap_to_select),
                         onClick = { appPickerTarget = "assistantDoubleTap"; showAppPicker = true },
                         onClear = { onSettingsUpdate(settings.copy(assistantDoubleTapApp = null)) }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SettingsToggle(
+                        label = stringResource(R.string.enable_assistant_sound),
+                        checked = settings.enableAssistantSound,
+                        onCheckedChange = { onSettingsUpdate(settings.copy(enableAssistantSound = it)) }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     // Icon Picker
