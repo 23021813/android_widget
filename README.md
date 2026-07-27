@@ -12,6 +12,10 @@ Bản cập nhật v1.5.6 mang tới cải tiến quan trọng về tính năng 
 - **Hỗ trợ Android 12+ / 13+**: Thay thế hoàn toàn cơ chế tự ép kết nối Wi-Fi ngầm cũ (vốn bị giới hạn quyền hệ thống trên Tbox S2P / Android 13) bằng nút bấm **Bảng Wi-Fi**.
 - **Mở nhanh từ Assistant**: Cho phép gán hành động mở bảng cài đặt Wi-Fi chính thức của Android vào phím Assistant (Tap/Double Tap/Long Press) để người dùng thao tác bật/chọn mạng cực kỳ nhanh chóng.
 
+### 🎙️ Cải tiến Nút Trợ Lý Ảo (Assistant Button)
+- **Quick Menu**: Thêm hành động mở **Quick Menu** cho nút Trợ lý ảo. Menu hiển thị danh sách dạng lưới trong suốt chứa các ứng dụng và hành động ảo, đóng vai trò như một App Launcher thu nhỏ.
+- **Pulse Glow & Âm thanh**: Tích hợp hiệu ứng tỏa sáng mờ dần (Radial Gradient Pulse Glow) và phát ra âm thanh click mượt mà khi bấm nút, giúp cải thiện cảm giác tương tác (có thể bật/tắt trong Cài đặt).
+
 ### 🕒 Tự động hóa Lịch trình Thông minh
 - **Logic "Closest-to-current"**: Sửa lỗi app luôn chọn nhầm lịch trình buổi sáng khi khởi động vào buổi chiều. Hệ thống giờ đây sẽ phân tích và chọn lịch trình khớp nhất với khung giờ hiện tại.
 - **Overlay Boot Trigger**: Đảm bảo thực hiện đồng thời việc chia đôi màn hình và gửi action điều hướng/tìm nhạc một cách ổn định ngay giây đầu tiên mở app.

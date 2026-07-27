@@ -114,6 +114,10 @@
     <string name="help_icons_tap">Chạm → Mở cài đặt hệ thống tương ứng</string>
     <string name="help_clickthrough_title">Chế độ xuyên qua</string>
     <string name="help_clickthrough_desc">Khi bật, thao tác chạm truyền xuyên widget. Giữ lâu chấm nhỏ ở góc để kéo.</string>
+    <string name="help_assistant_title">Nút Trợ Lý Ảo</string>
+    <string name="help_assistant_actions">Chạm/Chạm kép/Giữ → Mở tính năng được gán (VD: Quick Menu)</string>
+    <string name="help_assistant_drag">Kéo thả → Di chuyển nút</string>
+    <string name="help_assistant_feedback">Tích hợp hiệu ứng tỏa sáng &amp; âm thanh click</string>
 
     <!-- OTA -->
     <string name="update_available">Có bản cập nhật</string>

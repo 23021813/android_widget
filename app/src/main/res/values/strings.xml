@@ -120,6 +120,10 @@
     <string name="help_icons_tap">Tap → Open corresponding System Settings</string>
     <string name="help_clickthrough_title">Click-Through Mode</string>
     <string name="help_clickthrough_desc">When enabled, touches pass through the widget. Long press the small dot at the corner to drag.</string>
+    <string name="help_assistant_title">Assistant Button</string>
+    <string name="help_assistant_actions">Tap/Double Tap/Long Press → Trigger assigned actions (e.g., Quick Menu)</string>
+    <string name="help_assistant_drag">Drag → Move button</string>
+    <string name="help_assistant_feedback">Features pulse glow &amp; sound feedback</string>
 
     <!-- Virtual Actions (App Picker) -->
     <string name="action_home_label">Go to Home Screen</string>

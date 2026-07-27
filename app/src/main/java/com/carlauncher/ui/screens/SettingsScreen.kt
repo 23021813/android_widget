@@ -443,6 +443,12 @@ fun SettingsScreen(
                         stringResource(R.string.help_clickthrough_desc),
                         stringResource(R.string.help_drag_handle_double_tap)
                     ))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HelpRow(emoji = "🎙️", title = stringResource(R.string.help_assistant_title), lines = listOf(
+                        stringResource(R.string.help_assistant_actions),
+                        stringResource(R.string.help_assistant_drag),
+                        stringResource(R.string.help_assistant_feedback)
+                    ))
                 }
             }
 

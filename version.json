@@ -2,7 +2,6 @@
   "versionCode": 28,
   "versionName": "1.5.6",
   "downloadUrl": "https://github.com/23021813/android_widget/releases/download/v1.5.6/app-release.apk",
-  "changelog": "Wi-Fi Popup Action: Thay thế cơ chế ép kết nối Wi-Fi ngầm bằng Activity trong suốt (Trampoline Activity) giúp tương thích với Android 13+ / Tbox S2P.",
+  "changelog": "Th\u00eam t\u00ednh n\u0103ng Quick Menu cho Tr\u1ee3 l\u00fd \u1ea3o. N\u00fat Tr\u1ee3 l\u00fd \u1ea3o c\u00f3 th\u00eam hi\u1ec7u \u1ee9ng Pulse Glow v\u00e0 ph\u1ea3n h\u1ed3i \u00e2m thanh khi b\u1ea5m.",
   "forceUpdate": false
 }
-
