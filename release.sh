@@ -155,7 +155,7 @@ TESTPLAN
 
     if [ "$all_ok" = false ]; then
         warn "Some checks failed. Fix issues above or press Ctrl+C to abort."
-        read -rp "  Continue anyway? (y/N) " confirm
+        read -rp "  Continue anyway? (y/N) " confirm || true
         if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
             die "Aborted by user"
         fi
