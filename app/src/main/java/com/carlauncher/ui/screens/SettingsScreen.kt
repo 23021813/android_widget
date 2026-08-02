@@ -255,6 +255,29 @@ fun SettingsScreen(
                 }
             }
 
+            // ═══ REST MODE ═══
+            item {
+                SettingsSection(title = stringResource(R.string.section_rest_mode)) {
+                    Text(stringResource(R.string.rest_mode_hint), color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    val restModeLabels = mapOf(
+                        0 to stringResource(R.string.rest_mode_auto_exit_none),
+                        15 to stringResource(R.string.rest_mode_auto_exit_15m),
+                        30 to stringResource(R.string.rest_mode_auto_exit_30m),
+                        60 to stringResource(R.string.rest_mode_auto_exit_60m)
+                    )
+                    SettingsDropdown(
+                        label = stringResource(R.string.rest_mode_auto_exit),
+                        value = restModeLabels[settings.restModeAutoExitMinutes] ?: restModeLabels.getValue(0),
+                        options = restModeLabels.values.toList(),
+                        onSelect = { label ->
+                            val minutes = restModeLabels.entries.first { it.value == label }.key
+                            onSettingsUpdate(settings.copy(restModeAutoExitMinutes = minutes))
+                        }
+                    )
+                }
+            }
+
             // ═══ SCHEDULE AUTOMATION ═══
             item {
                 SettingsSection(title = stringResource(R.string.section_schedule)) {
