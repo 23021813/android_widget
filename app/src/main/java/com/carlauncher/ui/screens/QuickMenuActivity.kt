@@ -29,6 +29,7 @@ import com.carlauncher.data.AppRepository
 import com.carlauncher.data.models.AppInfo
 import com.carlauncher.data.models.VirtualActions
 import com.carlauncher.SplitScreenProxyActivity
+import com.carlauncher.service.OverlayService
 import com.carlauncher.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -66,8 +67,13 @@ class QuickMenuActivity : ComponentActivity() {
                     label = context.getString(R.string.action_wifi_popup_label),
                     icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_menu_preferences)
                 )
+                val restModeApp = AppInfo(
+                    packageName = VirtualActions.ACTION_REST_MODE,
+                    label = context.getString(R.string.action_rest_mode_label),
+                    icon = androidx.core.content.ContextCompat.getDrawable(context, android.R.drawable.ic_lock_power_off)
+                )
 
-                apps = listOf(homeApp, splitViewApp, wifiPopupApp) + installed
+                apps = listOf(homeApp, splitViewApp, wifiPopupApp, restModeApp) + installed
                 isLoading = false
             }
 
@@ -167,6 +173,9 @@ class QuickMenuActivity : ComponentActivity() {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 }
                 startActivity(intent)
+            }
+            VirtualActions.ACTION_REST_MODE -> {
+                OverlayService.instance?.enterRestMode()
             }
             else -> {
                 com.carlauncher.service.SplitScreenLauncher.launchApp(this, app.packageName)
