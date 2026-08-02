@@ -96,6 +96,9 @@ data class LauncherSettings(
     // Click-through
     val clockClickThrough: Boolean = false,
 
+    // Rest Mode
+    val restModeAutoExitMinutes: Int = 0,
+
     // Weather
     val showWeather: Boolean = true,
     val weatherLocationMode: WeatherLocationMode = WeatherLocationMode.GPS,

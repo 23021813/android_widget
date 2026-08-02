@@ -36,6 +36,8 @@ internal object SettingsKeys {
 
     val CLOCK_CLICK_THROUGH = booleanPreferencesKey("clock_click_through")
 
+    val REST_MODE_AUTO_EXIT_MINUTES = intPreferencesKey("rest_mode_auto_exit_minutes")
+
     val SHOW_WEATHER = booleanPreferencesKey("show_weather")
     val WEATHER_LOCATION_MODE = stringPreferencesKey("weather_location_mode")
     val WEATHER_CITY = stringPreferencesKey("weather_city")
@@ -86,6 +88,8 @@ internal object SettingsPreferencesMapper {
             showGps = prefs[SettingsKeys.SHOW_GPS] ?: true,
 
             clockClickThrough = prefs[SettingsKeys.CLOCK_CLICK_THROUGH] ?: false,
+
+            restModeAutoExitMinutes = prefs[SettingsKeys.REST_MODE_AUTO_EXIT_MINUTES] ?: 0,
 
             showWeather = prefs[SettingsKeys.SHOW_WEATHER] ?: true,
             weatherLocationMode = prefs[SettingsKeys.WEATHER_LOCATION_MODE]?.let {
@@ -155,6 +159,8 @@ internal object SettingsPreferencesMapper {
         prefs[SettingsKeys.SHOW_GPS] = settings.showGps
 
         prefs[SettingsKeys.CLOCK_CLICK_THROUGH] = settings.clockClickThrough
+
+        prefs[SettingsKeys.REST_MODE_AUTO_EXIT_MINUTES] = settings.restModeAutoExitMinutes
 
         prefs[SettingsKeys.SHOW_WEATHER] = settings.showWeather
         prefs[SettingsKeys.WEATHER_LOCATION_MODE] = settings.weatherLocationMode.name
