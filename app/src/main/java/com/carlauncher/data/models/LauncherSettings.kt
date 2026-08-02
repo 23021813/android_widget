@@ -40,6 +40,7 @@ object VirtualActions {
     const val ACTION_HOME = "com.carlauncher.ACTION_HOME"
     const val ACTION_SPLIT_VIEW = "com.carlauncher.ACTION_SPLIT_VIEW"
     const val ACTION_QUICK_MENU = "com.carlauncher.ACTION_QUICK_MENU"
+    const val ACTION_REST_MODE = "com.carlauncher.ACTION_REST_MODE"
 }
 
 data class ScheduleProfile(

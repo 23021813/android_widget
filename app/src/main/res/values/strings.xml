@@ -130,6 +130,16 @@
     <string name="action_split_view_label">🚗 CarFloat (Split View)</string>
     <string name="action_wifi_popup_label">📶 Wi-Fi Settings</string>
     <string name="action_quick_menu_label">⚡ Quick Menu</string>
+    <string name="action_rest_mode_label">😴 Rest Mode</string>
+
+    <!-- Rest Mode -->
+    <string name="section_rest_mode">😴 Rest Mode</string>
+    <string name="rest_mode_auto_exit">Auto exit after</string>
+    <string name="rest_mode_auto_exit_none">Never</string>
+    <string name="rest_mode_auto_exit_15m">15 minutes</string>
+    <string name="rest_mode_auto_exit_30m">30 minutes</string>
+    <string name="rest_mode_auto_exit_60m">60 minutes</string>
+    <string name="rest_mode_hint">Screen turns black, music keeps playing. Tap to wake.</string>
 
     <string name="help_drag_handle_double_tap">Double tap the white dot: Activate split view</string>
 
