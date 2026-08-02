@@ -77,6 +77,10 @@ class OverlayService : Service() {
         @Volatile
         var splitInProgress = false
 
+        // Reference to the running service instance (set in onCreate, cleared in onDestroy)
+        @Volatile
+        var instance: OverlayService? = null
+
         fun start(context: Context) {
             val intent = Intent(context, OverlayService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -102,6 +106,11 @@ class OverlayService : Service() {
     // Position save debounce
     private var positionSaveJob: Job? = null
 
+    // Rest Mode state
+    private var restView: View? = null
+    private var isRestModeActive = false
+    private var restAutoExitJob: Job? = null
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
@@ -110,6 +119,7 @@ class OverlayService : Service() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, createNotification())
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        instance = this
 
         // Auto split-view on first boot, gửi action nếu đang trong bất kỳ khoảng lịch nào khớp
         serviceScope.launch {
@@ -190,6 +200,8 @@ class OverlayService : Service() {
         // Observe settings changes for dynamic widget visibility
         serviceScope.launch {
             settingsDataStore.settingsFlow.collectLatest { settings ->
+                // While Rest Mode is active, don't let settings changes re-add overlays
+                if (isRestModeActive) return@collectLatest
                 // Status Widget
                 if (settings.showStatusWidget && statusView == null) {
                     showStatusOverlay()
@@ -881,6 +893,74 @@ class OverlayService : Service() {
         }
     }
 
+    // ═══════════════════════════════════════
+    // Rest Mode (black overlay, music keeps playing)
+    // ═══════════════════════════════════════
+
+    fun enterRestMode() {
+        if (isRestModeActive) return
+        serviceScope.launch {
+            val minutes = settingsDataStore.settingsFlow.first().restModeAutoExitMinutes
+            if (isRestModeActive) return@launch
+
+            removeStatusOverlay()
+            removeAssistantOverlay()
+            removeDragHandle()
+
+            val view = View(this@OverlayService).apply {
+                setBackgroundColor(android.graphics.Color.BLACK)
+                setOnClickListener { exitRestMode() }
+            }
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                PixelFormat.OPAQUE
+            )
+            try {
+                windowManager?.addView(view, params)
+            } catch (e: Exception) {
+                Log.e("OverlayService", "RestMode: addView failed", e)
+                return@launch
+            }
+            restView = view
+            isRestModeActive = true
+            Log.d("OverlayService", "RestMode entered (autoExit=$minutes min)")
+
+            if (minutes > 0) {
+                restAutoExitJob?.cancel()
+                restAutoExitJob = launch {
+                    delay(minutes * 60_000L)
+                    exitRestMode()
+                }
+            }
+        }
+    }
+
+    fun exitRestMode() {
+        if (!isRestModeActive) return
+        removeRestOverlay()
+        isRestModeActive = false
+        restAutoExitJob?.cancel()
+        restAutoExitJob = null
+        Log.d("OverlayService", "RestMode exited")
+        serviceScope.launch {
+            val settings = settingsDataStore.settingsFlow.first()
+            if (settings.showStatusWidget && statusView == null) showStatusOverlay()
+            if (settings.showAssistantWidget && assistantView == null) showAssistantOverlay()
+        }
+    }
+
+    private fun removeRestOverlay() {
+        restView?.let {
+            try { windowManager?.removeView(it) } catch (_: Exception) {}
+        }
+        restView = null
+    }
+
     private fun removeAssistantOverlay() {
         assistantView?.let {
             try { windowManager?.removeView(it) } catch (_: Exception) {}
@@ -926,6 +1006,8 @@ class OverlayService : Service() {
     override fun onDestroy() {
         removeStatusOverlay()
         removeAssistantOverlay()
+        removeRestOverlay()
+        instance = null
         TimeSyncMonitor.stopMonitoring(this)
         serviceScope.cancel()
         super.onDestroy()
