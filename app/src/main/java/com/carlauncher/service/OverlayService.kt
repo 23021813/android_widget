@@ -924,6 +924,9 @@ class OverlayService : Service() {
                 windowManager?.addView(view, params)
             } catch (e: Exception) {
                 Log.e("OverlayService", "RestMode: addView failed", e)
+                val settings = settingsDataStore.settingsFlow.first()
+                if (settings.showStatusWidget && statusView == null) showStatusOverlay()
+                if (settings.showAssistantWidget && assistantView == null) showAssistantOverlay()
                 return@launch
             }
             restView = view
